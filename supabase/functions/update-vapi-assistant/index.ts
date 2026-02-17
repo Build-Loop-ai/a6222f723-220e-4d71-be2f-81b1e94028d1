@@ -1,0 +1,231 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { organizationId, updates } = await req.json();
+
+    if (!organizationId) {
+      throw new Error("organizationId is required");
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Get organization settings including language config
+    const { data: settings, error: settingsError } = await supabase
+      .from("organization_settings")
+      .select("vapi_assistant_id, vapi_api_key, language, transcriber_language, custom_greeting")
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (settingsError || !settings?.vapi_assistant_id) {
+      throw new Error("Assistant not found for this organization");
+    }
+
+    const vapiApiKey = settings.vapi_api_key || Deno.env.get("VAPI_API_KEY");
+
+    if (!vapiApiKey) {
+      throw new Error("VAPI_API_KEY is not configured");
+    }
+
+    console.log("Updating Vapi assistant:", settings.vapi_assistant_id);
+    console.log("Updates:", JSON.stringify(updates, null, 2));
+
+    // Get organization details for system prompt
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("name")
+      .eq("id", organizationId)
+      .single();
+
+    // Build the update payload with improved voice settings
+    const updatePayload: Record<string, unknown> = {
+      // Always ensure good voice settings
+      backgroundSound: "off",
+      silenceTimeoutSeconds: 15,
+      responseDelaySeconds: 0.2,
+      interruptionsEnabled: true,
+
+      // Turn detection - when to start speaking after user stops
+      startSpeakingPlan: {
+        waitSeconds: 0.4,
+        smartEndpointingEnabled: true,
+        transcriptionEndpointingPlan: {
+          onPunctuationSeconds: 0.1,
+          onNoPunctuationSeconds: 1.5,
+          onNumberSeconds: 0.5,
+        },
+      },
+
+      // Turn detection - when to stop speaking if user interrupts (very responsive)
+      stopSpeakingPlan: {
+        numWords: 1,        // Stop on first word
+        voiceSeconds: 0.1,  // 100ms voice detection
+        backoffSeconds: 0.4, // Quick recovery
+      },
+    };
+
+    // Handle voice updates - use the voice ID directly (it's the actual ElevenLabs ID)
+    if (updates.voice) {
+      updatePayload.voice = {
+        provider: "11labs",
+        voiceId: updates.voice.voiceId,
+        model: "eleven_multilingual_v2",
+        stability: 0.5,
+        similarityBoost: 0.75,
+      };
+      console.log("Updating voice to:", updates.voice.voiceId);
+    }
+
+    // Handle transcriber updates with enhanced VAD settings
+    if (updates.transcriber) {
+      updatePayload.transcriber = {
+        provider: "deepgram",
+        model: "nova-2",
+        language: updates.transcriber.language,
+        smartFormat: true,
+        endpointing: 300, // Faster turn detection
+      };
+      console.log("Updating transcriber to:", updates.transcriber.language);
+    }
+
+    // Handle first message / greeting updates - always sync from database if not explicitly provided
+    if (updates.firstMessage) {
+      updatePayload.firstMessage = updates.firstMessage;
+      console.log("Updating firstMessage to:", updates.firstMessage);
+    } else if (settings.custom_greeting) {
+      // Always sync the greeting from database when updating voice/language
+      updatePayload.firstMessage = settings.custom_greeting;
+      console.log("Syncing firstMessage from database:", settings.custom_greeting);
+    }
+
+    // If updating voice/transcriber, also update system prompt to enforce language
+    if (updates.transcriber || updates.voice) {
+      const language = settings.language || "en-US";
+      const languageNames: Record<string, string> = {
+        "nl-NL": "Dutch",
+        "nl-BE": "Flemish Dutch",
+        "en-US": "English",
+        "en-GB": "British English",
+        "de-DE": "German",
+        "fr-FR": "French",
+        "es-ES": "Spanish",
+        "es-MX": "Mexican Spanish",
+        "it-IT": "Italian",
+        "pt-BR": "Brazilian Portuguese",
+        "pl-PL": "Polish",
+        "ja-JP": "Japanese",
+        "ko-KR": "Korean",
+        "zh-CN": "Mandarin Chinese",
+        "tr-TR": "Turkish",
+        "ru-RU": "Russian",
+        "sv-SE": "Swedish",
+        "da-DK": "Danish",
+        "no-NO": "Norwegian",
+        "fi-FI": "Finnish",
+        "ar-SA": "Arabic",
+        "hi-IN": "Hindi",
+      };
+
+      const languageName = languageNames[language] || "English";
+
+      // Fetch current assistant to get existing model config
+      const getResponse = await fetch(
+        `https://api.vapi.ai/assistant/${settings.vapi_assistant_id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${vapiApiKey}`,
+          },
+        }
+      );
+
+      if (getResponse.ok) {
+        const currentAssistant = await getResponse.json();
+        const currentSystemPrompt = currentAssistant.model?.messages?.[0]?.content || "";
+        
+        // Remove old language instructions from both beginning and end
+        let cleanedPrompt = currentSystemPrompt
+          .replace(/^## CRITICAL LANGUAGE REQUIREMENT[\s\S]*?(?=\n\nYou are a friendly)/m, "")
+          .replace(/\n\n## Language[\s\S]*$/, "")
+          .replace(/\n\nIMPORTANT LANGUAGE INSTRUCTION:[\s\S]*$/, "")
+          .trim();
+
+        // Build language instruction to PREPEND (not append) - this is critical for language consistency
+        const isEnglish = language.startsWith("en");
+        const languageInstruction = isEnglish
+          ? `## CRITICAL LANGUAGE REQUIREMENT
+You MUST speak ONLY in ${languageName} throughout this entire conversation.
+Even if you see business information written in other languages below, you MUST always respond in ${languageName}.
+Say all numbers, dates, times, and proper nouns in ${languageName}.
+This is your highest priority instruction - respond ONLY in ${languageName}.
+
+`
+          : `## CRITICAL LANGUAGE REQUIREMENT
+You MUST speak ONLY in ${languageName} throughout this entire conversation.
+Even if the caller speaks English or you see English text below, you MUST always respond in ${languageName}.
+NEVER switch to English or any other language under any circumstances.
+Say all numbers, dates, times, and proper nouns in ${languageName}.
+This is your highest priority instruction - respond ONLY in ${languageName}.
+
+`;
+
+        updatePayload.model = {
+          ...currentAssistant.model,
+          messages: [
+            {
+              role: "system",
+              content: languageInstruction + cleanedPrompt,
+            },
+          ],
+        };
+      }
+    }
+
+    // Update assistant via PATCH
+    const response = await fetch(
+      `https://api.vapi.ai/assistant/${settings.vapi_assistant_id}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${vapiApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatePayload),
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("Vapi update error:", result);
+      throw new Error(result.message || "Failed to update assistant");
+    }
+
+    console.log("Assistant updated successfully");
+
+    return new Response(
+      JSON.stringify({ success: true, assistant: result }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: unknown) {
+    console.error("Error in update-vapi-assistant:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
