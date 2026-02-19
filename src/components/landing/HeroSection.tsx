@@ -1,12 +1,16 @@
 import { Link } from "react-router-dom";
-import { Send, Mic, ArrowRight, Globe, MessageCircle, Phone } from "lucide-react";
+import { Send, Mic, ArrowRight, Globe, MessageCircle, Phone, Loader2 } from "lucide-react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 
 const ROTATING_WORDS = ["speaking.", "listening.", "converting.", "helping.", "greeting."];
+const HERO_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hero-chat`;
+
+type ChatMsg = { role: "user" | "assistant"; content: string };
 
 const HeroSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -15,7 +19,6 @@ const HeroSection = () => {
   const contentY = useTransform(scrollYProgress, [0, 1], [0, 150]);
   const orbScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.6]);
   const orbOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  // Widget stays fully visible until 70% scroll, then fades/shrinks out
   const widgetScale = useTransform(scrollYProgress, [0, 0.7, 1], [1, 1, 0.6]);
   const widgetY = useTransform(scrollYProgress, [0, 0.7, 1], [0, 0, 200]);
   const widgetOpacity = useTransform(scrollYProgress, [0, 0.7, 0.9], [1, 1, 0]);
@@ -27,6 +30,13 @@ const HeroSection = () => {
   const [widgetTab, setWidgetTab] = useState<"chat" | "voice">("chat");
   const [voiceActive, setVoiceActive] = useState(false);
   const [voiceSeconds, setVoiceSeconds] = useState(0);
+
+  // Chat state
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([
+    { role: "assistant", content: "Hi! 👋 I'm the Greet.ai assistant. Ask me anything about how we turn websites into smart AI chatbots!" },
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
 
   // Rotate words
   useEffect(() => {
@@ -40,7 +50,7 @@ const HeroSection = () => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setIsTypingUrl(true);
-      const url = "vandermolen.nl";
+      const url = "greet.ai";
       let i = 0;
       const typeInterval = setInterval(() => {
         setUrlValue(url.slice(0, i + 1));
@@ -73,12 +83,88 @@ const HeroSection = () => {
     return () => clearInterval(i);
   }, [voiceActive]);
 
-  // Auto-toggle to voice tab after chat is shown
+  // Scroll chat to bottom
   useEffect(() => {
-    if (!showWidget) return;
-    const t = setTimeout(() => setWidgetTab("voice"), 5000);
-    return () => clearTimeout(t);
-  }, [showWidget]);
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  const sendMessage = useCallback(async () => {
+    const text = chatInput.trim();
+    if (!text || isStreaming) return;
+
+    const userMsg: ChatMsg = { role: "user", content: text };
+    const newMessages = [...chatMessages, userMsg];
+    setChatMessages(newMessages);
+    setChatInput("");
+    setIsStreaming(true);
+
+    // Switch to chat tab if on voice
+    if (widgetTab !== "chat") setWidgetTab("chat");
+
+    let assistantContent = "";
+
+    try {
+      const resp = await fetch(HERO_CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
+        }),
+      });
+
+      if (!resp.ok || !resp.body) {
+        throw new Error("Stream failed");
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIdx: number;
+        while ((newlineIdx = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, newlineIdx);
+          buffer = buffer.slice(newlineIdx + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              assistantContent += delta;
+              const current = assistantContent;
+              setChatMessages((prev) => {
+                const last = prev[prev.length - 1];
+                if (last?.role === "assistant" && prev.length === newMessages.length + 1) {
+                  return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: current } : m));
+                }
+                return [...prev, { role: "assistant", content: current }];
+              });
+            }
+          } catch {
+            // partial JSON, wait for more
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Hero chat error:", err);
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Oops, something went wrong. Try again!" },
+      ]);
+    } finally {
+      setIsStreaming(false);
+    }
+  }, [chatInput, chatMessages, isStreaming, widgetTab]);
 
   const letterVariants = {
     hidden: { opacity: 0, y: 80, rotateX: -90 },
@@ -100,7 +186,6 @@ const HeroSection = () => {
     <section ref={sectionRef} className="relative min-h-[110vh] overflow-hidden flex flex-col items-center justify-center">
       {/* === BACKGROUND === */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: "#050508" }}>
-        {/* Central orb — the "portal" */}
         <motion.div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           style={{ scale: orbScale, opacity: orbOpacity }}
@@ -111,15 +196,11 @@ const HeroSection = () => {
               background: "radial-gradient(circle, rgba(52,215,123,0.2) 0%, rgba(0,194,224,0.1) 30%, rgba(52,215,123,0.03) 55%, transparent 70%)",
               filter: "blur(60px)",
             }}
-            animate={{
-              scale: [1, 1.08, 1],
-              opacity: [0.8, 1, 0.8],
-            }}
+            animate={{ scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           />
         </motion.div>
 
-        {/* Secondary orbs */}
         <motion.div
           className="absolute top-[10%] left-[15%] w-[300px] h-[300px] rounded-full"
           style={{ background: "radial-gradient(circle, rgba(0,194,224,0.08) 0%, transparent 70%)", filter: "blur(40px)" }}
@@ -133,7 +214,6 @@ const HeroSection = () => {
           transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
         />
 
-        {/* Grid lines for depth */}
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -143,8 +223,6 @@ const HeroSection = () => {
             WebkitMask: "radial-gradient(ellipse at center, black 20%, transparent 70%)",
           }}
         />
-
-        {/* Grain */}
         <div className="absolute inset-0 grain-overlay" />
       </div>
 
@@ -181,7 +259,7 @@ const HeroSection = () => {
           <span className="font-mono text-[10px] tracking-[3px] uppercase text-primary">Now in public beta</span>
         </motion.div>
 
-        {/* Headline with letter stagger */}
+        {/* Headline */}
         <div className="overflow-hidden mb-2" style={{ perspective: "800px" }}>
           <h1
             className="font-display font-[800] leading-[0.9] tracking-[-0.04em]"
@@ -232,7 +310,7 @@ const HeroSection = () => {
           Paste a URL. Greet crawls every page, learns your business, and deploys an AI chat widget visitors can talk&nbsp;to.
         </motion.p>
 
-        {/* Interactive URL Bar */}
+        {/* URL Bar */}
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -302,7 +380,7 @@ const HeroSection = () => {
           </Link>
         </motion.div>
 
-        {/* Stats row */}
+        {/* Stats */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -322,7 +400,7 @@ const HeroSection = () => {
         </motion.div>
       </motion.div>
 
-      {/* === FLOATING WIDGET (appears after URL typed) === */}
+      {/* === LIVE CHAT WIDGET === */}
       <AnimatePresence>
         {showWidget && (
           <motion.div
@@ -338,7 +416,7 @@ const HeroSection = () => {
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
             >
               <div
-                className="w-[300px] rounded-[20px] overflow-hidden"
+                className="w-[320px] rounded-[20px] overflow-hidden"
                 style={{
                   background: "rgba(255,255,255,0.03)",
                   border: "1px solid rgba(255,255,255,0.1)",
@@ -349,10 +427,10 @@ const HeroSection = () => {
                 <div className="px-5 py-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(52,215,123,0.12) 0%, rgba(0,194,224,0.08) 100%)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-[800] text-sm" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))", color: "white" }}>G</div>
                   <div className="flex-1">
-                    <h4 className="font-display text-[13px] font-[700] text-foreground">Van der Molen</h4>
+                    <h4 className="font-display text-[13px] font-[700] text-foreground">Greet.ai</h4>
                     <div className="flex items-center gap-1.5 text-[11px] text-primary">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary pulse-live" />
-                      Online
+                      Live Demo
                     </div>
                   </div>
                 </div>
@@ -375,7 +453,7 @@ const HeroSection = () => {
                   ))}
                 </div>
 
-                {/* Chat messages */}
+                {/* Content */}
                 <AnimatePresence mode="wait">
                   {widgetTab === "chat" ? (
                     <motion.div
@@ -384,24 +462,41 @@ const HeroSection = () => {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.3 }}
-                      className="px-5 py-5 space-y-2.5"
-                      style={{ background: "#0D0D0F" }}
+                      className="px-4 py-4 space-y-2.5 overflow-y-auto"
+                      style={{ background: "#0D0D0F", maxHeight: "220px", minHeight: "140px" }}
                     >
-                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-                        <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-bl-md text-[13px] leading-relaxed text-foreground glass">
-                          Hi! Hoe kan ik je helpen? 👋
-                        </div>
-                      </motion.div>
-                      <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 }} className="flex justify-end">
-                        <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-br-md text-[13px] leading-relaxed text-white" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }}>
-                          Wat kost een kroon?
-                        </div>
-                      </motion.div>
-                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.6 }}>
-                        <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-bl-md text-[13px] leading-relaxed text-foreground glass">
-                          Tussen €350–€750. Afspraak maken?
-                        </div>
-                      </motion.div>
+                      {chatMessages.map((msg, idx) => (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, x: msg.role === "user" ? 10 : -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.25 }}
+                          className={msg.role === "user" ? "flex justify-end" : ""}
+                        >
+                          <div
+                            className={`max-w-[88%] px-3.5 py-2.5 text-[12px] leading-relaxed ${
+                              msg.role === "user"
+                                ? "rounded-2xl rounded-br-md text-white"
+                                : "rounded-2xl rounded-bl-md text-foreground glass"
+                            }`}
+                            style={
+                              msg.role === "user"
+                                ? { background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }
+                                : undefined
+                            }
+                          >
+                            {msg.content}
+                            {isStreaming && idx === chatMessages.length - 1 && msg.role === "assistant" && (
+                              <motion.span
+                                className="inline-block w-1.5 h-3.5 bg-primary ml-0.5 align-middle"
+                                animate={{ opacity: [1, 0] }}
+                                transition={{ duration: 0.5, repeat: Infinity }}
+                              />
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                      <div ref={chatEndRef} />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -413,7 +508,6 @@ const HeroSection = () => {
                       className="flex flex-col items-center justify-center py-8 gap-5"
                       style={{ background: "#0D0D0F" }}
                     >
-                      {/* Voice orb */}
                       <div className="relative">
                         <motion.div
                           className="w-20 h-20 rounded-full flex items-center justify-center"
@@ -431,7 +525,6 @@ const HeroSection = () => {
                         >
                           <Phone className="w-7 h-7 text-white" />
                         </motion.div>
-                        {/* Pulse rings */}
                         {voiceActive && (
                           <>
                             <motion.div
@@ -448,7 +541,6 @@ const HeroSection = () => {
                         )}
                       </div>
 
-                      {/* Waveform bars */}
                       {voiceActive && (
                         <div className="flex items-center gap-[3px] h-8">
                           {Array.from({ length: 16 }).map((_, i) => (
@@ -456,9 +548,7 @@ const HeroSection = () => {
                               key={i}
                               className="w-[3px] rounded-full"
                               style={{ background: "linear-gradient(to top, hsl(148 68% 52%), hsl(190 100% 44%))" }}
-                              animate={{
-                                height: [4, 8 + Math.random() * 22, 4],
-                              }}
+                              animate={{ height: [4, 8 + Math.random() * 22, 4] }}
                               transition={{
                                 duration: 0.4 + Math.random() * 0.4,
                                 repeat: Infinity,
@@ -475,9 +565,7 @@ const HeroSection = () => {
                           {voiceActive ? "AI is speaking…" : "Connecting…"}
                         </p>
                         <p className="text-[11px] text-muted-foreground mt-0.5 font-mono">
-                          {voiceActive
-                            ? `0:${voiceSeconds.toString().padStart(2, "0")}`
-                            : "Starting call"}
+                          {voiceActive ? `0:${voiceSeconds.toString().padStart(2, "0")}` : "Starting call"}
                         </p>
                       </div>
                     </motion.div>
@@ -485,16 +573,41 @@ const HeroSection = () => {
                 </AnimatePresence>
 
                 {/* Input */}
-                <div className="px-4 py-3 flex items-center gap-2" style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                <div className="px-3 py-2.5 flex items-center gap-2" style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
                   {widgetTab === "chat" ? (
                     <>
-                      <div className="flex-1 px-3 py-2.5 rounded-xl text-[12px] text-muted-foreground glass">Stel een vraag...</div>
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5" style={{ background: "rgba(52,215,123,0.1)" }} onClick={() => setWidgetTab("voice")}>
-                        <Mic className="w-3.5 h-3.5 text-primary" />
-                      </div>
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }}>
-                        <Send className="w-3.5 h-3.5 text-white" />
-                      </div>
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                        placeholder="Ask anything about Greet.ai..."
+                        className="flex-1 px-3 py-2 rounded-xl text-[12px] text-foreground placeholder:text-muted-foreground glass bg-transparent outline-none border-none"
+                        disabled={isStreaming}
+                        style={{ background: "rgba(255,255,255,0.04)" }}
+                      />
+                      <button
+                        onClick={() => setWidgetTab("voice")}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5 shrink-0"
+                        style={{ background: "rgba(52,215,123,0.1)" }}
+                      >
+                        <Mic className="w-3 h-3 text-primary" />
+                      </button>
+                      <button
+                        onClick={sendMessage}
+                        disabled={isStreaming || !chatInput.trim()}
+                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-opacity"
+                        style={{
+                          background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))",
+                          opacity: isStreaming || !chatInput.trim() ? 0.5 : 1,
+                        }}
+                      >
+                        {isStreaming ? (
+                          <Loader2 className="w-3 h-3 text-white animate-spin" />
+                        ) : (
+                          <Send className="w-3 h-3 text-white" />
+                        )}
+                      </button>
                     </>
                   ) : (
                     <button
@@ -514,7 +627,7 @@ const HeroSection = () => {
                 </div>
               </div>
 
-              {/* Glow ring under widget */}
+              {/* Glow ring */}
               <div
                 className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-8 rounded-full"
                 style={{ background: "radial-gradient(ellipse, rgba(52,215,123,0.15) 0%, transparent 70%)", filter: "blur(12px)" }}
