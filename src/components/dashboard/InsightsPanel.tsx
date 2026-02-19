@@ -32,7 +32,7 @@ const InsightsPanel = ({
     totalConversations === 0 && {
       icon: MessageSquare,
       text: "No conversations yet today. Your AI widget is ready!",
-      color: "text-muted-foreground",
+      color: "text-foreground/40",
     },
     avgMessagesPerConversation > 4 && {
       icon: Lightbulb,
@@ -47,7 +47,7 @@ const InsightsPanel = ({
     <div className="rounded-2xl glass-light p-6">
       <div className="flex items-center gap-2 mb-4">
         <Lightbulb className="w-5 h-5 text-warning" />
-        <h2 className="text-lg font-semibold">Insights</h2>
+        <h2 className="text-lg font-bold text-foreground">Insights</h2>
       </div>
 
       <div className="space-y-3">
@@ -63,7 +63,7 @@ const InsightsPanel = ({
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <Icon className={cn("w-4 h-4 mt-0.5 shrink-0", insight.color)} />
-              <p className="text-muted-foreground">{insight.text}</p>
+              <p className="text-foreground/60">{insight.text}</p>
             </div>
           );
         })}

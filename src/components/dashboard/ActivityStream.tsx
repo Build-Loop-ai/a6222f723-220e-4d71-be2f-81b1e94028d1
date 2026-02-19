@@ -33,16 +33,16 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
     return (
       <div className="rounded-2xl glass-light p-6">
         <div className="flex items-center justify-between mb-6">
-          <div className="h-6 w-32 bg-muted animate-pulse rounded" />
-          <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+          <div className="h-6 w-32 bg-foreground/5 animate-pulse rounded-lg" />
+          <div className="h-4 w-16 bg-foreground/5 animate-pulse rounded-lg" />
         </div>
         <div className="space-y-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex items-center gap-4">
-              <div className="w-2 h-2 rounded-full bg-muted" />
+              <div className="w-2 h-2 rounded-full bg-foreground/10" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
-                <div className="h-3 w-32 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-24 bg-foreground/5 animate-pulse rounded-lg" />
+                <div className="h-3 w-32 bg-foreground/5 animate-pulse rounded-lg" />
               </div>
             </div>
           ))}
@@ -54,9 +54,9 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
   return (
     <div className="rounded-2xl glass-light p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold">Recent Conversations</h2>
+        <h2 className="text-lg font-bold text-foreground">Recent Conversations</h2>
         <Link to="/dashboard/conversations">
-          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="sm" className="text-foreground/50 hover:text-foreground hover:bg-white/50">
             See all
             <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
@@ -64,10 +64,12 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
       </div>
 
       {conversations.length === 0 ? (
-        <div className="text-center py-8">
-          <MessageSquare className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
-          <p className="text-muted-foreground text-sm">No conversations yet today</p>
-          <p className="text-muted-foreground/60 text-xs mt-1">
+        <div className="text-center py-12">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+            <MessageSquare className="w-8 h-8 text-primary/60" />
+          </div>
+          <p className="text-foreground/70 text-sm font-medium">No conversations yet today</p>
+          <p className="text-foreground/40 text-xs mt-1">
             Your AI widget is ready to chat
           </p>
         </div>
@@ -82,8 +84,8 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
                 key={conv.id}
                 to={`/dashboard/conversations/${conv.id}`}
                 className={cn(
-                  "flex items-center gap-4 p-3 -mx-3 rounded-xl transition-colors",
-                  "hover:bg-muted/50 cursor-pointer group",
+                  "flex items-center gap-4 p-3 -mx-3 rounded-xl transition-all",
+                  "hover:bg-white/60 cursor-pointer group",
                   "animate-fade-in"
                 )}
                 style={{ animationDelay: `${index * 0.05}s` }}
@@ -91,38 +93,38 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
                 {/* Status indicator */}
                 <div className="relative">
                   <span className={cn(
-                    "block w-2 h-2 rounded-full",
-                    isActive ? "bg-success" : "bg-border"
+                    "block w-2.5 h-2.5 rounded-full",
+                    isActive ? "bg-success" : "bg-foreground/15"
                   )} />
                   {isActive && (
-                    <span className="absolute inset-0 w-2 h-2 rounded-full bg-success animate-ping" />
+                    <span className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-success animate-ping" />
                   )}
                 </div>
 
                 {/* Time */}
-                <span className="text-xs text-muted-foreground w-20 shrink-0">
+                <span className="text-xs text-foreground/40 w-20 shrink-0 font-medium">
                   {formatTime(conv.started_at)}
                 </span>
 
                 {/* Visitor */}
-                <span className="font-mono text-sm text-foreground/80 w-24 shrink-0 truncate">
+                <span className="font-mono text-sm text-foreground/70 w-24 shrink-0 truncate">
                   {conv.visitor_id.slice(0, 8)}
                 </span>
 
                 {/* Channel */}
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <ChannelIcon className="w-4 h-4 shrink-0 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground truncate">
+                  <ChannelIcon className="w-4 h-4 shrink-0 text-foreground/40" />
+                  <span className="text-sm text-foreground/50 truncate">
                     {conv.channel === "voice" ? "Voice" : "Text chat"}
                   </span>
                   {conv.page_url && (
-                    <span className="text-xs text-muted-foreground/60 truncate hidden md:inline">
+                    <span className="text-xs text-foreground/30 truncate hidden md:inline">
                       • {new URL(conv.page_url).pathname}
                     </span>
                   )}
                 </div>
 
-                <ArrowRight className="w-4 h-4 text-muted-foreground/0 group-hover:text-muted-foreground transition-colors" />
+                <ArrowRight className="w-4 h-4 text-foreground/0 group-hover:text-foreground/40 transition-colors" />
               </Link>
             );
           })}
