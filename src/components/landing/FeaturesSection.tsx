@@ -1,5 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Globe, Mic, ArrowUpRight, UserPlus, FileText, Languages } from "lucide-react";
+import { useRef } from "react";
 
 const features = [
   { icon: Globe, title: "Auto-learns from your site", desc: "Greet reads every page on your sitemap. When you update content, the AI updates automatically. Zero manual training." },
@@ -11,16 +12,42 @@ const features = [
 ];
 
 const FeaturesSection = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const leftOrbX = useTransform(scrollYProgress, [0, 1], ["-10%", "5%"]);
+  const rightOrbX = useTransform(scrollYProgress, [0, 1], ["10%", "-5%"]);
+
   return (
-    <section id="features" className="relative py-32 md:py-40 overflow-hidden">
-      {/* Split-tone ambient orbs */}
+    <section ref={sectionRef} id="features" className="relative py-32 md:py-44 overflow-hidden">
+      {/* BOLD SPLIT-TONE BACKGROUND — cyan left, green right */}
       <div className="absolute inset-0 pointer-events-none" style={{
-        background: `
-          radial-gradient(ellipse 600px 600px at 15% 40%, rgba(52,215,123,0.06) 0%, transparent 70%),
-          radial-gradient(ellipse 600px 600px at 85% 60%, rgba(0,194,224,0.05) 0%, transparent 70%),
-          #050506
-        `,
+        background: "linear-gradient(180deg, #070810 0%, #070D12 30%, #080F14 50%, #070D12 70%, #070810 100%)",
       }} />
+
+      {/* Cyan aurora — left */}
+      <motion.div
+        className="absolute top-[10%] left-[-200px] w-[800px] h-[800px] pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(0,194,224,0.15) 0%, rgba(0,194,224,0.03) 40%, transparent 65%)",
+          x: leftOrbX,
+        }}
+      />
+
+      {/* Green aurora — right */}
+      <motion.div
+        className="absolute bottom-[10%] right-[-200px] w-[800px] h-[800px] pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(52,215,123,0.12) 0%, rgba(52,215,123,0.02) 40%, transparent 65%)",
+          x: rightOrbX,
+        }}
+      />
+
+      {/* Horizontal glow line */}
+      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent 10%, rgba(0,194,224,0.2) 50%, transparent 90%)" }} />
 
       <div className="max-w-[1140px] mx-auto px-6 md:px-12 relative z-10">
         {/* Header */}
@@ -32,40 +59,38 @@ const FeaturesSection = () => {
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="font-display font-[700] leading-[1.1] tracking-[-0.02em] text-foreground"
-            style={{ fontSize: "clamp(36px, 5vw, 44px)" }}
+            style={{ fontSize: "clamp(36px, 5vw, 48px)" }}
           >
             Everything your website needs to talk
           </motion.h2>
         </div>
 
-        {/* Feature grid: 2 cols, 3 rows */}
+        {/* Feature grid */}
         <div className="grid md:grid-cols-2 gap-5">
           {features.map((f, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: idx * 0.08 }}
-              className="glass rounded-[20px] p-9 group transition-all duration-300 hover:border-[rgba(255,255,255,0.14)]"
-              style={{ cursor: "default" }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 40px rgba(52,215,123,0.06)";
+              initial={{ opacity: 0, y: 80, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.7, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{
+                y: -6,
+                boxShadow: "0 0 60px rgba(0,194,224,0.08), 0 20px 60px rgba(0,0,0,0.3)",
+                borderColor: "rgba(255,255,255,0.14)",
               }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow = "none";
-              }}
+              className="glass rounded-[20px] p-9 group transition-all duration-500 cursor-default"
             >
               <div
                 className="w-12 h-12 rounded-[14px] flex items-center justify-center mb-6"
-                style={{ background: "rgba(52,215,123,0.10)", border: "1px solid rgba(52,215,123,0.12)" }}
+                style={{ background: "rgba(0,194,224,0.10)", border: "1px solid rgba(0,194,224,0.12)" }}
               >
-                <f.icon className="w-5 h-5 text-primary" />
+                <f.icon className="w-5 h-5 text-cyan" />
               </div>
               <h3 className="font-display text-lg font-[700] text-foreground mb-2 tracking-[-0.01em]">{f.title}</h3>
-              <p className="text-[15px] text-[hsl(240,4%,65%)] leading-relaxed">{f.desc}</p>
+              <p className="text-[15px] text-muted-foreground leading-relaxed">{f.desc}</p>
             </motion.div>
           ))}
         </div>
