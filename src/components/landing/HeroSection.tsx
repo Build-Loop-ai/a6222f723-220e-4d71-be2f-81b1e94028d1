@@ -15,8 +15,10 @@ const HeroSection = () => {
   const contentY = useTransform(scrollYProgress, [0, 1], [0, 150]);
   const orbScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.6]);
   const orbOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const widgetScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
-  const widgetY = useTransform(scrollYProgress, [0, 1], [0, 300]);
+  // Widget stays fully visible until 70% scroll, then fades/shrinks out
+  const widgetScale = useTransform(scrollYProgress, [0, 0.7, 1], [1, 1, 0.6]);
+  const widgetY = useTransform(scrollYProgress, [0, 0.7, 1], [0, 0, 200]);
+  const widgetOpacity = useTransform(scrollYProgress, [0, 0.7, 0.9], [1, 1, 0]);
 
   const [wordIndex, setWordIndex] = useState(0);
   const [urlValue, setUrlValue] = useState("");
@@ -328,7 +330,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
             className="absolute bottom-8 right-8 z-20 hidden lg:block"
-            style={{ y: widgetY }}
+            style={{ y: widgetY, opacity: widgetOpacity }}
           >
             <motion.div
               style={{ scale: widgetScale }}
