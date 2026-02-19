@@ -19,6 +19,7 @@ import {
   Plus,
   X,
   MessageSquare,
+  ExternalLink,
   Code,
   Shield,
   Smartphone,
@@ -489,7 +490,15 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
               <Wand2 className="h-3.5 w-3.5 text-primary" />
             </div>
             <span className="text-xs font-semibold text-gray-900">Widget Builder</span>
-            <div className="ml-auto flex items-center gap-1">
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={() => window.open("/widget-preview", "_blank")}
+                className="flex items-center gap-1 rounded-lg bg-gray-100 hover:bg-gray-200 px-2 py-1 text-[10px] font-medium text-gray-600 hover:text-gray-900 transition-all"
+                title="Open live preview in new tab"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Preview
+              </button>
               <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               <span className="text-[9px] text-primary font-medium">Auto-saving</span>
             </div>

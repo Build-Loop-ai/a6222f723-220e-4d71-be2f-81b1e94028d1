@@ -28,6 +28,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
 import WidgetEmbed from "./pages/WidgetEmbed";
+import WidgetLivePreview from "./pages/WidgetLivePreview";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,11 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/widget" element={<WidgetEmbed />} />
+            <Route path="/widget-preview" element={
+              <ProtectedRoute>
+                <WidgetLivePreview />
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
