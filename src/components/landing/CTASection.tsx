@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Phone, Sparkles } from "lucide-react";
+import { ArrowRight, MessageSquare, Sparkles } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
@@ -33,22 +33,6 @@ const CTASection = () => {
             ease: "easeInOut"
           }}
         />
-        <motion.div 
-          className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, hsl(166 76% 40% / 0.15) 0%, transparent 70%)',
-          }}
-          animate={{
-            x: [0, -40, 0],
-            y: [0, 30, 0],
-            scale: [1, 1.15, 1],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
       </div>
 
       {/* Grid pattern */}
@@ -69,7 +53,7 @@ const CTASection = () => {
             transition={{ duration: 0.6 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-premium mb-8"
           >
-            <Phone className="w-4 h-4 text-teal-light" />
+            <MessageSquare className="w-4 h-4 text-teal-light" />
             <span className="text-sm text-white/80">
               Join {config.socialProof.customerCount} {config.socialProof.customerLabel} already using {config.name}
             </span>
@@ -82,9 +66,9 @@ const CTASection = () => {
             transition={{ duration: 0.8, delay: 0.1 }}
             className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif mb-6"
           >
-            <span className="text-gradient-white">Ready to transform your</span>
+            <span className="text-gradient-white">Ready to supercharge</span>
             <br />
-            <span className="italic text-teal-light">front desk?</span>
+            <span className="italic text-teal-light">your website?</span>
           </motion.h2>
 
           <motion.p
@@ -94,7 +78,7 @@ const CTASection = () => {
             className="text-lg md:text-xl text-white/60 max-w-2xl mx-auto mb-12"
           >
             Start your {config.trialDays}-day free trial today. No credit card required, no
-            commitment. See the difference AI can make.
+            commitment. See the difference an AI assistant can make.
           </motion.p>
 
           <motion.div
@@ -116,7 +100,7 @@ const CTASection = () => {
             </Link>
             <Link to="/demo">
               <Button variant="glass" size="xl">
-                Hear Demo First
+                Try Demo First
               </Button>
             </Link>
           </motion.div>

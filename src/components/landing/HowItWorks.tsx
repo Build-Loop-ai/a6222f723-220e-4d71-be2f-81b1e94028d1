@@ -16,22 +16,22 @@ const HowItWorks = () => {
     {
       number: "01",
       title: "Connect",
-      headline: "Forward your calls in 5 minutes",
-      description: "Get a dedicated AI phone number or forward your existing line. Our wizard guides you through every step—no technical knowledge required.",
+      headline: "Add your website in 2 minutes",
+      description: "Enter your website URL and our AI crawls your content automatically. It learns everything about your business, services, and FAQs — no manual training needed.",
       visual: "connect",
     },
     {
       number: "02",
       title: "Customize",
-      headline: "Make it sound like you",
-      description: "Choose the voice, personality, and language. Add your business hours, services, and special instructions. Your AI learns everything about your practice.",
+      headline: "Make it match your brand",
+      description: "Choose colors, set a welcome message, and configure the chat personality. Your widget blends seamlessly into your website design.",
       visual: "customize",
     },
     {
       number: "03",
       title: "Launch",
-      headline: "Go live, stress-free",
-      description: "Your AI receptionist starts handling calls immediately. Monitor conversations, track bookings, and watch your productivity soar—all from one dashboard.",
+      headline: "Go live with one line of code",
+      description: "Copy a single script tag and paste it into your website. Your AI assistant starts engaging visitors immediately. Monitor conversations and track results from your dashboard.",
       visual: "launch",
     },
   ];
@@ -65,11 +65,11 @@ const HowItWorks = () => {
             className="text-4xl md:text-6xl lg:text-7xl font-serif leading-[1.1] text-foreground"
           >
             Three steps to{" "}
-            <span className="italic text-gradient">freedom</span>
+            <span className="italic text-gradient">engagement</span>
           </motion.h2>
         </div>
 
-        {/* Steps - Staggered layout */}
+        {/* Steps */}
         <div className="relative max-w-5xl mx-auto">
           {/* Vertical progress line */}
           <div className="absolute left-[28px] md:left-1/2 top-0 bottom-0 w-px bg-border hidden md:block">

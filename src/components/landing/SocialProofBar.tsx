@@ -12,15 +12,15 @@ const SocialProofBar = () => {
   const x2 = useTransform(scrollYProgress, [0, 1], ["10%", "-10%"]);
 
   const words = [
-    "Appointments Booked",
+    "Questions Answered",
     "•",
-    "Calls Answered",
+    "Visitors Engaged",
     "•",
     "Hours Saved",
     "•",
-    "Happy Patients",
+    "Happy Customers",
     "•",
-    "Zero Missed Calls",
+    "Appointments Booked",
     "•",
     "24/7 Coverage",
     "•",

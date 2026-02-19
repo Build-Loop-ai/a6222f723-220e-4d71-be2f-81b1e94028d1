@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Play, CheckCircle2, Sparkles } from "lucide-react";
+import { Play, CheckCircle2, Sparkles, MessageSquare, Send, Bot } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 
@@ -22,7 +22,7 @@ const HeroSection = () => {
         }}
       />
       
-      {/* Grain texture overlay - very subtle */}
+      {/* Grain texture overlay */}
       <div 
         className="absolute inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay"
         style={{
@@ -57,8 +57,9 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
               className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif leading-[1.1] mb-6"
             >
-              <span className="text-gradient-white">Your AI Receptionist</span>
+              <span className="text-gradient-white">Your AI Website</span>
               <br />
+              <span className="text-gradient-white">Assistant </span>
               <span className="italic text-teal-light">Never Sleeps</span>
             </motion.h1>
 
@@ -69,8 +70,8 @@ const HeroSection = () => {
               transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className="text-lg md:text-xl text-white/60 max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed"
             >
-              Answer every call. Book every appointment. 24/7. Let AI handle your
-              front desk while you focus on what matters most.
+              Engage every visitor. Answer every question. Book every appointment.
+              24/7. An AI chat assistant trained on your website, ready in minutes.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -98,8 +99,8 @@ const HeroSection = () => {
                   size="xl"
                   className="w-full sm:w-auto gap-2 group"
                 >
-                  <Play className="w-5 h-5 transition-transform group-hover:scale-110" />
-                  Hear Demo
+                  <MessageSquare className="w-5 h-5 transition-transform group-hover:scale-110" />
+                  Try Demo
                 </Button>
               </Link>
             </motion.div>
@@ -124,7 +125,7 @@ const HeroSection = () => {
             </motion.div>
           </div>
 
-          {/* Right Column - Premium iPhone Mockup */}
+          {/* Right Column - Chat Widget Mockup */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -132,7 +133,6 @@ const HeroSection = () => {
             className="relative flex justify-center lg:justify-center lg:pr-8"
           >
             <Link to="/demo" className="relative block cursor-pointer">
-              {/* iPhone 15 Pro style mockup */}
               <motion.div 
                 className="relative"
                 animate={{ y: [0, -12, 0] }}
@@ -140,157 +140,117 @@ const HeroSection = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                {/* Phone outer frame - titanium style */}
+                {/* Chat widget mockup */}
                 <div 
-                  className="relative w-[280px] md:w-[320px] rounded-[3.5rem] p-[3px]"
+                  className="relative w-[320px] md:w-[380px] rounded-3xl overflow-hidden"
                   style={{
-                    background: 'linear-gradient(145deg, rgba(120,120,130,0.8) 0%, rgba(60,60,70,0.9) 50%, rgba(40,40,50,1) 100%)',
                     boxShadow: `
                       0 50px 100px -20px rgba(0,0,0,0.5),
                       0 30px 60px -15px rgba(0,0,0,0.4),
-                      inset 0 1px 0 rgba(255,255,255,0.1),
-                      inset 0 -1px 0 rgba(0,0,0,0.3)
+                      0 0 0 1px rgba(255,255,255,0.1)
                     `,
                   }}
                 >
-                  {/* Inner bezel */}
+                  {/* Chat header */}
                   <div 
-                    className="w-full rounded-[3.3rem] p-[2px]"
-                    style={{
-                      background: 'linear-gradient(180deg, rgba(30,30,35,1) 0%, rgba(15,15,20,1) 100%)',
-                    }}
+                    className="px-6 py-4 flex items-center gap-3"
+                    style={{ background: 'linear-gradient(135deg, hsl(166 76% 36%) 0%, hsl(166 76% 28%) 100%)' }}
                   >
-                    {/* Screen */}
-                    <div className="relative w-full aspect-[9/19.5] rounded-[3.1rem] overflow-hidden bg-black">
-                      {/* Dynamic Island */}
-                      <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20">
-                        <div 
-                          className="w-[100px] h-[32px] rounded-full bg-black flex items-center justify-center gap-3"
-                          style={{
-                            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
-                          }}
-                        >
-                          <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-gray-700 to-gray-900" />
-                          <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-gray-600 to-gray-800" />
-                        </div>
-                      </div>
-                      
-                      {/* Screen content */}
-                      <div 
-                        className="absolute inset-0 pt-14 pb-6 px-5"
-                        style={{
-                          background: 'linear-gradient(180deg, hsl(220 20% 8%) 0%, hsl(220 25% 6%) 100%)',
-                        }}
-                      >
-                        {/* Status bar */}
-                        <div className="flex justify-between items-center text-white/60 text-xs mb-6 px-1">
-                          <span className="font-medium">9:41</span>
-                          <div className="flex items-center gap-1.5">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 3c-4.5 0-8 1.5-8 3v3l8 5 8-5V6c0-1.5-3.5-3-8-3z"/>
-                            </svg>
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M2 17h20v4H2zm0-7h20v4H2zm0-7h20v4H2z"/>
-                            </svg>
-                            <div className="w-6 h-3 rounded-sm border border-current flex items-center justify-end pr-0.5">
-                              <div className="w-4 h-2 rounded-sm bg-teal" />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Active call UI */}
-                        <div className="flex flex-col items-center text-center">
-                          {/* Caller avatar with ring animation */}
-                          <div className="relative mb-4">
-                            <motion.div
-                              className="absolute inset-0 rounded-full bg-teal/30"
-                              animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            />
-                            <motion.div
-                              className="absolute inset-0 rounded-full bg-teal/20"
-                              animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
-                              transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-                            />
-                            <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-teal to-teal-dark flex items-center justify-center">
-                              <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                              </svg>
-                            </div>
-                          </div>
-
-                          <p className="text-white/50 text-sm mb-1">Incoming Call</p>
-                          <h3 className="text-white text-xl font-medium mb-1">Dr. Smith's Office</h3>
-                          <p className="text-white/40 text-sm mb-6">+31 6 12345678</p>
-
-                          {/* AI status indicator */}
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.8 }}
-                            className="px-4 py-2 rounded-full bg-teal/10 border border-teal/20 mb-6"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal"></span>
-                              </span>
-                              <span className="text-teal text-sm font-medium">AI Answering</span>
-                            </div>
-                          </motion.div>
-
-                          {/* Audio waveform */}
-                          <div className="flex items-center justify-center gap-1 h-12 mb-8">
-                            {[...Array(12)].map((_, i) => (
-                              <motion.div
-                                key={i}
-                                className="w-1 rounded-full bg-gradient-to-t from-teal/50 to-teal"
-                                animate={{
-                                  height: [12, 24 + Math.random() * 20, 12],
-                                }}
-                                transition={{
-                                  duration: 0.8 + Math.random() * 0.4,
-                                  repeat: Infinity,
-                                  delay: i * 0.05,
-                                }}
-                              />
-                            ))}
-                          </div>
-
-                          {/* Call controls */}
-                          <div className="flex items-center gap-4">
-                            <button className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
-                              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                              </svg>
-                            </button>
-                            <button className="w-16 h-16 rounded-full bg-destructive flex items-center justify-center shadow-lg shadow-destructive/30">
-                              <svg className="w-7 h-7 text-white rotate-[135deg]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                              </svg>
-                            </button>
-                            <button className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
-                              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.828-2.828" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Home indicator */}
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
-                          <div className="w-32 h-1 bg-white/20 rounded-full" />
-                        </div>
+                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white font-medium text-sm">AI Assistant</p>
+                      <div className="flex items-center gap-1.5">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+                        </span>
+                        <span className="text-white/70 text-xs">Online now</span>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Side buttons */}
-                <div className="absolute left-0 top-24 w-[3px] h-8 bg-gradient-to-b from-gray-600 to-gray-700 rounded-l-sm" />
-                <div className="absolute left-0 top-40 w-[3px] h-12 bg-gradient-to-b from-gray-600 to-gray-700 rounded-l-sm" />
-                <div className="absolute left-0 top-56 w-[3px] h-12 bg-gradient-to-b from-gray-600 to-gray-700 rounded-l-sm" />
-                <div className="absolute right-0 top-36 w-[3px] h-16 bg-gradient-to-b from-gray-600 to-gray-700 rounded-r-sm" />
+                  {/* Chat messages */}
+                  <div 
+                    className="px-5 py-6 space-y-4"
+                    style={{ background: 'linear-gradient(180deg, hsl(220 20% 12%) 0%, hsl(220 25% 9%) 100%)' }}
+                  >
+                    {/* AI message */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.8 }}
+                      className="flex gap-2"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-teal/20 flex items-center justify-center flex-shrink-0 mt-1">
+                        <Bot className="w-3.5 h-3.5 text-teal" />
+                      </div>
+                      <div className="bg-white/10 rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]">
+                        <p className="text-white/90 text-sm leading-relaxed">
+                          Hi! 👋 Welcome to Dr. Smith's Dental. How can I help you today?
+                        </p>
+                      </div>
+                    </motion.div>
+
+                    {/* User message */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.2 }}
+                      className="flex justify-end"
+                    >
+                      <div className="bg-teal/20 border border-teal/30 rounded-2xl rounded-tr-md px-4 py-3 max-w-[85%]">
+                        <p className="text-white/90 text-sm">
+                          I'd like to book a teeth cleaning appointment
+                        </p>
+                      </div>
+                    </motion.div>
+
+                    {/* AI response with typing */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.8 }}
+                      className="flex gap-2"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-teal/20 flex items-center justify-center flex-shrink-0 mt-1">
+                        <Bot className="w-3.5 h-3.5 text-teal" />
+                      </div>
+                      <div className="bg-white/10 rounded-2xl rounded-tl-md px-4 py-3 max-w-[85%]">
+                        <p className="text-white/90 text-sm leading-relaxed">
+                          I'd be happy to help! We have openings this Thursday at 2:00 PM and Friday at 10:00 AM. Which works better for you?
+                        </p>
+                      </div>
+                    </motion.div>
+
+                    {/* Suggested link */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 2.4 }}
+                      className="ml-9"
+                    >
+                      <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-teal/10 border border-teal/20 text-xs text-teal">
+                        <span>📋</span>
+                        <span>View our services & pricing</span>
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* Chat input */}
+                  <div 
+                    className="px-4 py-3 flex items-center gap-2"
+                    style={{ background: 'hsl(220 25% 8%)', borderTop: '1px solid rgba(255,255,255,0.08)' }}
+                  >
+                    <div className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/30 text-sm">
+                      Type your message...
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-teal flex items-center justify-center">
+                      <Send className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </div>
               </motion.div>
 
               {/* Floating notification cards */}
@@ -338,13 +298,11 @@ const HeroSection = () => {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-teal/20 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
+                      <MessageSquare className="w-5 h-5 text-teal" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white truncate">Call Handled</p>
-                      <p className="text-xs text-white/50 truncate">1m 42s</p>
+                      <p className="text-sm font-medium text-white truncate">Visitor helped</p>
+                      <p className="text-xs text-white/50 truncate">Just now</p>
                     </div>
                   </div>
                 </div>

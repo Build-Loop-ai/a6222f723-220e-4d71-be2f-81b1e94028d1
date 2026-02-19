@@ -36,7 +36,6 @@ const PricingSection = () => {
 
         if (error) throw error;
 
-        // Transform the data to ensure features is an array
         const transformedPlans = (data || []).map((plan) => ({
           ...plan,
           features: Array.isArray(plan.features) 
@@ -63,10 +62,8 @@ const PricingSection = () => {
 
   const getAnnualMonthlyPrice = (plan: Plan) => {
     if (plan.price_annual_cents) {
-      // Show monthly equivalent of annual price
       return Math.round(plan.price_annual_cents / 100 / 12);
     }
-    // Calculate with discount if no annual price set
     return Math.round(formatPrice(plan.price_monthly_cents) * (1 - siteConfig.annualDiscount / 100));
   };
 
@@ -117,11 +114,7 @@ const PricingSection = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex items-center justify-center gap-3 mb-16"
         >
-          <span
-            className={`text-sm font-medium transition-colors ${
-              !isAnnual ? "text-foreground" : "text-muted-foreground"
-            }`}
-          >
+          <span className={`text-sm font-medium transition-colors ${!isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
             Monthly
           </span>
           <button
@@ -134,11 +127,7 @@ const PricingSection = () => {
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             />
           </button>
-          <span
-            className={`text-sm font-medium transition-colors flex items-center gap-2 ${
-              isAnnual ? "text-foreground" : "text-muted-foreground"
-            }`}
-          >
+          <span className={`text-sm font-medium transition-colors flex items-center gap-2 ${isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
             Annual
             <span className="px-2 py-0.5 rounded-full bg-success/10 text-success text-xs font-medium">
               -{siteConfig.annualDiscount}%
@@ -163,9 +152,7 @@ const PricingSection = () => {
                   initial={{ opacity: 0, y: 60 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.6, delay: 0.3 + idx * 0.1 }}
-                  className={`flex-shrink-0 w-[85%] md:w-auto snap-center ${
-                    plan.is_popular ? 'md:-my-4' : ''
-                  }`}
+                  className={`flex-shrink-0 w-[85%] md:w-auto snap-center ${plan.is_popular ? 'md:-my-4' : ''}`}
                 >
                   <div
                     className={`relative h-full rounded-3xl p-8 transition-all duration-500 ${
@@ -209,37 +196,19 @@ const PricingSection = () => {
                     </div>
 
                     <ul className="space-y-3 mb-8">
-                      {/* Show minutes and phone numbers from plan data */}
                       {plan.minutes_included && (
                         <li className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                            plan.is_popular ? "bg-teal/20" : "bg-primary/10"
-                          }`}>
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.is_popular ? "bg-teal/20" : "bg-primary/10"}`}>
                             <Check className={`w-3 h-3 ${plan.is_popular ? "text-teal" : "text-primary"}`} />
                           </div>
                           <span className={`text-sm ${plan.is_popular ? "text-white/80" : "text-muted-foreground"}`}>
-                            {plan.minutes_included} minutes/month
+                            {plan.minutes_included} conversations/month
                           </span>
                         </li>
                       )}
-                      {plan.phone_numbers_limit && (
-                        <li className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                            plan.is_popular ? "bg-teal/20" : "bg-primary/10"
-                          }`}>
-                            <Check className={`w-3 h-3 ${plan.is_popular ? "text-teal" : "text-primary"}`} />
-                          </div>
-                          <span className={`text-sm ${plan.is_popular ? "text-white/80" : "text-muted-foreground"}`}>
-                            {plan.phone_numbers_limit} phone number{plan.phone_numbers_limit > 1 ? 's' : ''}
-                          </span>
-                        </li>
-                      )}
-                      {/* Show additional features */}
                       {plan.features.map((feature, featureIdx) => (
                         <li key={featureIdx} className="flex items-center gap-3">
-                          <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                            plan.is_popular ? "bg-teal/20" : "bg-primary/10"
-                          }`}>
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center ${plan.is_popular ? "bg-teal/20" : "bg-primary/10"}`}>
                             <Check className={`w-3 h-3 ${plan.is_popular ? "text-teal" : "text-primary"}`} />
                           </div>
                           <span className={`text-sm ${plan.is_popular ? "text-white/80" : "text-muted-foreground"}`}>
@@ -253,11 +222,7 @@ const PricingSection = () => {
                       <Button
                         variant={plan.is_popular ? "secondary" : "outline"}
                         size="lg"
-                        className={`w-full group ${
-                          plan.is_popular 
-                            ? "bg-white text-navy hover:bg-white/90" 
-                            : ""
-                        }`}
+                        className={`w-full group ${plan.is_popular ? "bg-white text-navy hover:bg-white/90" : ""}`}
                       >
                         Start Free Trial
                         <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
