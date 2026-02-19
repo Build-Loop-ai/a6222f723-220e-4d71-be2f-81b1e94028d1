@@ -118,13 +118,13 @@ function ColorSwatch({
 
   return (
     <div className="space-y-1">
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">
+      <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">
         {label}
       </span>
       <div className="flex items-center gap-2">
         <button
           onClick={() => setOpen(!open)}
-          className="relative h-7 w-7 rounded-lg border border-border/50 transition-all hover:scale-110 hover:shadow-md active:scale-95 shrink-0"
+          className="relative h-7 w-7 rounded-lg border border-gray-200 transition-all hover:scale-110 hover:shadow-md active:scale-95 shrink-0"
           style={{ backgroundColor: value }}
         >
           {open && (
@@ -138,7 +138,7 @@ function ColorSwatch({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="flex-1 h-7 bg-transparent border-0 border-b border-border/30 text-[11px] font-mono text-foreground/70 outline-none focus:border-primary/50 transition-colors px-0"
+          className="flex-1 h-7 bg-transparent border-0 border-b border-gray-200 text-[11px] font-mono text-gray-700 outline-none focus:border-primary/50 transition-colors px-0"
         />
       </div>
       <AnimatePresence>
@@ -163,7 +163,7 @@ function ColorSwatch({
                     key={c}
                     onClick={() => { onChange(c); setOpen(false); }}
                     className={`h-4 w-4 rounded-full transition-all hover:scale-125 ${
-                      value === c ? "ring-1 ring-primary ring-offset-1 ring-offset-background" : ""
+                      value === c ? "ring-1 ring-primary ring-offset-1 ring-offset-white" : ""
                     }`}
                     style={{ backgroundColor: c }}
                   />
@@ -305,16 +305,16 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             transition={{ delay: 0.1 }}
             className="mx-auto mb-8 relative"
           >
-            <div className="h-24 w-24 mx-auto rounded-[28px] glass border-glow flex items-center justify-center">
+            <div className="h-24 w-24 mx-auto rounded-[28px] bg-gray-100 flex items-center justify-center shadow-sm">
               <Wand2 className="h-10 w-10 text-primary" />
             </div>
-            <div className="absolute -inset-4 rounded-[36px] bg-primary/5 blur-xl -z-10" />
+            <div className="absolute -inset-4 rounded-[36px] bg-gray-100/50 blur-xl -z-10" />
           </motion.div>
           <motion.h3
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-2xl font-bold font-heading mb-2"
+            className="text-2xl font-bold font-heading mb-2 text-gray-900"
           >
             Widget Builder
           </motion.h3>
@@ -322,7 +322,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-sm text-muted-foreground mb-8"
+            className="text-sm text-gray-500 mb-8"
           >
             Design your chat widget visually. Click any element to customize it in real-time.
           </motion.p>
@@ -373,13 +373,13 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           </div>
           <button
             onClick={() => setEditingZone(null)}
-            className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="h-6 w-6 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors"
           >
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
 
-        <div className="h-px bg-border/50" />
+        <div className="h-px bg-gray-200" />
 
         {/* Zone-specific controls */}
         <div className="space-y-3">
@@ -397,12 +397,12 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             <>
               <FieldInput label="Bot Name" value={config.bot_name} onChange={(v) => u("bot_name", v)} />
               <div className="space-y-1">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">Welcome Message</span>
+                <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">Welcome Message</span>
                 <Textarea
                   value={config.welcome_message}
                   onChange={(e) => u("welcome_message", e.target.value)}
                   rows={3}
-                  className="text-xs bg-transparent border-border/30 focus:border-primary/50 resize-none"
+                  className="text-xs bg-white border-gray-200 text-gray-900 focus:border-primary/50 resize-none"
                 />
               </div>
             </>
@@ -434,7 +434,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
           {editingZone === "branding" && (
             <div className="flex items-center justify-between py-1">
-              <span className="text-xs text-muted-foreground">Show "Powered by" text</span>
+              <span className="text-xs text-gray-600">Show "Powered by" text</span>
               <Switch checked={config.show_branding} onCheckedChange={(v) => uNow("show_branding", v)} />
             </div>
           )}
@@ -443,7 +443,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             <>
               <ColorSwatch label="Button Color" value={config.accent_color} onChange={(v) => u("accent_color", v)} />
               <div className="space-y-1.5">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">Position</span>
+                <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">Position</span>
                 <div className="grid grid-cols-2 gap-1.5">
                   {(["bottom-right", "bottom-left"] as const).map((pos) => (
                     <button
@@ -452,7 +452,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                       className={`relative rounded-xl p-3 text-[10px] font-medium transition-all ${
                         config.position === pos
                           ? "bg-primary/10 text-primary border border-primary/30"
-                          : "bg-muted/50 text-muted-foreground border border-transparent hover:border-border/50"
+                          : "bg-gray-100 text-gray-500 border border-transparent hover:border-gray-200"
                       }`}
                     >
                       <div className="relative h-8 w-full rounded-md border border-current/10 bg-current/5 mb-1.5">
@@ -478,17 +478,17 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex gap-0 min-h-[740px] -mx-6 -mt-2 rounded-2xl overflow-hidden border border-border/50"
+      className="flex gap-0 min-h-[740px] -mx-6 -mt-2 rounded-2xl overflow-hidden bg-white text-gray-900 shadow-lg"
     >
       {/* ━━━━ Left Panel — Glass sidebar ━━━━ */}
-      <div className="w-[300px] shrink-0 flex flex-col border-r border-border/50 bg-card/50">
+      <div className="w-[300px] shrink-0 flex flex-col border-r border-gray-200 bg-gray-50/80">
         {/* Panel header with tabs */}
-        <div className="px-4 pt-4 pb-2 border-b border-border/30">
+        <div className="px-4 pt-4 pb-2 border-b border-gray-200">
           <div className="flex items-center gap-2 mb-3">
             <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
               <Wand2 className="h-3.5 w-3.5 text-primary" />
             </div>
-            <span className="text-xs font-semibold">Widget Builder</span>
+            <span className="text-xs font-semibold text-gray-900">Widget Builder</span>
             <div className="ml-auto flex items-center gap-1">
               <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               <span className="text-[9px] text-primary font-medium">Auto-saving</span>
@@ -496,7 +496,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           </div>
 
           {/* Tab pills */}
-          <div className="flex gap-0.5 p-0.5 rounded-xl bg-muted/50">
+          <div className="flex gap-0.5 p-0.5 rounded-xl bg-gray-100">
             {([
               { key: "style", icon: <Palette className="h-3 w-3" />, label: "Design" },
               { key: "embed", icon: <Code className="h-3 w-3" />, label: "Embed" },
@@ -507,8 +507,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                 onClick={() => setActivePanel(tab.key)}
                 className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-medium transition-all ${
                   activePanel === tab.key
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-500 hover:text-gray-900"
                 }`}
               >
                 {tab.icon}
@@ -530,7 +530,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                 className="space-y-5"
               >
                 {/* Click instruction */}
-                <div className="flex items-center gap-2.5 rounded-xl bg-primary/5 border border-primary/10 px-3 py-2.5">
+                <div className="flex items-center gap-2.5 rounded-xl bg-green-50 border border-green-200/60 px-3 py-2.5">
                   <MousePointerClick className="h-4 w-4 text-primary shrink-0" />
                   <div>
                     <p className="text-[11px] font-medium text-primary">Click to edit</p>
@@ -552,7 +552,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                     >
                       {/* ── Brand Color ── */}
                       <div className="space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold flex items-center gap-1.5">
+                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold flex items-center gap-1.5">
                           <Palette className="h-3 w-3" />
                           Brand Color
                         </span>
@@ -564,8 +564,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                               whileTap={{ scale: 0.9 }}
                               onClick={() => u("accent_color", c)}
                               className={`h-7 w-7 rounded-full transition-all ${
-                                config.accent_color === c
-                                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg"
+                                 config.accent_color === c
+                                   ? "ring-2 ring-primary ring-offset-2 ring-offset-white shadow-lg"
                                   : "hover:shadow-md"
                               }`}
                               style={{ backgroundColor: c }}
@@ -583,14 +583,14 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                             type="text"
                             value={config.accent_color}
                             onChange={(e) => u("accent_color", e.target.value)}
-                            className="flex-1 h-7 bg-transparent border-0 border-b border-border/30 text-[11px] font-mono text-foreground/70 outline-none focus:border-primary/50 px-0"
+                            className="flex-1 h-7 bg-transparent border-0 border-b border-gray-200 text-[11px] font-mono text-gray-700 outline-none focus:border-primary/50 px-0"
                           />
                         </div>
                       </div>
 
                       {/* ── Typography ── */}
                       <div className="space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold flex items-center gap-1.5">
+                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold flex items-center gap-1.5">
                           <Type className="h-3 w-3" />
                           Typography
                         </span>
@@ -602,7 +602,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                               className={`flex flex-col items-center gap-0.5 rounded-xl p-2 text-[9px] font-medium transition-all ${
                                 config.font_family === f.value
                                   ? "bg-primary/10 text-primary border border-primary/20"
-                                  : "bg-muted/30 text-muted-foreground border border-transparent hover:border-border/40 hover:bg-muted/50"
+                                  : "bg-gray-100 text-gray-500 border border-transparent hover:border-gray-200 hover:bg-gray-100/80"
                               }`}
                             >
                               <span className="text-base font-bold" style={{ fontFamily: f.value }}>
@@ -616,7 +616,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
                       {/* ── Corner Style ── */}
                       <div className="space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold flex items-center gap-1.5">
+                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold flex items-center gap-1.5">
                           <LayoutGrid className="h-3 w-3" />
                           Corners
                         </span>
@@ -628,7 +628,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                               className={`flex flex-col items-center gap-1 rounded-xl p-2.5 text-[9px] font-medium transition-all ${
                                 config.border_radius === r.value
                                   ? "bg-primary/10 text-primary border border-primary/20"
-                                  : "bg-muted/30 text-muted-foreground border border-transparent hover:border-border/40"
+                                  : "bg-gray-100 text-gray-500 border border-transparent hover:border-gray-200"
                               }`}
                             >
                               <div
@@ -643,7 +643,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
                       {/* ── Position ── */}
                       <div className="space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
+                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">
                           Position
                         </span>
                         <div className="grid grid-cols-2 gap-1.5">
@@ -654,7 +654,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                               className={`relative rounded-xl p-3 text-[10px] font-medium transition-all ${
                                 config.position === pos
                                   ? "bg-primary/10 text-primary border border-primary/30"
-                                  : "bg-muted/30 text-muted-foreground border border-transparent hover:border-border/40"
+                                  : "bg-gray-100 text-gray-500 border border-transparent hover:border-gray-200"
                               }`}
                             >
                               <div className="relative h-8 w-full rounded-md border border-current/10 bg-current/5 mb-1">
@@ -672,7 +672,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
                       {/* ── Toggles ── */}
                       <div className="space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
+                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">
                           Features
                         </span>
                         <div className="space-y-1.5">
@@ -682,11 +682,11 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                           ].map((toggle) => (
                             <div
                               key={toggle.key}
-                              className="flex items-center justify-between rounded-xl bg-muted/20 px-3 py-2"
+                              className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"
                             >
                               <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground">{toggle.icon}</span>
-                                <span className="text-xs text-foreground/80">{toggle.label}</span>
+                                <span className="text-gray-400">{toggle.icon}</span>
+                                <span className="text-xs text-gray-700">{toggle.label}</span>
                               </div>
                               <Switch
                                 checked={config[toggle.key] as boolean}
@@ -699,7 +699,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
                       {/* ── Clickable zone map ── */}
                       <div className="space-y-2">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
+                        <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">
                           Quick Edit Zones
                         </span>
                         <div className="space-y-0.5">
@@ -707,13 +707,13 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                             <button
                               key={key}
                               onClick={() => setEditingZone(key as EditingZone)}
-                              className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-all hover:bg-muted/50 group"
+                              className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-all hover:bg-gray-100 group"
                             >
-                              <span className="text-muted-foreground group-hover:text-primary transition-colors">{zone.icon}</span>
+                              <span className="text-gray-400 group-hover:text-primary transition-colors">{zone.icon}</span>
                               <div className="flex-1 min-w-0">
-                                <span className="text-xs font-medium group-hover:text-foreground">{zone.title}</span>
+                                <span className="text-xs font-medium text-gray-700 group-hover:text-gray-900">{zone.title}</span>
                               </div>
-                              <ChevronRight className="h-3 w-3 text-muted-foreground/40 group-hover:text-foreground/60 transition-colors" />
+                              <ChevronRight className="h-3 w-3 text-gray-300 group-hover:text-gray-500 transition-colors" />
                             </button>
                           ))}
                         </div>
@@ -733,8 +733,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
               >
                 <div className="space-y-3">
                   <div>
-                    <h4 className="text-xs font-semibold mb-1">Install on Your Website</h4>
-                    <p className="text-[10px] text-muted-foreground">
+                    <h4 className="text-xs font-semibold text-gray-900 mb-1">Install on Your Website</h4>
+                    <p className="text-[10px] text-gray-500">
                       Add this snippet before the closing {'</body>'} tag.
                     </p>
                   </div>
@@ -752,8 +752,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                 className="space-y-4"
               >
                 <div>
-                  <h4 className="text-xs font-semibold mb-1">Allowed Domains</h4>
-                  <p className="text-[10px] text-muted-foreground">
+                  <h4 className="text-xs font-semibold text-gray-900 mb-1">Allowed Domains</h4>
+                  <p className="text-[10px] text-gray-500">
                     Restrict where your widget can appear. Leave empty for no restrictions.
                   </p>
                 </div>
@@ -763,7 +763,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                     value={newDomain}
                     onChange={(e) => setNewDomain(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addDomain()}
-                    className="h-8 text-xs bg-transparent border-border/30"
+                    className="h-8 text-xs bg-white border-gray-200 text-gray-900"
                   />
                   <Button variant="outline" size="sm" onClick={addDomain} className="h-8 w-8 p-0 shrink-0">
                     <Plus className="h-3.5 w-3.5" />
@@ -781,9 +781,9 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-dashed border-border/40 py-6 text-center">
-                    <Shield className="h-5 w-5 text-muted-foreground/30 mx-auto mb-2" />
-                    <p className="text-[10px] text-muted-foreground/50">No domain restrictions</p>
+                  <div className="rounded-xl border border-dashed border-gray-200 py-6 text-center">
+                    <Shield className="h-5 w-5 text-gray-300 mx-auto mb-2" />
+                    <p className="text-[10px] text-gray-400">No domain restrictions</p>
                   </div>
                 )}
               </motion.div>
@@ -793,11 +793,11 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
       </div>
 
       {/* ━━━━ Right: Immersive Canvas ━━━━ */}
-      <div className="flex-1 flex flex-col min-w-0 bg-gradient-to-br from-muted/20 via-background to-muted/10">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#fafafa]">
         {/* Canvas toolbar */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-border/30">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white">
           <div className="flex items-center gap-3">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 font-semibold">Preview</span>
+            <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Preview</span>
             {editingZone && (
               <motion.div
                 initial={{ opacity: 0, x: -8 }}
@@ -809,7 +809,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
               </motion.div>
             )}
           </div>
-          <div className="flex items-center gap-1 rounded-xl bg-muted/30 p-0.5">
+          <div className="flex items-center gap-1 rounded-xl bg-gray-100 p-0.5">
             {([
               { key: "desktop", icon: <Monitor className="h-3 w-3" /> },
               { key: "mobile", icon: <Smartphone className="h-3 w-3" /> },
@@ -819,8 +819,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                 onClick={() => setPreviewDevice(d.key)}
                 className={`rounded-lg p-1.5 transition-all ${
                   previewDevice === d.key
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-400 hover:text-gray-700"
                 }`}
               >
                 {d.icon}
@@ -832,9 +832,9 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
         {/* Canvas area */}
         <div className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
           {/* Subtle grid background */}
-          <div className="absolute inset-0 opacity-[0.03]"
+           <div className="absolute inset-0 opacity-[0.04]"
             style={{
-              backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
+              backgroundImage: "radial-gradient(circle, #9ca3af 1px, transparent 1px)",
               backgroundSize: "24px 24px",
             }}
           />
@@ -843,11 +843,11 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           <motion.div
             layout
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className={`relative overflow-hidden rounded-[20px] border border-border/40 bg-white shadow-2xl ${
+            className={`relative overflow-hidden rounded-[20px] border border-gray-200 bg-white shadow-xl ${
               previewDevice === "mobile" ? "w-[375px] h-[680px]" : "w-[640px] h-[680px]"
             }`}
             style={{
-              boxShadow: "0 25px 80px -12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)",
+              boxShadow: "0 25px 60px -12px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)",
             }}
           >
             {/* Browser chrome */}
@@ -1114,7 +1114,7 @@ function FieldInput({
 }) {
   return (
     <div className="space-y-1">
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">
+      <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">
         {label}
       </span>
       <input
@@ -1122,7 +1122,7 @@ function FieldInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-8 bg-transparent border-0 border-b border-border/30 text-xs text-foreground outline-none focus:border-primary/50 transition-colors px-0 placeholder:text-muted-foreground/30"
+        className="w-full h-8 bg-transparent border-0 border-b border-gray-200 text-xs text-gray-900 outline-none focus:border-primary/50 transition-colors px-0 placeholder:text-gray-300"
       />
     </div>
   );
