@@ -26,6 +26,7 @@ import Admin from "./pages/Admin";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import WidgetEmbed from "./pages/WidgetEmbed";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => (
                 </AdminRoute>
               </ProtectedRoute>
             } />
+            <Route path="/widget" element={<WidgetEmbed />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
