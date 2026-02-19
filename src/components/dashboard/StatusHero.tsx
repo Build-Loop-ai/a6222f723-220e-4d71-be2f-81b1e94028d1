@@ -1,23 +1,21 @@
-import { Phone, Calendar, Clock, TrendingUp, Zap } from "lucide-react";
+import { MessageSquare, Users, Send, FileText, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StatusHeroProps {
   isLive: boolean;
-  lastCallTime?: string | null;
-  todayCalls: number;
-  todayBooked: number;
-  avgDuration: string;
-  resolutionRate: number;
+  totalConversations: number;
+  activeVisitors: number;
+  messagesSent: number;
+  pagesRecommended: number;
   userName?: string;
 }
 
 const StatusHero = ({
   isLive,
-  lastCallTime,
-  todayCalls,
-  todayBooked,
-  avgDuration,
-  resolutionRate,
+  totalConversations,
+  activeVisitors,
+  messagesSent,
+  pagesRecommended,
   userName,
 }: StatusHeroProps) => {
   const getGreeting = () => {
@@ -29,27 +27,27 @@ const StatusHero = ({
 
   const metrics = [
     {
-      label: "Calls today",
-      value: todayCalls,
-      icon: Phone,
+      label: "Conversations today",
+      value: totalConversations,
+      icon: MessageSquare,
       color: "text-foreground",
     },
     {
-      label: "Booked",
-      value: todayBooked,
-      icon: Calendar,
+      label: "Active visitors",
+      value: activeVisitors,
+      icon: Users,
       color: "text-success",
     },
     {
-      label: "Avg duration",
-      value: avgDuration,
-      icon: Clock,
+      label: "Messages sent",
+      value: messagesSent,
+      icon: Send,
       color: "text-foreground",
     },
     {
-      label: "Resolved",
-      value: `${resolutionRate}%`,
-      icon: TrendingUp,
+      label: "Pages recommended",
+      value: pagesRecommended,
+      icon: FileText,
       color: "text-foreground",
     },
   ];
@@ -62,13 +60,12 @@ const StatusHero = ({
           {getGreeting()}{userName ? `, ${userName.split(" ")[0]}` : ""}
         </h1>
         <p className="text-muted-foreground">
-          Here's how your AI receptionist is performing today
+          Here's how your AI assistant is performing today
         </p>
       </div>
 
       {/* Status Card */}
       <div className="relative overflow-hidden rounded-2xl bg-card border border-border p-6 shadow-card">
-        {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-teal/5 via-transparent to-transparent pointer-events-none" />
         
         <div className="relative space-y-6">
@@ -85,13 +82,8 @@ const StatusHero = ({
                   "w-2 h-2 rounded-full",
                   isLive ? "bg-success pulse-live" : "bg-muted-foreground"
                 )} />
-                {isLive ? "Live" : "Offline"}
+                {isLive ? "Widget Live" : "Offline"}
               </div>
-              {lastCallTime && (
-                <span className="text-sm text-muted-foreground">
-                  Last call {lastCallTime}
-                </span>
-              )}
             </div>
             
             {isLive && (

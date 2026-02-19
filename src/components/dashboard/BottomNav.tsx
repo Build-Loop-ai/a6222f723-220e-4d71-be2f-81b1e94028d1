@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Phone, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, MessageSquare, BarChart3, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Home", href: "/dashboard" },
-  { icon: Phone, label: "Calls", href: "/dashboard/calls" },
+  { icon: MessageSquare, label: "Chats", href: "/dashboard/conversations" },
   { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];
@@ -42,7 +42,6 @@ const BottomNav = () => {
           );
         })}
       </div>
-      {/* Safe area padding for iOS */}
       <div className="h-safe-area-inset-bottom bg-card" />
     </nav>
   );
