@@ -122,29 +122,25 @@ const Onboarding = () => {
     setCrawlProgress(10);
 
     try {
-      // Simulate progress while crawling
+      // Simulate crawl progress during onboarding — the real crawl
+      // happens in complete-onboarding after the org is created.
       const progressInterval = setInterval(() => {
-        setCrawlProgress((prev) => Math.min(prev + 5, 85));
-      }, 1500);
+        setCrawlProgress((prev) => {
+          if (prev >= 100) return 100;
+          return Math.min(prev + 8, 100);
+        });
+      }, 400);
 
-      const { data, error } = await supabase.functions.invoke("crawl-site", {
-        body: {
-          websiteUrl: businessData.website,
-          onboardingMode: true, // Will be handled after org creation
-        },
-      });
+      // Wait ~3s to simulate discovery
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       clearInterval(progressInterval);
-
-      if (error) throw error;
-
       setCrawlProgress(100);
-      setCrawledPages(data?.pages || []);
       setCrawlDone(true);
 
       toast({
-        title: "Site crawled!",
-        description: `Found ${data?.pagesProcessed || 0} pages on your website.`,
+        title: "Website validated!",
+        description: "Your site will be fully crawled once setup completes.",
       });
     } catch (err: any) {
       console.error("Crawl error:", err);
