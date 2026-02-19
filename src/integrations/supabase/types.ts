@@ -173,6 +173,41 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+          suggested_url: string | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role?: string
+          suggested_url?: string | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          suggested_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_requests: {
         Row: {
           company: string | null
@@ -211,6 +246,53 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      conversations: {
+        Row: {
+          channel: string
+          created_at: string
+          ended_at: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          page_url: string | null
+          started_at: string
+          status: string
+          visitor_id: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          page_url?: string | null
+          started_at?: string
+          status?: string
+          visitor_id?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          page_url?: string | null
+          started_at?: string
+          status?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_config: {
         Row: {
@@ -709,6 +791,79 @@ export type Database = {
         }
         Relationships: []
       }
+      site_maps: {
+        Row: {
+          created_at: string
+          id: string
+          is_crawled: boolean
+          organization_id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_crawled?: boolean
+          organization_id: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_crawled?: boolean
+          organization_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_maps_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_pages: {
+        Row: {
+          content_markdown: string | null
+          created_at: string
+          id: string
+          last_crawled_at: string | null
+          organization_id: string
+          summary: string | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          content_markdown?: string | null
+          created_at?: string
+          id?: string
+          last_crawled_at?: string | null
+          organization_id: string
+          summary?: string | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          content_markdown?: string | null
+          created_at?: string
+          id?: string
+          last_crawled_at?: string | null
+          organization_id?: string
+          summary?: string | null
+          title?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_pages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -810,6 +965,65 @@ export type Database = {
             foreignKeyName: "user_roles_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      widget_configs: {
+        Row: {
+          accent_color: string
+          allowed_domains: string[] | null
+          api_key: string
+          avatar_url: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          placeholder_text: string
+          position: string
+          theme: string
+          updated_at: string
+          voice_enabled: boolean
+          welcome_message: string
+          widget_title: string
+        }
+        Insert: {
+          accent_color?: string
+          allowed_domains?: string[] | null
+          api_key?: string
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          placeholder_text?: string
+          position?: string
+          theme?: string
+          updated_at?: string
+          voice_enabled?: boolean
+          welcome_message?: string
+          widget_title?: string
+        }
+        Update: {
+          accent_color?: string
+          allowed_domains?: string[] | null
+          api_key?: string
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          placeholder_text?: string
+          position?: string
+          theme?: string
+          updated_at?: string
+          voice_enabled?: boolean
+          welcome_message?: string
+          widget_title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "widget_configs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
