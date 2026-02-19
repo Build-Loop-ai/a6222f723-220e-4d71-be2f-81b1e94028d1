@@ -1,151 +1,224 @@
 
 
-# Plan: Fix Onboarding Loop & Add Currency Toggle
+# Complete Redesign: Voice Receptionist to Website Embed Widget
 
-Based on the feedback, I've identified two issues that need to be addressed.
+## Overview
 
----
+Transform the platform from a phone-based AI receptionist into a **website embed widget** that provides voice + text chat, using Firecrawl to crawl customer websites and guide visitors to the right pages. The existing auth, organizations, billing, and admin infrastructure stays intact.
 
-## Issue 1: Onboarding Loop (Already Fixed by User)
+## What Changes
 
-**What was happening:** After completing onboarding, users were being redirected back to the beginning instead of going to the dashboard.
+### Concept Shift
+- **Before**: AI answers phone calls for businesses using Twilio phone numbers
+- **After**: AI powers a chat widget businesses embed on their websites, using their site content as knowledge
 
-**Root Cause Analysis:** 
-Looking at the code flow:
-1. `complete-onboarding` edge function sets `onboarding_completed: true` in the profile (line 121)
-2. `ProtectedRoute` checks `profile.onboarding_completed` and should redirect completed users to `/dashboard`
-3. The onboarding page sets `isCompleted = true` and shows a success screen with "Go to Dashboard" button
+### What Gets Removed
+- All Twilio integration (phone numbers, forwarding, etc.)
+- Phone-specific edge functions: `buy-phone-number`, `search-phone-numbers`, `release-phone-number`, `cleanup-vapi-phone`, `update-forwarding-status`, `vapi-webhook`
+- Phone-related UI: `PhoneNumberDialog`, `TestCallDialog`, phone carrier utilities
+- Call log dashboard views (replaced with conversation logs)
+- Phone-specific onboarding steps
 
-**Potential Issue:** There's a race condition - the frontend's `isCompleted` state is local, but after clicking "Go to Dashboard", the `ProtectedRoute` might still have stale data. If the profile query cache wasn't invalidated, it could still see `onboarding_completed: false` and redirect back to onboarding.
-
-**Fix:** Add cache invalidation after completing onboarding to ensure `ProtectedRoute` sees the updated value.
-
-### Changes
-**File:** `src/pages/Onboarding.tsx`
-
-In the `handleComplete` function, after the successful response, add a query client invalidation to refresh the profile data:
-
-```typescript
-// After toast success
-queryClient.invalidateQueries({ queryKey: ['profile'] });
-```
-
-This ensures the ProtectedRoute will see the updated `onboarding_completed` status.
+### What Stays
+- Authentication (login, signup, forgot password, invitations)
+- Organizations, user roles, profiles
+- Subscriptions and Stripe billing
+- Admin panel and system roles
+- Site config and branding
+- Email via Resend
+- Google Calendar integration
+- Vapi (repurposed for browser-based voice in the widget)
+- ElevenLabs (voice synthesis)
 
 ---
 
-## Issue 2: Phone Pricing Shows Only Euros
+## Implementation Plan
 
-**What the user wants:** An easy way to toggle between regions/currencies (EUR vs USD) without changing code.
+### Phase 1: Database Changes
 
-**Current state:**
-- `phone-countries.ts` has hardcoded prices in EUR (field name: `monthlyPriceEur`)
-- `PhoneNumberDialog.tsx` displays `€{c.monthlyPriceEur}/mo` (line 193)
-- The `site_config` table already has `currency` and `currency_symbol` columns
-- AdminSiteConfig currently doesn't expose currency settings to admins
+**New tables:**
 
-### Solution
+1. **`widget_configs`** -- per-organization widget settings
+   - `id`, `organization_id`, `position` (bottom-right, bottom-left), `theme` (light/dark/auto), `accent_color`, `welcome_message`, `placeholder_text`, `avatar_url`, `widget_title`, `allowed_domains` (array), `voice_enabled` (boolean), `created_at`, `updated_at`
 
-Add a "Regional Settings" section to the Admin Site Config with:
-1. Currency dropdown (EUR, USD, GBP, etc.)
-2. Currency symbol input
+2. **`site_pages`** -- cached Firecrawl content
+   - `id`, `organization_id`, `url`, `title`, `content_markdown`, `summary`, `last_crawled_at`, `created_at`
 
-Then update the phone number display to use the site config currency instead of hardcoded EUR.
+3. **`site_maps`** -- discovered URLs from Firecrawl map
+   - `id`, `organization_id`, `url`, `is_crawled`, `created_at`
 
-### Changes
+4. **`conversations`** -- replaces call_logs
+   - `id`, `organization_id`, `visitor_id` (anonymous identifier), `channel` (text/voice), `status`, `started_at`, `ended_at`, `page_url` (where visitor started), `metadata`
 
-**1. Update `AdminSiteConfig.tsx`** - Add a new "Regional Settings" card with currency dropdown
+5. **`chat_messages`** -- individual messages
+   - `id`, `conversation_id`, `role` (user/assistant/system), `content`, `suggested_url`, `created_at`
 
-Add after the "Branding" card:
-```tsx
-{/* Regional Settings */}
-<Card>
-  <CardHeader>
-    <div className="flex items-center gap-2">
-      <Globe className="h-5 w-5 text-primary" />
-      <CardTitle>Regional Settings</CardTitle>
-    </div>
-    <CardDescription>Currency and locale preferences</CardDescription>
-  </CardHeader>
-  <CardContent className="space-y-4">
-    <div className="grid gap-4 md:grid-cols-2">
-      <div className="space-y-2">
-        <Label htmlFor="currency">Currency</Label>
-        <Select 
-          value={formData.currency || "EUR"} 
-          onValueChange={(value) => updateField("currency", value)}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="EUR">Euro (EUR)</SelectItem>
-            <SelectItem value="USD">US Dollar (USD)</SelectItem>
-            <SelectItem value="GBP">British Pound (GBP)</SelectItem>
-            <SelectItem value="CHF">Swiss Franc (CHF)</SelectItem>
-            <SelectItem value="AUD">Australian Dollar (AUD)</SelectItem>
-            <SelectItem value="CAD">Canadian Dollar (CAD)</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="currency_symbol">Currency Symbol</Label>
-        <Input
-          id="currency_symbol"
-          value={formData.currency_symbol || "€"}
-          onChange={(e) => updateField("currency_symbol", e.target.value)}
-          placeholder="€"
-          maxLength={3}
-        />
-      </div>
-    </div>
-  </CardContent>
-</Card>
+**Tables to eventually clean up** (not dropped immediately to preserve data):
+- `phone_numbers`, `call_logs` -- mark as deprecated, remove references in code
+
+**RLS policies**: All new tables get org-based RLS policies. `conversations` and `chat_messages` also need a public insert policy for anonymous widget visitors (validated via widget API key).
+
+### Phase 2: Firecrawl Integration
+
+Connect Firecrawl using the connector system.
+
+**New edge functions:**
+
+1. **`crawl-site`** -- triggered during onboarding or manually
+   - Uses Firecrawl `map` to discover all URLs on the customer's website
+   - Stores URLs in `site_maps`
+   - Crawls top pages (limit ~50) using Firecrawl `scrape`, stores content in `site_pages`
+   - Generates summaries for each page using Lovable AI
+
+2. **`refresh-site`** -- re-crawl on demand or scheduled
+   - Updates `site_pages` with fresh content
+
+3. **`widget-chat`** -- the main chat endpoint (public, no JWT required)
+   - Receives message + conversation history + widget API key
+   - Validates the widget key against `widget_configs`
+   - Searches `site_pages` content to find relevant answers
+   - Uses Lovable AI to generate a response grounded in the site content
+   - Returns answer + suggested page URL when relevant
+   - Supports streaming for better UX
+
+### Phase 3: Embeddable Widget
+
+**Widget component** (`src/components/embed/ChatWidget.tsx`):
+- Floating bubble + expandable chat panel
+- Text input with message history
+- Voice button that uses Vapi's browser SDK for voice interaction
+- Displays suggested links when the AI recommends a page
+- Configurable colors, position, avatar, welcome message
+- Built as a standalone bundle that can be loaded via a `<script>` tag
+
+**Widget loader script** (served as a static asset or via edge function):
+```text
+<script src="https://[your-domain]/widget.js" data-widget-id="xxx"></script>
 ```
 
-**2. Update `PhoneNumberDialog.tsx`** - Use site config currency
+**Inline embed option:**
+- Also provide an iframe-based embed for customers who want inline placement
+- Same widget UI, just rendered in an iframe with configurable dimensions
 
-```typescript
-import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
+### Phase 4: Dashboard Redesign
 
-// Inside component:
-const { config } = useSiteConfigTransformed();
+**Dashboard home** -- replace call-focused metrics with:
+- Total conversations today
+- Active visitors right now
+- Messages sent
+- Pages recommended
+- Recent conversations feed
 
-// Change display from:
-<span className="text-muted-foreground ml-auto">€{c.monthlyPriceEur}/mo</span>
+**Conversations page** (replaces Calls page):
+- List of conversations with visitor info, channel (text/voice), duration
+- Click to see full transcript
+- Filter by date, channel, status
 
-// To:
-<span className="text-muted-foreground ml-auto">
-  {config.currencySymbol}{c.monthlyPriceEur}/mo
-</span>
-```
+**Settings updates:**
+- Remove phone number management
+- Add **Widget Settings** tab: customize colors, position, welcome message, allowed domains
+- Add **Knowledge Base** tab: view crawled pages, trigger re-crawl, see site map
+- Keep AI assistant settings (voice selection, language, greeting)
+- Keep Google Calendar, billing, team management
 
-**3. Update `phone-countries.ts`** - Rename field to be currency-agnostic
+### Phase 5: Onboarding Redesign
 
-Rename `monthlyPriceEur` to `monthlyPrice` to be more generic. The value stays the same (prices are set by admin in their chosen currency).
+New 3-step onboarding flow:
 
----
+1. **Business Basics** -- name, website URL, type (same as before but website is required)
+2. **Crawl Your Site** -- enter website URL, trigger Firecrawl, show progress, preview discovered pages
+3. **Customize Widget** -- pick colors, write welcome message, preview the widget live
 
-## Summary of Changes
+### Phase 6: Landing Page Updates
 
-| File | Change |
-|------|--------|
-| `src/pages/Onboarding.tsx` | Add query invalidation after onboarding completion |
-| `src/components/admin/AdminSiteConfig.tsx` | Add "Regional Settings" card with currency dropdown |
-| `src/components/dashboard/PhoneNumberDialog.tsx` | Use site config currency symbol |
-| `src/lib/phone-countries.ts` | Rename `monthlyPriceEur` to `monthlyPrice` |
+- Change hero messaging from "AI Receptionist" to "AI Website Assistant"
+- Update mockup from phone call to chat widget
+- Update features, pricing copy, FAQ
+- Demo page: embed the actual widget for visitors to try
+
+### Phase 7: Cleanup
+
+- Delete Twilio-related edge functions (6 functions)
+- Delete phone utility files (`phone-carriers.ts`, `phone-countries.ts`, `phone-utils.ts`)
+- Remove phone-related components
+- Update `health-check` to remove Twilio checks
+- Update site-config defaults to reflect new branding
+- Remove `TWILIO_*` secrets (4 secrets)
 
 ---
 
 ## Technical Details
 
-### Exchange Rate Note
-The phone prices themselves are hardcoded values in `phone-countries.ts`. When changing currency, admins need to understand:
-- The displayed symbol changes, but the underlying prices need to be updated separately
-- For a full currency conversion solution, we'd need a price conversion API or separate price fields per currency
+### Widget Architecture
 
-For now, this solution gives admins control over the display currency and symbol. If they're operating in USD, they can:
-1. Set currency to USD and symbol to $
-2. The phone number prices will show as $5/mo, $7/mo, etc. (same numeric values)
-3. If they need different numeric values, that requires code changes to `phone-countries.ts`
+The widget will be built as a self-contained React component that gets bundled separately:
+
+```text
+Customer's website
+  |
+  +-- <script> tag loads widget.js
+        |
+        +-- Renders floating chat bubble
+        +-- On click: opens chat panel
+        +-- Messages sent to widget-chat edge function
+        +-- Voice: initializes Vapi browser SDK
+```
+
+### AI Chat Flow
+
+```text
+Visitor sends message
+  |
+  +-- widget-chat edge function receives message
+  |     |
+  |     +-- Validates widget API key
+  |     +-- Searches site_pages for relevant content (text matching)
+  |     +-- Calls Lovable AI with:
+  |     |     - System prompt with business context
+  |     |     - Relevant page content as context
+  |     |     - Conversation history
+  |     |     - Instruction to suggest URLs when relevant
+  |     +-- Returns AI response + optional suggested URL
+  |
+  +-- Widget displays response with clickable link
+```
+
+### Edge Functions Summary
+
+| Function | Purpose | Auth |
+|----------|---------|------|
+| `crawl-site` | Firecrawl map + scrape customer site | JWT (org member) |
+| `refresh-site` | Re-crawl site content | JWT (org member) |
+| `widget-chat` | Handle chat messages from widget | Widget API key |
+| `generate-widget-key` | Create API key for widget embed | JWT (org admin) |
+
+### Files to Delete
+
+- `supabase/functions/buy-phone-number/`
+- `supabase/functions/search-phone-numbers/`
+- `supabase/functions/release-phone-number/`
+- `supabase/functions/cleanup-vapi-phone/`
+- `supabase/functions/update-forwarding-status/`
+- `supabase/functions/vapi-webhook/`
+- `src/lib/phone-carriers.ts`
+- `src/lib/phone-countries.ts`
+- `src/lib/phone-utils.ts`
+- `src/components/dashboard/PhoneNumberDialog.tsx`
+- `src/components/dashboard/TestCallDialog.tsx`
+- `src/components/dashboard/CallCard.tsx`
+- `src/components/dashboard/CallDetailSheet.tsx`
+
+### Execution Order
+
+Due to the scope, this should be implemented across multiple prompts:
+
+1. Database migrations (new tables + RLS)
+2. Connect Firecrawl connector
+3. Build `crawl-site` and `widget-chat` edge functions
+4. Build the embeddable chat widget component
+5. Redesign dashboard (conversations view)
+6. Redesign onboarding (website + crawl + widget setup)
+7. Update landing page messaging and visuals
+8. Delete deprecated phone/Twilio code and functions
+9. End-to-end testing
 
