@@ -1,49 +1,42 @@
-import { Lightbulb, TrendingUp, Clock, Calendar } from "lucide-react";
+import { Lightbulb, TrendingUp, Clock, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface InsightsPanelProps {
-  totalCalls: number;
-  appointmentsBooked: number;
-  peakHour?: number;
-  avgDurationSeconds?: number;
+  totalConversations: number;
+  totalMessages: number;
+  pagesRecommended: number;
+  activeVisitors: number;
 }
 
 const InsightsPanel = ({ 
-  totalCalls, 
-  appointmentsBooked, 
-  peakHour,
-  avgDurationSeconds 
+  totalConversations, 
+  totalMessages, 
+  pagesRecommended,
+  activeVisitors,
 }: InsightsPanelProps) => {
-  const bookingRate = totalCalls > 0 
-    ? Math.round((appointmentsBooked / totalCalls) * 100) 
+  const avgMessagesPerConversation = totalConversations > 0 
+    ? Math.round(totalMessages / totalConversations) 
     : 0;
 
-  const formatHour = (hour: number) => {
-    if (hour === 0) return "12 AM";
-    if (hour === 12) return "12 PM";
-    if (hour > 12) return `${hour - 12} PM`;
-    return `${hour} AM`;
-  };
-
   const insights = [
-    totalCalls > 0 && bookingRate > 50 && {
+    totalConversations > 0 && pagesRecommended > 0 && {
       icon: TrendingUp,
-      text: `Your AI converted ${bookingRate}% of calls into appointments`,
+      text: `Your AI recommended ${pagesRecommended} pages to visitors today`,
       color: "text-success",
     },
-    peakHour !== undefined && totalCalls > 3 && {
+    activeVisitors > 0 && {
       icon: Clock,
-      text: `Peak calling hour today: ${formatHour(peakHour)}`,
+      text: `${activeVisitors} visitor${activeVisitors > 1 ? 's' : ''} currently chatting with your AI`,
       color: "text-info",
     },
-    totalCalls === 0 && {
-      icon: Calendar,
-      text: "No calls yet today. Your AI is ready to answer!",
+    totalConversations === 0 && {
+      icon: MessageSquare,
+      text: "No conversations yet today. Your AI widget is ready!",
       color: "text-muted-foreground",
     },
-    avgDurationSeconds && avgDurationSeconds > 120 && {
+    avgMessagesPerConversation > 4 && {
       icon: Lightbulb,
-      text: "Longer calls often mean better customer engagement",
+      text: `Average ${avgMessagesPerConversation} messages per conversation — great engagement!`,
       color: "text-warning",
     },
   ].filter(Boolean);

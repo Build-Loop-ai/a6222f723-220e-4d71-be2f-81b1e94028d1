@@ -14,7 +14,8 @@ import ResetPassword from "./pages/ResetPassword";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
-import DashboardCalls from "./pages/DashboardCalls";
+import DashboardConversations from "./pages/DashboardConversations";
+import DashboardConversationDetail from "./pages/DashboardConversationDetail";
 import DashboardCallDetail from "./pages/DashboardCallDetail";
 import DashboardAnalytics from "./pages/DashboardAnalytics";
 import DashboardSettings from "./pages/DashboardSettings";
@@ -60,7 +61,8 @@ const App = () => (
               </ProtectedRoute>
             }>
               <Route index element={<Dashboard />} />
-              <Route path="calls" element={<DashboardCalls />} />
+              <Route path="conversations" element={<DashboardConversations />} />
+              <Route path="conversations/:conversationId" element={<DashboardConversationDetail />} />
               <Route path="calls/:callId" element={<DashboardCallDetail />} />
               <Route path="analytics" element={<DashboardAnalytics />} />
               <Route path="settings" element={<DashboardSettings />} />
