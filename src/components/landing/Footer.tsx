@@ -1,64 +1,75 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Twitter, Linkedin, Instagram, ArrowUpRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { Twitter, Linkedin, Instagram } from "lucide-react";
 import ContactDialog from "./ContactDialog";
-import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 
 const Footer = () => {
   const [contactOpen, setContactOpen] = useState(false);
-  const { config } = useSiteConfigTransformed();
 
-  const footerLinks = {
-    Product: [
-      { name: "Features", href: "#features" },
-      { name: "Pricing", href: "#pricing" },
-      { name: "Demo", href: "/demo" },
-    ],
-    Company: [
-      { name: "Assessment", href: "/assessment" },
-      { name: "Contact", href: "#", onClick: () => setContactOpen(true) },
-    ],
-    Account: [
-      { name: "Login", href: "/login" },
-      { name: "Sign Up", href: "/signup" },
-    ],
-  };
+  const columns = [
+    {
+      title: "Product",
+      links: [
+        { name: "Features", href: "#features" },
+        { name: "Pricing", href: "#pricing" },
+        { name: "Demo", href: "/demo" },
+        { name: "Changelog", href: "#" },
+      ],
+    },
+    {
+      title: "Resources",
+      links: [
+        { name: "Documentation", href: "#" },
+        { name: "Blog", href: "#" },
+        { name: "Support", href: "#", onClick: () => setContactOpen(true) },
+        { name: "API", href: "#" },
+      ],
+    },
+    {
+      title: "Company",
+      links: [
+        { name: "About", href: "#" },
+        { name: "Contact", href: "#", onClick: () => setContactOpen(true) },
+        { name: "Privacy", href: "/privacy" },
+        { name: "Terms", href: "/terms" },
+      ],
+    },
+  ];
 
   return (
-    <footer className="bg-background relative overflow-hidden" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-      <div className="container mx-auto px-4 md:px-6 py-16 relative z-10">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-16">
+    <footer style={{ background: "#050506", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="max-w-[1140px] mx-auto px-6 md:px-12 py-16">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-16">
           {/* Logo */}
           <div className="col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4 group">
-              <span className="font-display text-2xl font-800 text-gradient">{config.name.toLowerCase()}</span>
+            <Link to="/" className="font-display text-2xl font-[800] text-gradient inline-block mb-4">
+              greet
             </Link>
-            <p className="text-muted-foreground text-sm mb-6 max-w-xs leading-relaxed">{config.description}</p>
+            <p className="text-sm text-[hsl(240,4%,45%)] max-w-xs leading-relaxed mb-6">
+              AI chat and voice for every website.
+            </p>
             <div className="flex gap-3">
               {[Twitter, Linkedin, Instagram].map((Icon, idx) => (
-                <motion.a key={idx} href="#" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} className="w-10 h-10 rounded-xl glass flex items-center justify-center text-muted-foreground hover:text-primary transition-colors duration-300">
-                  <Icon className="w-5 h-5" />
-                </motion.a>
+                <a key={idx} href="#" className="w-10 h-10 rounded-xl glass flex items-center justify-center text-[hsl(240,4%,45%)] hover:text-foreground transition-colors duration-300">
+                  <Icon className="w-4 h-4" />
+                </a>
               ))}
             </div>
           </div>
 
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
-              <h4 className="font-mono text-[10px] tracking-[2.5px] uppercase text-muted-foreground mb-4">{category}</h4>
+          {columns.map((col) => (
+            <div key={col.title}>
+              <h4 className="font-mono text-[10px] tracking-[2.5px] uppercase text-[hsl(240,4%,45%)] mb-5">{col.title}</h4>
               <ul className="space-y-3">
-                {links.map((link) => (
+                {col.links.map((link) => (
                   <li key={link.name}>
                     {"onClick" in link && link.onClick ? (
-                      <button onClick={link.onClick} className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200 inline-flex items-center gap-1 group">
+                      <button onClick={link.onClick} className="text-sm text-[hsl(240,4%,45%)] hover:text-foreground transition-colors duration-200">
                         {link.name}
-                        <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-50 transition-all duration-200" />
                       </button>
                     ) : (
-                      <a href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200 inline-flex items-center gap-1 group">
+                      <a href={link.href} className="text-sm text-[hsl(240,4%,45%)] hover:text-foreground transition-colors duration-200">
                         {link.name}
-                        <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-50 transition-all duration-200" />
                       </a>
                     )}
                   </li>
@@ -70,8 +81,14 @@ const Footer = () => {
 
         {/* Bottom */}
         <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} {config.name}. All rights reserved.</p>
-          <p className="text-sm text-muted-foreground flex items-center gap-1">Made with <span className="text-destructive">❤</span> using Lovable</p>
+          <p className="text-sm text-[hsl(240,4%,45%)]">© {new Date().getFullYear()} Greet. All rights reserved.</p>
+          <div className="flex gap-4">
+            {[Twitter, Linkedin, Instagram].map((Icon, idx) => (
+              <a key={idx} href="#" className="text-[hsl(240,4%,45%)] hover:text-foreground transition-colors">
+                <Icon className="w-4 h-4" />
+              </a>
+            ))}
+          </div>
         </div>
       </div>
       <ContactDialog open={contactOpen} onOpenChange={setContactOpen} />

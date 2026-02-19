@@ -1,24 +1,73 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
-import { ConnectVisual, CustomizeVisual, LaunchVisual } from "./HowItWorksVisuals";
+import { motion } from "framer-motion";
+import { Link as LinkIcon, SlidersHorizontal, Rocket } from "lucide-react";
+
+const steps = [
+  {
+    num: "01",
+    title: "Paste your URL",
+    desc: "Enter any website URL. Greet crawls the entire sitemap and reads every page, product, service, and FAQ automatically.",
+    icon: LinkIcon,
+    visual: (
+      <div className="space-y-3">
+        <div className="glass rounded-xl p-3 flex items-center gap-3">
+          <div className="flex-1 px-3 py-2 rounded-lg text-xs text-[hsl(240,4%,45%)]" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            vandermolen.nl
+          </div>
+          <div className="px-3 py-2 rounded-lg text-xs font-medium text-primary" style={{ background: "rgba(52,215,123,0.10)", border: "1px solid rgba(52,215,123,0.15)" }}>
+            Crawling...
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    num: "02",
+    title: "Customize your agent",
+    desc: "Set the tone, add custom documents, configure lead capture. Your agent matches your brand perfectly.",
+    icon: SlidersHorizontal,
+    visual: (
+      <div className="space-y-2">
+        {["Voice Mode", "Lead Capture", "Auto-Reply"].map((label, i) => (
+          <div key={i} className="glass rounded-lg p-2.5 flex items-center justify-between">
+            <span className="text-xs text-foreground">{label}</span>
+            <div className={`w-8 h-5 rounded-full relative ${i < 2 ? "bg-primary/30" : "bg-foreground/10"}`}>
+              <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${i < 2 ? "left-3.5 bg-primary" : "left-0.5 bg-foreground/30"}`} />
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    num: "03",
+    title: "Go live in minutes",
+    desc: "Copy one line of code or use our plugin. The chat widget appears on your site, ready to help every visitor.",
+    icon: Rocket,
+    visual: (
+      <div className="glass rounded-xl p-3">
+        <code className="font-mono text-[11px] text-primary leading-relaxed block">
+          {'<script src="greet.js"></script>'}
+        </code>
+      </div>
+    ),
+  },
+];
 
 const HowItWorks = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start center", "end center"],
-  });
-  const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
-
-  const steps = [
-    { number: "01", title: "Connect", headline: "Add your website in 2 minutes", description: "Enter your website URL and our AI crawls your content automatically. It learns everything about your business — no manual training needed.", visual: "connect" },
-    { number: "02", title: "Customize", headline: "Make it match your brand", description: "Choose colors, set a welcome message, and configure the chat personality. Your widget blends seamlessly into your website design.", visual: "customize" },
-    { number: "03", title: "Launch", headline: "Go live with one line of code", description: "Copy a single script tag and paste it into your website. Your AI assistant starts engaging visitors immediately.", visual: "launch" },
-  ];
-
   return (
-    <section ref={containerRef} className="relative py-32 md:py-40 bg-background overflow-hidden">
-      <div className="container mx-auto px-4 md:px-6 relative z-10">
+    <section className="relative py-32 md:py-40 overflow-hidden">
+      {/* Background mesh gradient */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 1200px 800px at 50% 50%, rgba(52,215,123,0.08) 0%, transparent 70%),
+            #050506
+          `,
+        }}
+      />
+
+      <div className="max-w-[1140px] mx-auto px-6 md:px-12 relative z-10">
         {/* Header */}
         <div className="max-w-3xl mb-16 md:mb-24">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="section-label mb-5">
@@ -29,57 +78,42 @@ const HowItWorks = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="font-display font-700 leading-[1.1] tracking-[-0.02em] text-foreground"
-            style={{ fontSize: "clamp(36px, 5vw, 56px)" }}
+            className="font-display font-[700] leading-[1.1] tracking-[-0.02em] text-foreground"
+            style={{ fontSize: "clamp(36px, 5vw, 44px)" }}
           >
-            Three steps to <span className="text-gradient">engagement</span>
+            Three steps, one result.
           </motion.h2>
         </div>
 
-        {/* Steps */}
-        <div className="relative max-w-5xl mx-auto">
-          {/* Progress line */}
-          <div className="absolute left-7 md:left-1/2 top-0 bottom-0 w-px bg-foreground/8 hidden md:block">
-            <motion.div className="absolute top-0 left-0 w-full bg-gradient-to-b from-primary via-cyan to-primary" style={{ height: lineHeight }} />
-          </div>
-
+        {/* Cards */}
+        <div className="grid md:grid-cols-3 gap-5">
           {steps.map((step, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 80 }}
+              initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: idx * 0.1 }}
-              className={`relative grid md:grid-cols-2 gap-8 md:gap-16 items-center mb-24 md:mb-32 last:mb-0 ${idx % 2 === 1 ? "md:direction-rtl" : ""}`}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: idx * 0.15 }}
+              className="glass rounded-[28px] p-10 group"
             >
               {/* Number */}
-              <div className={`absolute left-0 md:left-1/2 md:-translate-x-1/2 z-20`}>
-                <motion.div
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3, type: "spring" }}
-                  className="w-14 h-14 rounded-full bg-background border-4 border-primary flex items-center justify-center shadow-lg"
-                >
-                  <span className="text-lg font-display text-primary">{step.number}</span>
-                </motion.div>
+              <div className="font-display font-[800] text-gradient mb-6" style={{ fontSize: "48px" }}>
+                {step.num}
               </div>
 
-              {/* Content */}
-              <div className={`pl-20 md:pl-0 ${idx % 2 === 1 ? "md:text-right md:pr-16 md:order-2" : "md:pr-16"}`}>
-                <span className="section-label mb-3 block">{step.title}</span>
-                <h3 className="text-2xl md:text-3xl lg:text-4xl font-display font-700 text-foreground mt-3 mb-4 leading-tight tracking-[-0.02em]">{step.headline}</h3>
-                <p className="text-muted-foreground text-lg leading-relaxed">{step.description}</p>
+              {/* Icon */}
+              <div
+                className="w-12 h-12 rounded-[14px] flex items-center justify-center mb-6"
+                style={{ background: "rgba(52,215,123,0.10)", border: "1px solid rgba(52,215,123,0.12)" }}
+              >
+                <step.icon className="w-6 h-6 text-primary" />
               </div>
+
+              <h3 className="font-display text-xl font-[700] text-foreground mb-3 tracking-[-0.01em]">{step.title}</h3>
+              <p className="text-[15px] text-[hsl(240,4%,65%)] leading-relaxed mb-6">{step.desc}</p>
 
               {/* Visual */}
-              <div className={`pl-20 md:pl-0 ${idx % 2 === 1 ? "md:pl-16 md:order-1" : "md:pl-16"}`}>
-                <div className="relative aspect-[4/3] glass rounded-[28px] overflow-hidden">
-                  {step.visual === "connect" && <ConnectVisual />}
-                  {step.visual === "customize" && <CustomizeVisual />}
-                  {step.visual === "launch" && <LaunchVisual />}
-                </div>
-              </div>
+              <div className="mt-auto">{step.visual}</div>
             </motion.div>
           ))}
         </div>
