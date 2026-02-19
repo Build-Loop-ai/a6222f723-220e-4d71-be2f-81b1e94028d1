@@ -7,9 +7,9 @@ interface PerformanceCardProps {
 }
 
 const COLORS = [
-  "hsl(148 68% 52%)",  // success/resolved
+  "hsl(148 68% 42%)",  // success/resolved
   "hsl(38 92% 50%)",   // warning/escalated
-  "hsl(240 4% 45%)",   // muted/abandoned
+  "hsl(225 12% 65%)",  // muted/abandoned
 ];
 
 const PerformanceCard = ({ resolved, escalated, abandoned }: PerformanceCardProps) => {
@@ -25,8 +25,8 @@ const PerformanceCard = ({ resolved, escalated, abandoned }: PerformanceCardProp
   const hasData = total > 0;
 
   return (
-    <div className="rounded-xl glass-light p-5 space-y-4">
-      <h3 className="text-sm font-semibold text-foreground">AI Performance</h3>
+    <div className="rounded-2xl glass-light p-5 space-y-4">
+      <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Performance</h3>
 
       {hasData ? (
         <div className="flex items-center gap-6">
@@ -51,30 +51,30 @@ const PerformanceCard = ({ resolved, escalated, abandoned }: PerformanceCardProp
             </ResponsiveContainer>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <span className="text-xl font-bold">{resolutionRate}%</span>
+                <span className="text-xl font-bold text-foreground">{resolutionRate}%</span>
               </div>
             </div>
           </div>
 
-          <div className="space-y-2 flex-1 min-w-0">
+          <div className="space-y-3 flex-1 min-w-0">
             {[
               { label: "Resolved", value: resolved, color: "bg-success" },
               { label: "Escalated", value: escalated, color: "bg-warning" },
-              { label: "Abandoned", value: abandoned, color: "bg-muted-foreground" },
+              { label: "Abandoned", value: abandoned, color: "bg-foreground/30" },
             ].map((item) => (
               <div key={item.label} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${item.color}`} />
-                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
+                  <span className="text-foreground/60 font-medium">{item.label}</span>
                 </div>
-                <span className="font-medium tabular-nums">{item.value}</span>
+                <span className="font-bold tabular-nums text-foreground">{item.value}</span>
               </div>
             ))}
           </div>
         </div>
       ) : (
-        <div className="py-8 text-center text-sm text-muted-foreground">
-          No conversation data yet
+        <div className="py-10 text-center">
+          <p className="text-sm text-foreground/40 font-medium">No conversation data yet</p>
         </div>
       )}
     </div>
