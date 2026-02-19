@@ -93,7 +93,7 @@ const CallCard = ({
     <button
       onClick={onClick}
       className={cn(
-        "w-full text-left rounded-xl bg-card border border-border p-4",
+        "w-full text-left rounded-xl glass-light p-4",
         "transition-all duration-200 card-hover",
         "hover:border-border/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       )}

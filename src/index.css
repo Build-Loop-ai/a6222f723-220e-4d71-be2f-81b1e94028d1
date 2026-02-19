@@ -86,9 +86,9 @@
     --sidebar-ring: 148 68% 52%;
   }
 
-  /* Light mode override for dashboard if needed */
+  /* ━━ Dashboard Light Theme ━━ ChatGPT × Notion × Apple 2027 Glass */
   .light-theme {
-    --background: 0 0% 99%;
+    --background: 220 20% 97%;
     --foreground: 220 20% 10%;
     --card: 0 0% 100%;
     --card-foreground: 220 20% 10%;
@@ -105,6 +105,45 @@
     --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 148 68% 42%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Sidebar – frosted glass on light */
+    --sidebar-background: 0 0% 100% / 0.60;
+    --sidebar-foreground: 220 20% 15%;
+    --sidebar-primary: 148 68% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 148 50% 95%;
+    --sidebar-accent-foreground: 148 50% 25%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 148 68% 42%;
+
+    /* Surfaces for glass cards */
+    --surface: 0 0% 0% / 0.02;
+    --surface-2: 0 0% 0% / 0.04;
+    --surface-3: 0 0% 0% / 0.06;
+    --glass-border: 0 0% 0% / 0.06;
+    --glass-border-hover: 0 0% 0% / 0.12;
+
+    /* Status – legible on white */
+    --success: 148 68% 38%;
+    --success-foreground: 0 0% 100%;
+    --success-muted: 148 40% 94%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 92% 20%;
+    --warning-muted: 38 60% 94%;
+    --info: 190 80% 42%;
+    --info-foreground: 0 0% 100%;
+    --info-muted: 190 40% 94%;
+
+    /* Shadows – soft, layered, Apple-style */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+    --shadow-lg: 0 12px 40px -8px rgb(0 0 0 / 0.08);
+    --shadow-xl: 0 20px 60px -12px rgb(0 0 0 / 0.1);
+    --shadow-glow: 0 0 60px hsl(148 68% 52% / 0.06);
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.03);
+    --shadow-card-hover: 0 8px 30px -8px rgb(0 0 0 / 0.08);
   }
 
   /* Admin dark theme */
@@ -157,7 +196,7 @@
 }
 
 @layer utilities {
-  /* Glass system – Apple 2027 */
+  /* Glass system – Dark (original) */
   .glass {
     background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
     backdrop-filter: blur(40px);
@@ -186,6 +225,33 @@
     border: 1px solid rgba(255,255,255,0.08);
   }
 
+  /* ━━ Glass system – Light / Apple 2027 ━━ */
+  .glass-light {
+    background: linear-gradient(135deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.50) 100%);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.60);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.04), 0 8px 32px -8px rgb(0 0 0 / 0.06);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .glass-light:hover {
+    border-color: rgba(255,255,255,0.80);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.04), 0 12px 40px -8px rgb(0 0 0 / 0.08);
+  }
+  .glass-light-strong {
+    background: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.70) 100%);
+    backdrop-filter: blur(60px) saturate(200%);
+    -webkit-backdrop-filter: blur(60px) saturate(200%);
+    border: 1px solid rgba(255,255,255,0.70);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.03), 0 12px 48px -12px rgb(0 0 0 / 0.07);
+  }
+  .glass-light-subtle {
+    background: rgba(255,255,255,0.45);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.40);
+  }
+
   .gradient-mesh {
     background: 
       radial-gradient(at 40% 20%, hsl(var(--teal) / 0.03) 0px, transparent 50%),
@@ -194,6 +260,15 @@
   }
   .hero-gradient {
     background: hsl(var(--background));
+  }
+  
+  /* Light dashboard mesh – subtle warm gradient with color orbs */
+  .light-theme .gradient-mesh {
+    background: 
+      radial-gradient(ellipse at 20% 0%, hsl(148 60% 80% / 0.15) 0px, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, hsl(190 80% 80% / 0.10) 0px, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, hsl(260 60% 85% / 0.08) 0px, transparent 50%),
+      linear-gradient(180deg, hsl(220 20% 97%) 0%, hsl(220 20% 95%) 100%);
   }
   
   /* Text effects */

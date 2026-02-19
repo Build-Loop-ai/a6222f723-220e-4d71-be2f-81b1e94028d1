@@ -15,7 +15,7 @@ interface MetricCardProps {
 const MetricCard = ({ label, value, icon: Icon, trend, className }: MetricCardProps) => {
   return (
     <div className={cn(
-      "rounded-xl bg-card border border-border p-5 shadow-card card-hover",
+      "rounded-xl glass-light p-5 card-hover",
       className
     )}>
       <div className="flex items-start justify-between mb-3">

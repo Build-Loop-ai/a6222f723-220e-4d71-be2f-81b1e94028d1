@@ -7,7 +7,7 @@ const DashboardLayout = () => {
   return (
     <>
       <CommandPalette />
-      <div className="min-h-screen flex w-full bg-background gradient-mesh">
+      <div className="light-theme min-h-screen flex w-full gradient-mesh">
         {/* Desktop sidebar */}
         <DashboardSidebar />
         

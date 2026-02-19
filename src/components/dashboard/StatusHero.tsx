@@ -65,8 +65,8 @@ const StatusHero = ({
       </div>
 
       {/* Status Card */}
-      <div className="relative overflow-hidden rounded-2xl bg-card border border-border p-6 shadow-card">
-        <div className="absolute inset-0 bg-gradient-to-br from-teal/5 via-transparent to-transparent pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl glass-light p-6">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
         
         <div className="relative space-y-6">
           {/* Live Status */}
