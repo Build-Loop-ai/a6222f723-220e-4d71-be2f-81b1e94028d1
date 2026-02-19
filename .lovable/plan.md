@@ -1,90 +1,50 @@
 
 
-# Dashboard Redesign for Greet.ai SaaS
+# Widget Builder: Light Theme Redesign
 
-## Current State
-The dashboard currently has a basic layout: a greeting + status card with 4 metrics, a recent conversations list, and a simple insights panel. It works, but feels like a prototype rather than a polished SaaS product. The sidebar has only 4 items and there's no quick access to key actions.
+## Problem
+The current widget builder uses the app's dark theme with grey text on dark backgrounds and white outline borders, making it hard to read and visually noisy.
 
-## Vision
-Transform the dashboard into a command center that gives business owners everything they need at a glance: what's happening now, what happened recently, how their AI is performing, and what needs attention. The design should feel like a premium SaaS tool (think: Intercom, Crisp, or HubSpot dashboard).
+## Solution
+Convert the entire widget builder into a self-contained light-themed interface. This means applying light colors directly via inline styles and explicit class overrides so the builder feels like a standalone design tool -- clean, readable, and professional.
 
----
+## Changes (single file: `src/components/settings/WidgetSettings.tsx`)
 
-## Changes Overview
+### 1. Outer Container
+- Remove the `border border-border/50` (the white outline)
+- Add a light background (`bg-white`), subtle shadow, and soft rounded corners
+- Apply `text-gray-900` as the base text color for the entire builder
 
-### 1. Redesigned Main Dashboard Page (`Dashboard.tsx`)
-The new dashboard home will have these sections from top to bottom:
+### 2. Left Panel (Controls Sidebar)
+- Background: `bg-gray-50/80` with a subtle right border in `border-gray-200`
+- All labels and headings: dark grays (`text-gray-900`, `text-gray-600`, `text-gray-400`)
+- Tab pills: light gray inactive (`bg-gray-100`), white active with shadow
+- "Click to edit" banner: soft green tint on white instead of dark primary/5
+- Quick Edit Zone list items: light hover states (`hover:bg-gray-100`)
+- Toggle rows: `bg-gray-50` background
+- Color swatch text inputs: light borders, dark text
+- FieldInput component: light bottom borders (`border-gray-200`), dark text
 
-**A. Smart Greeting Bar** - Time-aware greeting with the user's name, a "Widget Live" status badge, and quick-action buttons (open settings, view widget, copy embed code).
+### 3. Right Panel (Canvas)
+- Background: very subtle warm gray (`bg-[#fafafa]`) with a lighter dot grid
+- Canvas toolbar: white background with light bottom border
+- Device toggle pills: `bg-gray-100` inactive, white active
+- "Preview" label and editing badge: dark text on light backgrounds
+- Device frame shadow: softer, lighter shadow suitable for light backgrounds
 
-**B. Metric Cards Row** - 6 compact metric cards in a horizontal grid:
-- Conversations Today (with sparkline trend vs yesterday)
-- Active Visitors Now (live count with pulse indicator)
-- Messages Sent Today
-- Avg Response Time (how fast the AI replies)
-- Pages Recommended
-- Satisfaction indicator (based on conversation length / engagement)
+### 4. "Create Widget" Empty State
+- Light background card instead of glass/dark
+- Dark text for heading and description
 
-**C. Two-Column Layout:**
-- **Left (wider):** Live Activity Feed - Real-time conversation stream with visitor ID, channel icon (chat/voice), page URL, message preview, and time. Each row is clickable. Includes a "View All" link.
-- **Right:** Two stacked cards:
-  - **AI Performance Card** - Donut chart showing conversation outcomes (resolved, escalated, abandoned) with a "resolution rate" percentage in the center.
-  - **Quick Actions Card** - Buttons for: "Test Your Widget", "Invite Team Member", "View Analytics", "Edit Knowledge Base".
+### 5. FieldInput Helper Component
+- Update default classes to use light-friendly colors
 
-**D. Setup Checklist** (only shown if onboarding steps are incomplete) - Collapsible banner at the top showing remaining setup steps. Disappears once all steps are done.
+### 6. ColorSwatch Component
+- Hex text input: dark text, light border
+- Preset color dots: light ring-offset color
 
-### 2. Enhanced Sidebar (`DashboardSidebar.tsx`)
-Add a user profile avatar and email at the bottom (above sign-out), and group navigation more logically:
-- Dashboard (home icon)
-- Conversations (message icon)
-- Analytics (chart icon)
-- Knowledge Base (book icon) -- new shortcut to settings/knowledge tab
-- Settings (gear icon)
-
-Also add a small "status dot" next to Conversations showing count of active conversations.
-
-### 3. New Component: `QuickActions.tsx`
-A card with 4 action tiles that link to common tasks. Each tile has an icon, label, and navigates to the relevant page/tab.
-
-### 4. New Component: `PerformanceCard.tsx`
-A compact card with a donut chart (using recharts) showing conversation outcomes breakdown and a central "resolution rate" number.
-
-### 5. Updated `StatusHero.tsx` -> `DashboardHeader.tsx`
-Simplified to just the greeting, live status badge, and action buttons. Metrics move to their own row of cards.
-
-### 6. Updated `ActivityStream.tsx`
-Enhanced with message previews (fetch last message per conversation), better empty state, and real-time updates via database subscriptions.
-
-### 7. New Component: `MetricCardsRow.tsx`
-A row of 6 small metric cards replacing the old StatusHero metrics grid. Each card is its own component with icon, label, value, and optional comparison indicator.
-
----
-
-## Technical Details
-
-### Files to Create
-- `src/components/dashboard/DashboardHeader.tsx` - Greeting + status + quick actions bar
-- `src/components/dashboard/MetricCardsRow.tsx` - 6 metric cards in a responsive grid
-- `src/components/dashboard/PerformanceCard.tsx` - Donut chart for conversation outcomes
-- `src/components/dashboard/QuickActions.tsx` - Quick action tiles card
-
-### Files to Modify
-- `src/pages/Dashboard.tsx` - Complete rewrite of layout composition using new components
-- `src/components/dashboard/ActivityStream.tsx` - Add message previews, improve empty state
-- `src/components/dashboard/DashboardSidebar.tsx` - Add user avatar/email, active conversation badge
-- `src/components/dashboard/BottomNav.tsx` - No major changes needed
-
-### Files to Remove/Deprecate
-- `src/components/dashboard/StatusHero.tsx` - Replaced by DashboardHeader + MetricCardsRow
-- `src/components/dashboard/InsightsPanel.tsx` - Replaced by PerformanceCard + QuickActions
-
-### Data Fetching
-All data comes from existing tables (conversations, chat_messages, profiles, widget_configs, organization_settings). No new database tables needed. The dashboard will:
-1. Fetch profile + org ID
-2. Parallel fetch: conversations (last 50), widget config, subscription, org settings
-3. Compute metrics client-side from conversation data
-4. Fetch last message per recent conversation for previews
-
-### No Database Changes Required
-All needed data already exists in the schema. We just present it better.
+## Technical Approach
+- All changes are CSS class swaps within the component -- no new files, no theme system changes
+- The rest of the app remains dark-themed; only the widget builder panel becomes light
+- Uses explicit Tailwind color classes (e.g., `bg-white`, `text-gray-700`) rather than CSS variables so the light theme is self-contained
 
