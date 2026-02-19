@@ -1,174 +1,79 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 
+const features = [
+  { num: "01", title: "Sitemap Crawling", desc: "Paste URL, Greet reads every page. Knowledge base built automatically. Updates when content changes." },
+  { num: "02", title: "Custom Documents", desc: "Upload PDFs, docs, spreadsheets. Internal pricing, FAQs, policies. Greet learns it all." },
+  { num: "03", title: "Smart Page Routing", desc: "Visitor asks about pricing? Greet answers AND links to the pricing page. Contextual navigation built in." },
+  { num: "04", title: "Voice Mode", desc: "Toggle from text to voice inside the chat widget. Same brain, spoken conversation. No phone number needed." },
+  { num: "05", title: "Lead Capture", desc: "Collect name, email, phone during conversations. Push to CRM. Every chat is a potential conversion." },
+  { num: "06", title: "Multi-tenant Dashboard", desc: "Manage all client websites from one dashboard. Usage analytics, conversation logs, knowledge management." },
+];
+
 const FeaturesSection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const { config } = useSiteConfigTransformed();
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
 
   return (
-    <section id="features" ref={containerRef} className="relative pt-24 pb-32 md:pt-32 md:pb-48 overflow-hidden bg-background">
-
+    <section id="features" className="relative py-32 md:py-40 overflow-hidden bg-background">
       <div className="container mx-auto px-4 md:px-6 relative z-10">
-        {/* Section header */}
-        <div className="max-w-5xl mx-auto mb-24 md:mb-32">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-sm uppercase tracking-[0.3em] text-primary mb-6"
-          >
-            Why {config.name}
-          </motion.p>
+        {/* Header */}
+        <div className="max-w-3xl mb-16 md:mb-20">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="section-label mb-5">
+            Product Definition
+          </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl lg:text-7xl font-serif leading-[1.1] text-foreground"
+            className="font-display font-700 leading-[1.1] tracking-[-0.02em] text-foreground mb-5"
+            style={{ fontSize: "clamp(36px, 5vw, 56px)" }}
           >
-            Your website,{" "}
-            <span className="italic text-gradient">supercharged</span>
+            Core features
           </motion.h2>
-        </div>
-
-        {/* Bento-style feature blocks */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 max-w-6xl mx-auto">
-          {/* Large feature - 24/7 */}
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="md:col-span-7 group"
+            transition={{ delay: 0.2 }}
+            className="text-[17px] text-muted-foreground max-w-[640px] leading-relaxed"
           >
-            <div className="relative h-full min-h-[400px] md:min-h-[500px] rounded-[2rem] overflow-hidden bg-gradient-to-br from-navy via-navy to-navy-light p-8 md:p-12">
-              {/* Animated clock visualization */}
-              <div className="absolute right-8 bottom-8 w-48 h-48 md:w-64 md:h-64 opacity-20 group-hover:opacity-30 transition-opacity duration-700">
-                <svg viewBox="0 0 200 200" className="w-full h-full">
-                  <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="2" className="text-teal/50" />
-                  <motion.circle 
-                    cx="100" cy="100" r="90" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="4" 
-                    strokeLinecap="round"
-                    strokeDasharray="565"
-                    className="text-teal"
-                    initial={{ strokeDashoffset: 565 }}
-                    whileInView={{ strokeDashoffset: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 3, ease: "easeOut" }}
-                  />
-                </svg>
-              </div>
-              
-              <div className="relative z-10 h-full flex flex-col">
-                <div className="flex-1">
-                  <span className="text-8xl md:text-[10rem] font-serif font-light text-teal leading-none">
-                    24/7
-                  </span>
-                  <p className="text-xl md:text-2xl text-white/60 mt-4 font-light">
-                    Always Online
-                  </p>
-                </div>
-                <p className="text-white/50 text-lg leading-relaxed max-w-md">
-                  Your AI assistant never sleeps. Every visitor gets instant help, every question gets an answer, day or night.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Stacked features */}
-          <div className="md:col-span-5 flex flex-col gap-6">
-            {/* Response time */}
-            <motion.div
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="group flex-1"
-            >
-              <div className="relative h-full min-h-[220px] rounded-[2rem] overflow-hidden bg-card border border-border/50 p-8 group-hover:border-primary/20 transition-colors duration-500">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                <div className="relative z-10">
-                  <div className="flex items-baseline gap-2 mb-3">
-                    <span className="text-5xl md:text-6xl font-serif text-foreground">&lt;1</span>
-                    <span className="text-2xl text-primary font-medium">sec</span>
-                  </div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground mb-4">
-                    Response Time
-                  </p>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Instant replies. No waiting, no queue. Your visitors get answers immediately.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Languages */}
-            <motion.div
-              initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="group flex-1"
-            >
-              <div className="relative h-full min-h-[220px] rounded-[2rem] overflow-hidden bg-card border border-border/50 p-8 group-hover:border-primary/20 transition-colors duration-500">
-                <div className="absolute inset-0 bg-gradient-to-br from-teal/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                {/* Language flags visualization */}
-                <div className="absolute right-6 top-6 flex flex-wrap gap-2 max-w-[120px] opacity-30 group-hover:opacity-50 transition-opacity">
-                  {['🇳🇱', '🇩🇪', '🇫🇷', '🇪🇸', '🇮🇹', '🇵🇹', '🇯🇵', '🇰🇷'].map((flag, i) => (
-                    <motion.span 
-                      key={i} 
-                      className="text-xl"
-                      initial={{ opacity: 0, scale: 0 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.3 + i * 0.05 }}
-                    >
-                      {flag}
-                    </motion.span>
-                  ))}
-                </div>
-
-                <div className="relative z-10">
-                  <div className="flex items-baseline gap-2 mb-3">
-                    <span className="text-5xl md:text-6xl font-serif text-foreground">22</span>
-                    <span className="text-2xl text-primary font-medium">+</span>
-                  </div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground mb-4">
-                    Languages
-                  </p>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Chat with visitors in their language, automatically.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+            What {config.name} does out of the box. Every feature should feel native, instant, and zero-effort for both the owner and the visitor.
+          </motion.p>
         </div>
 
-        {/* Full-width capability showcase */}
+        {/* Feature grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {features.map((f, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: idx * 0.05 }}
+              className="glass rounded-[20px] p-9 group"
+            >
+              <span className="font-mono text-[10px] tracking-[2px] text-muted-foreground mb-5 block">{f.num}</span>
+              <h3 className="font-display text-[17px] font-700 tracking-[-0.01em] text-foreground mb-2.5">{f.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Stats bar */}
         <motion.div
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="mt-6 max-w-6xl mx-auto"
+          className="mt-5"
         >
-          <div className="relative rounded-[2rem] overflow-hidden bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 border border-border/30 p-8 md:p-12">
+          <div className="glass rounded-[28px] p-10 md:p-14">
             <div className="grid md:grid-cols-3 gap-8 md:gap-12">
               {[
-                { metric: "50,000+", label: "Conversations this month" },
-                { metric: "98%", label: "Visitor satisfaction rate" },
-                { metric: "4.9★", label: "Average customer rating" },
+                { metric: "2,847", label: "Conversations this month" },
+                { metric: "1.2s", label: "Avg response time" },
+                { metric: "94%", label: "Visitors rated helpful" },
               ].map((stat, idx) => (
                 <motion.div
                   key={idx}
@@ -178,12 +83,10 @@ const FeaturesSection = () => {
                   transition={{ delay: 0.4 + idx * 0.1 }}
                   className="text-center"
                 >
-                  <div className="text-3xl md:text-4xl font-serif text-foreground mb-2">
+                  <div className="font-display font-800 text-gradient mb-2" style={{ fontSize: "36px" }}>
                     {stat.metric}
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
+                  <div className="text-sm text-muted-foreground">{stat.label}</div>
                 </motion.div>
               ))}
             </div>

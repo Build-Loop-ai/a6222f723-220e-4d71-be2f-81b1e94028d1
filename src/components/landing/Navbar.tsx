@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { siteConfig } from "@/lib/site-config";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 
 const Navbar = () => {
@@ -12,9 +10,7 @@ const Navbar = () => {
   const { config } = useSiteConfigTransformed();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -35,70 +31,63 @@ const Navbar = () => {
       >
         <div
           className={`relative rounded-2xl transition-all duration-500 ${
-            isScrolled
-              ? "bg-[hsl(222,47%,8%)]/95"
-              : "bg-[hsl(222,47%,8%)]/70"
+            isScrolled ? "bg-background/95" : "bg-background/70"
           }`}
           style={{
             backdropFilter: "blur(40px) saturate(180%)",
             WebkitBackdropFilter: "blur(40px) saturate(180%)",
-            border: isScrolled 
-              ? "1px solid rgba(255,255,255,0.1)" 
-              : "1px solid rgba(255,255,255,0.15)",
-            boxShadow: isScrolled 
-              ? "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)" 
-              : "0 4px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08)",
+            border: isScrolled
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(255,255,255,0.12)",
+            boxShadow: isScrolled
+              ? "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)"
+              : "0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)",
           }}
         >
           <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-3">
             {/* Logo */}
             <Link to="/" className="group flex items-center gap-2">
               {config.logoUrl ? (
-                <img 
-                  src={config.logoUrl} 
-                  alt={config.name} 
-                  className="h-8 w-auto object-contain"
-                />
+                <img src={config.logoUrl} alt={config.name} className="h-8 w-auto object-contain" />
               ) : (
-                <span className="font-serif text-xl font-medium text-white tracking-tight">
+                <span className="font-display text-xl font-800 tracking-tight text-gradient">
                   {config.name.toLowerCase()}
                 </span>
               )}
             </Link>
 
-            {/* Desktop Navigation - centered */}
+            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-1 flex-shrink-0">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="px-3 py-2 text-sm font-medium text-white/70 hover:text-white rounded-xl hover:bg-white/10 transition-all duration-200 whitespace-nowrap"
+                  className="px-3 py-2 text-sm font-medium text-foreground/60 hover:text-foreground rounded-xl hover:bg-foreground/5 transition-all duration-200 whitespace-nowrap"
                 >
                   {link.name}
                 </a>
               ))}
               <Link
                 to="/demo"
-                className="px-4 py-2 text-sm font-medium text-teal hover:text-teal-light rounded-xl hover:bg-teal/10 transition-all duration-200 whitespace-nowrap"
+                className="px-4 py-2 text-sm font-medium text-primary hover:text-green-light rounded-xl hover:bg-primary/10 transition-all duration-200 whitespace-nowrap"
               >
                 Try Demo
               </Link>
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA */}
             <div className="hidden md:flex items-center gap-2">
               <Link to="/login">
-                <button className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors">
+                <button className="px-4 py-2 text-sm font-medium text-foreground/60 hover:text-foreground transition-colors">
                   Sign in
                 </button>
               </Link>
               <Link to="/signup">
-                <button 
-                  className="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200"
+                <button
+                  className="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 text-primary-foreground"
                   style={{
-                    background: "linear-gradient(135deg, hsl(166 76% 36%) 0%, hsl(166 76% 28%) 100%)",
-                    color: "white",
-                    boxShadow: "0 2px 8px rgba(45, 180, 150, 0.3)",
+                    background: "linear-gradient(135deg, hsl(148 68% 52%) 0%, hsl(190 100% 44%) 100%)",
+                    boxShadow: "0 2px 12px hsla(148, 68%, 52%, 0.3)",
                   }}
                 >
                   Get Started
@@ -106,16 +95,12 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu */}
             <button
-              className="md:hidden p-2 rounded-xl hover:bg-white/10 transition-colors"
+              className="md:hidden p-2 rounded-xl hover:bg-foreground/5 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? (
-                <X className="w-5 h-5 text-white" />
-              ) : (
-                <Menu className="w-5 h-5 text-white" />
-              )}
+              {isMobileMenuOpen ? <X className="w-5 h-5 text-foreground" /> : <Menu className="w-5 h-5 text-foreground" />}
             </button>
           </div>
         </div>
@@ -130,43 +115,27 @@ const Navbar = () => {
               transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className="mt-2 overflow-hidden rounded-2xl"
               style={{
-                background: "rgba(20, 20, 30, 0.95)",
+                background: "hsl(240 7% 4% / 0.95)",
                 backdropFilter: "blur(40px)",
                 WebkitBackdropFilter: "blur(40px)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
               <div className="p-4 space-y-1">
                 {navLinks.map((link) => (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    className="block text-white/80 font-medium py-3 px-4 rounded-xl hover:bg-white/10 transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
+                  <a key={link.name} href={link.href} className="block text-foreground/80 font-medium py-3 px-4 rounded-xl hover:bg-foreground/5 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
                     {link.name}
                   </a>
                 ))}
-                <Link
-                  to="/demo"
-                  className="block text-teal font-medium py-3 px-4 rounded-xl hover:bg-teal/10 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
+                <Link to="/demo" className="block text-primary font-medium py-3 px-4 rounded-xl hover:bg-primary/10 transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
                   Try Demo
                 </Link>
-                <div className="pt-3 mt-3 border-t border-white/10 space-y-2">
+                <div className="pt-3 mt-3 border-t border-foreground/10 space-y-2">
                   <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                    <button className="w-full py-3 text-white/70 font-medium rounded-xl hover:bg-white/10 transition-colors">
-                      Sign in
-                    </button>
+                    <button className="w-full py-3 text-foreground/60 font-medium rounded-xl hover:bg-foreground/5 transition-colors">Sign in</button>
                   </Link>
                   <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                    <button 
-                      className="w-full py-3 font-medium rounded-xl text-white"
-                      style={{
-                        background: "linear-gradient(135deg, hsl(166 76% 36%) 0%, hsl(166 76% 28%) 100%)",
-                      }}
-                    >
+                    <button className="w-full py-3 font-medium rounded-xl text-primary-foreground" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%) 0%, hsl(190 100% 44%) 100%)" }}>
                       Get Started
                     </button>
                   </Link>

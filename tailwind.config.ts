@@ -14,8 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["Instrument Serif", "Georgia", "serif"],
+        display: ["Syne", "sans-serif"],
         sans: ["DM Sans", "system-ui", "sans-serif"],
+        mono: ["Space Mono", "monospace"],
+        serif: ["Syne", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -61,6 +63,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        green: {
+          DEFAULT: "hsl(var(--green))",
+          light: "hsl(var(--green-light))",
+          dim: "hsl(var(--green-dim))",
+          glow: "hsl(var(--green-glow))",
+        },
+        cyan: {
+          DEFAULT: "hsl(var(--cyan))",
+          dim: "hsl(var(--cyan-dim))",
+        },
+        // Legacy aliases
         navy: {
           DEFAULT: "hsl(var(--navy))",
           light: "hsl(var(--navy-light))",
@@ -91,8 +104,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
         xl: "1rem",
-        "2xl": "1.5rem",
-        "3xl": "2rem",
+        "2xl": "1.25rem",
+        "3xl": "1.75rem",
+        "4xl": "2.25rem",
       },
       boxShadow: {
         sm: "var(--shadow-sm)",
