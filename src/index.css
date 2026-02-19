@@ -88,6 +88,7 @@
 
   /* ━━ Dashboard Light Theme ━━ ChatGPT × Notion × Apple Vision Pro */
   .light-theme {
+    color: hsl(225 25% 8%);
     --background: 225 25% 96%;
     --foreground: 225 25% 8%;
     --card: 0 0% 100%;
