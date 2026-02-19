@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Card,
   CardContent,
@@ -19,19 +20,23 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Copy,
   Loader2,
   Plus,
   X,
-  Paintbrush,
   MessageSquare,
   Code,
   Shield,
   Eye,
   Smartphone,
   Monitor,
+  Pencil,
+  Check,
+  Type,
+  Palette,
+  Mic,
+  Send,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -53,13 +58,81 @@ interface WidgetConfig {
   voice_enabled: boolean;
   avatar_url: string | null;
   allowed_domains: string[];
+  header_text_color: string;
+  bot_message_bg: string;
+  bot_message_text_color: string;
+  user_message_text_color: string;
+  font_family: string;
+  border_radius: string;
+  show_branding: boolean;
+  header_subtitle: string;
+  bot_name: string;
+  chat_bg_color: string;
+  input_bg_color: string;
+  input_text_color: string;
+  input_border_color: string;
 }
+
+type EditingZone =
+  | null
+  | "header"
+  | "welcome"
+  | "user-bubble"
+  | "bot-bubble"
+  | "input"
+  | "branding"
+  | "bubble-btn";
 
 const PRESET_COLORS = [
   "#0d9488", "#6366f1", "#2563eb", "#dc2626",
   "#ea580c", "#d97706", "#16a34a", "#7c3aed",
   "#db2777", "#0891b2", "#4f46e5", "#059669",
 ];
+
+const FONT_OPTIONS = [
+  { value: "DM Sans", label: "DM Sans" },
+  { value: "Inter", label: "Inter" },
+  { value: "Syne", label: "Syne" },
+  { value: "Space Grotesk", label: "Space Grotesk" },
+  { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans" },
+  { value: "system-ui", label: "System Default" },
+];
+
+const RADIUS_OPTIONS = [
+  { value: "none", label: "Square", css: "0px" },
+  { value: "sm", label: "Subtle", css: "8px" },
+  { value: "rounded", label: "Rounded", css: "16px" },
+  { value: "full", label: "Pill", css: "9999px" },
+];
+
+function ColorInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs">{label}</Label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-8 w-8 cursor-pointer rounded-lg border border-border"
+        />
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 font-mono text-xs h-8"
+        />
+      </div>
+    </div>
+  );
+}
 
 export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [config, setConfig] = useState<WidgetConfig | null>(null);
@@ -68,6 +141,9 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [newDomain, setNewDomain] = useState("");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [previewOpen, setPreviewOpen] = useState(true);
+  const [editingZone, setEditingZone] = useState<EditingZone>(null);
+  const [showEmbed, setShowEmbed] = useState(false);
+  const [showDomains, setShowDomains] = useState(false);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -88,14 +164,14 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
       .from("widget_configs")
       .update(updates)
       .eq("id", config.id);
-    if (error) toast.error("Failed to save widget settings");
+    if (error) toast.error("Failed to save");
   };
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const debouncedSave = useCallback(
     (updates: Partial<WidgetConfig>) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => saveConfig(updates), 1000);
+      debounceRef.current = setTimeout(() => saveConfig(updates), 800);
     },
     [config]
   );
@@ -118,13 +194,13 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     }
   };
 
-  const updateField = <K extends keyof WidgetConfig>(key: K, value: WidgetConfig[K]) => {
+  const u = <K extends keyof WidgetConfig>(key: K, value: WidgetConfig[K]) => {
     if (!config) return;
     setConfig({ ...config, [key]: value });
     debouncedSave({ [key]: value });
   };
 
-  const updateFieldImmediate = <K extends keyof WidgetConfig>(key: K, value: WidgetConfig[K]) => {
+  const uNow = <K extends keyof WidgetConfig>(key: K, value: WidgetConfig[K]) => {
     if (!config) return;
     setConfig({ ...config, [key]: value });
     saveConfig({ [key]: value });
@@ -145,6 +221,9 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     saveConfig({ allowed_domains: updated });
   };
 
+  const radiusCss =
+    RADIUS_OPTIONS.find((r) => r.value === config?.border_radius)?.css || "16px";
+
   if (loading)
     return (
       <Card>
@@ -156,18 +235,22 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
   if (!config) {
     return (
-      <Card>
-        <CardContent className="p-12 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-            <MessageSquare className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="mb-2 text-lg font-semibold">Create Your Chat Widget</h3>
-          <p className="mb-6 text-muted-foreground">
-            Build a beautiful, customizable chat widget for your website in minutes.
+      <Card className="border-dashed">
+        <CardContent className="p-16 text-center">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10"
+          >
+            <MessageSquare className="h-10 w-10 text-primary" />
+          </motion.div>
+          <h3 className="mb-2 text-xl font-semibold">Build Your Chat Widget</h3>
+          <p className="mx-auto mb-8 max-w-sm text-muted-foreground">
+            Create a beautiful, fully customizable chat widget. Click any element in the preview to edit it.
           </p>
           <Button onClick={handleCreate} disabled={creating} size="lg">
             {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Create Widget
+            Start Building
           </Button>
         </CardContent>
       </Card>
@@ -175,269 +258,435 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   }
 
   return (
-    <div className="flex gap-6 min-h-[700px]">
-      {/* Left: Controls */}
-      <div className="flex-1 min-w-0 space-y-0">
-        <Tabs defaultValue="appearance" className="space-y-4">
-          <TabsList className="bg-muted/50 w-full justify-start gap-1 p-1">
-            <TabsTrigger value="appearance" className="gap-1.5 text-xs">
-              <Paintbrush className="h-3.5 w-3.5" />
-              Appearance
-            </TabsTrigger>
-            <TabsTrigger value="content" className="gap-1.5 text-xs">
-              <MessageSquare className="h-3.5 w-3.5" />
-              Content
-            </TabsTrigger>
-            <TabsTrigger value="embed" className="gap-1.5 text-xs">
-              <Code className="h-3.5 w-3.5" />
-              Embed
-            </TabsTrigger>
-            <TabsTrigger value="domains" className="gap-1.5 text-xs">
-              <Shield className="h-3.5 w-3.5" />
-              Domains
-            </TabsTrigger>
-          </TabsList>
+    <div className="flex gap-6 min-h-[720px]">
+      {/* ─── Left: Context-sensitive editor panel ─── */}
+      <div className="w-[340px] shrink-0 space-y-4 overflow-y-auto max-h-[720px] pr-1">
+        {/* Instruction */}
+        <div className="flex items-center gap-2 rounded-xl border border-dashed border-primary/30 bg-primary/5 px-3 py-2">
+          <Pencil className="h-4 w-4 text-primary shrink-0" />
+          <p className="text-xs text-primary">
+            Click any element in the preview to edit it
+          </p>
+        </div>
 
-          {/* ── Appearance ── */}
-          <TabsContent value="appearance" className="space-y-4 mt-0">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Brand Color</CardTitle>
-                <CardDescription>Pick a color that matches your brand.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {PRESET_COLORS.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => updateField("accent_color", c)}
-                      className={`h-8 w-8 rounded-full border-2 transition-all hover:scale-110 ${
-                        config.accent_color === c
-                          ? "border-foreground scale-110 ring-2 ring-ring ring-offset-2 ring-offset-background"
-                          : "border-transparent"
-                      }`}
-                      style={{ backgroundColor: c }}
-                    />
+        {/* ── Global settings (always visible) ── */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Palette className="h-4 w-4" />
+              Global Style
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* Color presets */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">Brand Color</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => u("accent_color", c)}
+                    className={`h-6 w-6 rounded-full border-2 transition-all hover:scale-110 ${
+                      config.accent_color === c
+                        ? "border-foreground ring-2 ring-ring ring-offset-1 ring-offset-background"
+                        : "border-transparent"
+                    }`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={config.accent_color}
+                  onChange={(e) => u("accent_color", e.target.value)}
+                  className="h-8 w-8 cursor-pointer rounded-lg border border-border"
+                />
+                <Input
+                  value={config.accent_color}
+                  onChange={(e) => u("accent_color", e.target.value)}
+                  className="flex-1 font-mono text-xs h-8"
+                />
+              </div>
+            </div>
+
+            {/* Font */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">Font Family</Label>
+              <Select value={config.font_family} onValueChange={(v) => uNow("font_family", v)}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_OPTIONS.map((f) => (
+                    <SelectItem key={f.value} value={f.value} style={{ fontFamily: f.value }}>
+                      {f.label}
+                    </SelectItem>
                   ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={config.accent_color}
-                    onChange={(e) => updateField("accent_color", e.target.value)}
-                    className="h-9 w-9 cursor-pointer rounded-lg border border-border"
-                  />
-                  <Input
-                    value={config.accent_color}
-                    onChange={(e) => updateField("accent_color", e.target.value)}
-                    className="flex-1 font-mono text-sm"
-                    placeholder="#000000"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Layout & Position</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Widget Position</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["bottom-right", "bottom-left"] as const).map((pos) => (
-                      <button
-                        key={pos}
-                        onClick={() => updateFieldImmediate("position", pos)}
-                        className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm transition-all ${
-                          config.position === pos
-                            ? "border-primary bg-primary/5 text-primary"
-                            : "border-border hover:border-primary/30"
-                        }`}
-                      >
-                        <div className="relative h-8 w-12 rounded border border-current/20 bg-current/5">
-                          <div
-                            className={`absolute bottom-0.5 h-2 w-2 rounded-full bg-current ${
-                              pos === "bottom-right" ? "right-0.5" : "left-0.5"
-                            }`}
-                          />
-                        </div>
-                        <span className="capitalize">{pos.replace("-", " ")}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Theme</Label>
-                  <Select
-                    value={config.theme}
-                    onValueChange={(v) => updateFieldImmediate("theme", v)}
+            {/* Border Radius */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">Corner Style</Label>
+              <div className="grid grid-cols-4 gap-1.5">
+                {RADIUS_OPTIONS.map((r) => (
+                  <button
+                    key={r.value}
+                    onClick={() => uNow("border_radius", r.value)}
+                    className={`flex flex-col items-center gap-1 rounded-lg border-2 p-2 text-[10px] transition-all ${
+                      config.border_radius === r.value
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border hover:border-primary/30"
+                    }`}
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="auto">Auto (follows system)</SelectItem>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <div
+                      className="h-5 w-5 border-2 border-current"
+                      style={{ borderRadius: r.css }}
+                    />
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-                <div className="space-y-2">
-                  <Label>Avatar URL</Label>
-                  <Input
-                    value={config.avatar_url || ""}
-                    onChange={(e) => updateField("avatar_url", e.target.value || null)}
-                    placeholder="https://example.com/avatar.png"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Shows a small avatar in the chat header.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Position */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">Position</Label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {(["bottom-right", "bottom-left"] as const).map((pos) => (
+                  <button
+                    key={pos}
+                    onClick={() => uNow("position", pos)}
+                    className={`flex items-center justify-center gap-1.5 rounded-lg border-2 p-2 text-[11px] transition-all ${
+                      config.position === pos
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border hover:border-primary/30"
+                    }`}
+                  >
+                    <div className="relative h-6 w-10 rounded border border-current/20 bg-current/5">
+                      <div
+                        className={`absolute bottom-0.5 h-2 w-2 rounded-full bg-current ${
+                          pos === "bottom-right" ? "right-0.5" : "left-0.5"
+                        }`}
+                      />
+                    </div>
+                    {pos === "bottom-right" ? "Right" : "Left"}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Features</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Voice Input</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Let visitors speak to your AI
-                    </p>
-                  </div>
-                  <Switch
-                    checked={config.voice_enabled}
-                    onCheckedChange={(v) => updateFieldImmediate("voice_enabled", v)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ── Content ── */}
-          <TabsContent value="content" className="space-y-4 mt-0">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Widget Title</CardTitle>
-                <CardDescription>The heading shown at the top of the chat window.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Input
-                  value={config.widget_title}
-                  onChange={(e) => updateField("widget_title", e.target.value)}
-                  placeholder="Chat with us"
+            {/* Toggles */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">Voice Input</Label>
+                <Switch
+                  checked={config.voice_enabled}
+                  onCheckedChange={(v) => uNow("voice_enabled", v)}
                 />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Welcome Message</CardTitle>
-                <CardDescription>
-                  The first message visitors see when they open the widget.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Textarea
-                  value={config.welcome_message}
-                  onChange={(e) => updateField("welcome_message", e.target.value)}
-                  rows={3}
-                  placeholder="Hi! How can I help you today?"
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs">Show Branding</Label>
+                <Switch
+                  checked={config.show_branding}
+                  onCheckedChange={(v) => uNow("show_branding", v)}
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Input Placeholder</CardTitle>
-                <CardDescription>
-                  Placeholder text shown in the message input field.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Input
-                  value={config.placeholder_text}
-                  onChange={(e) => updateField("placeholder_text", e.target.value)}
-                  placeholder="Type your message..."
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ── Embed Code ── */}
-          <TabsContent value="embed" className="space-y-4 mt-0">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Install on Your Website</CardTitle>
-                <CardDescription>
-                  Copy one of the snippets below and paste it into your website's HTML.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <EmbedCodeSnippet apiKey={config.api_key} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* ── Domains ── */}
-          <TabsContent value="domains" className="space-y-4 mt-0">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Allowed Domains</CardTitle>
-                <CardDescription>
-                  Restrict the widget to specific domains. Leave empty to allow everywhere.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="example.com"
-                    value={newDomain}
-                    onChange={(e) => setNewDomain(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addDomain()}
-                  />
-                  <Button variant="outline" onClick={addDomain}>
-                    <Plus className="h-4 w-4" />
+        {/* ── Zone-specific editor (shows on click) ── */}
+        <AnimatePresence mode="wait">
+          {editingZone && (
+            <motion.div
+              key={editingZone}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Card className="border-primary/30 shadow-md">
+                <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm">
+                    {editingZone === "header" && "Header"}
+                    {editingZone === "welcome" && "Welcome Message"}
+                    {editingZone === "bot-bubble" && "Bot Messages"}
+                    {editingZone === "user-bubble" && "User Messages"}
+                    {editingZone === "input" && "Input Field"}
+                    {editingZone === "branding" && "Branding Footer"}
+                    {editingZone === "bubble-btn" && "Chat Button"}
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => setEditingZone(null)}
+                  >
+                    <X className="h-3.5 w-3.5" />
                   </Button>
-                </div>
-                {(config.allowed_domains || []).length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {config.allowed_domains.map((d) => (
-                      <Badge key={d} variant="secondary" className="gap-1 pr-1">
-                        {d}
-                        <button
-                          onClick={() => removeDomain(d)}
-                          className="ml-1 hover:text-destructive"
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {editingZone === "header" && (
+                    <>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Title</Label>
+                        <Input
+                          value={config.widget_title}
+                          onChange={(e) => u("widget_title", e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Subtitle</Label>
+                        <Input
+                          value={config.header_subtitle}
+                          onChange={(e) => u("header_subtitle", e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                      <ColorInput
+                        label="Background Color"
+                        value={config.accent_color}
+                        onChange={(v) => u("accent_color", v)}
+                      />
+                      <ColorInput
+                        label="Text Color"
+                        value={config.header_text_color}
+                        onChange={(v) => u("header_text_color", v)}
+                      />
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Avatar URL</Label>
+                        <Input
+                          value={config.avatar_url || ""}
+                          onChange={(e) => u("avatar_url", e.target.value || null)}
+                          placeholder="https://..."
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {editingZone === "welcome" && (
+                    <>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Bot Name</Label>
+                        <Input
+                          value={config.bot_name}
+                          onChange={(e) => u("bot_name", e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Welcome Message</Label>
+                        <Textarea
+                          value={config.welcome_message}
+                          onChange={(e) => u("welcome_message", e.target.value)}
+                          rows={3}
+                          className="text-xs"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {editingZone === "bot-bubble" && (
+                    <>
+                      <ColorInput
+                        label="Background"
+                        value={config.bot_message_bg}
+                        onChange={(v) => u("bot_message_bg", v)}
+                      />
+                      <ColorInput
+                        label="Text Color"
+                        value={config.bot_message_text_color}
+                        onChange={(v) => u("bot_message_text_color", v)}
+                      />
+                      <ColorInput
+                        label="Chat Background"
+                        value={config.chat_bg_color}
+                        onChange={(v) => u("chat_bg_color", v)}
+                      />
+                    </>
+                  )}
+
+                  {editingZone === "user-bubble" && (
+                    <>
+                      <ColorInput
+                        label="Background"
+                        value={config.accent_color}
+                        onChange={(v) => u("accent_color", v)}
+                      />
+                      <ColorInput
+                        label="Text Color"
+                        value={config.user_message_text_color}
+                        onChange={(v) => u("user_message_text_color", v)}
+                      />
+                    </>
+                  )}
+
+                  {editingZone === "input" && (
+                    <>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Placeholder Text</Label>
+                        <Input
+                          value={config.placeholder_text}
+                          onChange={(e) => u("placeholder_text", e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+                      <ColorInput
+                        label="Background"
+                        value={config.input_bg_color}
+                        onChange={(v) => u("input_bg_color", v)}
+                      />
+                      <ColorInput
+                        label="Text Color"
+                        value={config.input_text_color}
+                        onChange={(v) => u("input_text_color", v)}
+                      />
+                      <ColorInput
+                        label="Border Color"
+                        value={config.input_border_color}
+                        onChange={(v) => u("input_border_color", v)}
+                      />
+                    </>
+                  )}
+
+                  {editingZone === "branding" && (
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Show "Powered by" text</Label>
+                      <Switch
+                        checked={config.show_branding}
+                        onCheckedChange={(v) => uNow("show_branding", v)}
+                      />
+                    </div>
+                  )}
+
+                  {editingZone === "bubble-btn" && (
+                    <>
+                      <ColorInput
+                        label="Button Color"
+                        value={config.accent_color}
+                        onChange={(v) => u("accent_color", v)}
+                      />
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Position</Label>
+                        <Select
+                          value={config.position}
+                          onValueChange={(v) => uNow("position", v)}
                         >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                            <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Quick actions ── */}
+        <div className="flex gap-2">
+          <Button
+            variant={showEmbed ? "default" : "outline"}
+            size="sm"
+            className="gap-1.5 flex-1 text-xs"
+            onClick={() => { setShowEmbed(!showEmbed); setShowDomains(false); }}
+          >
+            <Code className="h-3.5 w-3.5" />
+            Embed Code
+          </Button>
+          <Button
+            variant={showDomains ? "default" : "outline"}
+            size="sm"
+            className="gap-1.5 flex-1 text-xs"
+            onClick={() => { setShowDomains(!showDomains); setShowEmbed(false); }}
+          >
+            <Shield className="h-3.5 w-3.5" />
+            Domains
+          </Button>
+        </div>
+
+        <AnimatePresence>
+          {showEmbed && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Install on Your Website</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EmbedCodeSnippet apiKey={config.api_key} />
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+          {showDomains && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Allowed Domains</CardTitle>
+                  <CardDescription className="text-xs">Leave empty to allow everywhere.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="example.com"
+                      value={newDomain}
+                      onChange={(e) => setNewDomain(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addDomain()}
+                      className="h-8 text-xs"
+                    />
+                    <Button variant="outline" size="sm" onClick={addDomain}>
+                      <Plus className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                )}
-                {(config.allowed_domains || []).length === 0 && (
-                  <p className="text-xs text-muted-foreground italic">
-                    No restrictions — widget will work on any domain.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                  {(config.allowed_domains || []).length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {config.allowed_domains.map((d) => (
+                        <Badge key={d} variant="secondary" className="gap-1 pr-1 text-xs">
+                          {d}
+                          <button onClick={() => removeDomain(d)} className="ml-1 hover:text-destructive">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground italic">No restrictions.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Right: Live Preview */}
-      <div className="hidden lg:flex w-[420px] shrink-0 flex-col">
+      {/* ─── Right: Interactive Live Preview ─── */}
+      <div className="flex-1 flex flex-col min-w-0">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Eye className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Live Preview</span>
+            <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+              Click to edit
+            </span>
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
             <button
@@ -464,11 +713,11 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
         </div>
 
         <div
-          className={`relative mx-auto overflow-hidden rounded-2xl border-2 border-border bg-muted/30 shadow-lg transition-all duration-300 ${
-            previewDevice === "mobile" ? "w-[320px] h-[640px]" : "w-full h-[660px]"
+          className={`relative mx-auto overflow-hidden rounded-2xl border-2 border-border bg-muted/20 shadow-lg transition-all duration-300 ${
+            previewDevice === "mobile" ? "w-[360px] h-[700px]" : "w-full h-[700px]"
           }`}
         >
-          {/* Fake browser chrome */}
+          {/* Browser chrome */}
           <div className="flex h-7 items-center gap-1.5 bg-muted px-3">
             <div className="h-2 w-2 rounded-full bg-destructive/40" />
             <div className="h-2 w-2 rounded-full bg-warning/40" />
@@ -476,116 +725,223 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             <div className="ml-2 h-3.5 flex-1 rounded bg-background" />
           </div>
 
-          {/* Fake page content */}
-          <div className="relative h-[calc(100%-1.75rem)] overflow-hidden">
-            <div className="space-y-3 p-4">
-              <div className="h-5 w-3/4 rounded bg-muted" />
-              <div className="h-3 w-full rounded bg-muted/60" />
-              <div className="h-3 w-5/6 rounded bg-muted/60" />
-              <div className="h-24 w-full rounded-lg bg-muted/40" />
-              <div className="h-3 w-full rounded bg-muted/60" />
-              <div className="h-3 w-2/3 rounded bg-muted/60" />
-              <div className="h-16 w-full rounded-lg bg-muted/30" />
-              <div className="h-3 w-4/5 rounded bg-muted/50" />
+          {/* Page content */}
+          <div className="relative h-[calc(100%-1.75rem)] overflow-hidden bg-white">
+            <div className="space-y-3 p-5 opacity-40">
+              <div className="h-6 w-3/4 rounded bg-gray-200" />
+              <div className="h-3 w-full rounded bg-gray-100" />
+              <div className="h-3 w-5/6 rounded bg-gray-100" />
+              <div className="h-28 w-full rounded-lg bg-gray-100" />
+              <div className="h-3 w-full rounded bg-gray-100" />
+              <div className="h-3 w-2/3 rounded bg-gray-100" />
+              <div className="h-20 w-full rounded-lg bg-gray-50" />
+              <div className="h-3 w-4/5 rounded bg-gray-100" />
+              <div className="h-3 w-3/5 rounded bg-gray-100" />
             </div>
 
-            {/* Preview widget: chat panel (always open for preview) */}
-            {previewOpen && (
-              <div
-                className={`absolute z-10 ${
-                  config.position === "bottom-right" ? "right-3" : "left-3"
-                } bottom-16 flex flex-col overflow-hidden rounded-xl bg-white shadow-2xl`}
-                style={{
-                  width: previewDevice === "mobile" ? "280px" : "320px",
-                  height: previewDevice === "mobile" ? "380px" : "400px",
-                  fontFamily: "'DM Sans', system-ui, sans-serif",
-                }}
-              >
-                {/* Header */}
-                <div
-                  className="flex items-center gap-2.5 px-3 py-2.5"
-                  style={{ backgroundColor: config.accent_color }}
+            {/* ── Widget Chat Panel ── */}
+            <AnimatePresence>
+              {previewOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                  transition={{ type: "spring", damping: 25, stiffness: 350 }}
+                  className={`absolute z-10 flex flex-col overflow-hidden shadow-2xl ${
+                    config.position === "bottom-right" ? "right-4" : "left-4"
+                  } bottom-[72px]`}
+                  style={{
+                    width: previewDevice === "mobile" ? "300px" : "340px",
+                    height: previewDevice === "mobile" ? "420px" : "460px",
+                    fontFamily: `'${config.font_family}', system-ui, sans-serif`,
+                    borderRadius: config.border_radius === "full" ? "24px" : config.border_radius === "rounded" ? "16px" : config.border_radius === "sm" ? "8px" : "0px",
+                  }}
                 >
-                  {config.avatar_url && (
-                    <img
-                      src={config.avatar_url}
-                      alt=""
-                      className="h-7 w-7 rounded-full border-2 border-white/30 object-cover"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="truncate text-xs font-semibold text-white">
-                      {config.widget_title || "Chat with us"}
-                    </h3>
-                    <p className="text-[10px] text-white/70">Online</p>
-                  </div>
-                  <button
-                    onClick={() => setPreviewOpen(false)}
-                    className="rounded p-0.5 text-white/70 hover:bg-white/10 hover:text-white"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto px-3 py-2.5">
-                  <div className="mb-2 flex justify-start">
-                    <div className="max-w-[85%] rounded-xl rounded-bl-sm bg-gray-100 px-3 py-2 text-xs text-gray-800">
-                      {config.welcome_message || "Hi! How can I help you today?"}
-                    </div>
-                  </div>
-                  <div className="mb-2 flex justify-end">
-                    <div
-                      className="max-w-[85%] rounded-xl rounded-br-sm px-3 py-2 text-xs text-white"
-                      style={{ backgroundColor: config.accent_color }}
-                    >
-                      I'd like to book an appointment
-                    </div>
-                  </div>
-                  <div className="mb-2 flex justify-start">
-                    <div className="max-w-[85%] rounded-xl rounded-bl-sm bg-gray-100 px-3 py-2 text-xs text-gray-800">
-                      Of course! I'd be happy to help you schedule an appointment. What date works best for you?
-                    </div>
-                  </div>
-                </div>
-
-                {/* Input */}
-                <div className="flex items-center gap-1.5 border-t border-gray-100 px-2.5 py-2">
-                  {config.voice_enabled && (
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-400">
-                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                        <line x1="12" x2="12" y1="19" y2="22" />
-                      </svg>
-                    </div>
-                  )}
-                  <div className="flex-1 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-[11px] text-gray-400">
-                    {config.placeholder_text || "Type your message..."}
-                  </div>
+                  {/* HEADER — clickable zone */}
                   <div
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white"
+                    onClick={() => setEditingZone("header")}
+                    className={`group relative flex items-center gap-2.5 px-4 py-3 cursor-pointer transition-all ${
+                      editingZone === "header" ? "ring-2 ring-primary ring-inset" : ""
+                    }`}
                     style={{ backgroundColor: config.accent_color }}
                   >
-                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="m22 2-7 20-4-9-9-4Z" />
-                      <path d="M22 2 11 13" />
-                    </svg>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <Pencil className="h-4 w-4 text-white drop-shadow" />
+                    </div>
+                    {config.avatar_url && (
+                      <img
+                        src={config.avatar_url}
+                        alt=""
+                        className="h-8 w-8 rounded-full border-2 border-white/30 object-cover"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3
+                        className="truncate text-sm font-semibold"
+                        style={{ color: config.header_text_color }}
+                      >
+                        {config.widget_title || "Chat with us"}
+                      </h3>
+                      <p
+                        className="text-[11px]"
+                        style={{ color: config.header_text_color + "b3" }}
+                      >
+                        {config.header_subtitle || "Online"}
+                      </p>
+                    </div>
+                    <button className="rounded p-0.5 hover:bg-white/10">
+                      <X className="h-4 w-4" style={{ color: config.header_text_color + "b3" }} />
+                    </button>
                   </div>
-                </div>
 
-                <div className="border-t border-gray-50 py-1 text-center">
-                  <span className="text-[9px] text-gray-300">Powered by AI</span>
-                </div>
-              </div>
-            )}
+                  {/* MESSAGES AREA */}
+                  <div
+                    className="flex-1 overflow-y-auto px-4 py-3"
+                    style={{ backgroundColor: config.chat_bg_color }}
+                  >
+                    {/* Welcome / bot bubble — clickable */}
+                    <div
+                      onClick={() => setEditingZone("welcome")}
+                      className={`group relative mb-3 flex justify-start cursor-pointer`}
+                    >
+                      <div
+                        className={`max-w-[85%] px-3 py-2 text-xs relative transition-all ${
+                          editingZone === "welcome" ? "ring-2 ring-primary" : ""
+                        }`}
+                        style={{
+                          backgroundColor: config.bot_message_bg,
+                          color: config.bot_message_text_color,
+                          borderRadius: radiusCss,
+                          borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <Pencil className="h-3 w-3 text-foreground/50" />
+                        </div>
+                        {config.welcome_message || "Hi! How can I help you today?"}
+                      </div>
+                    </div>
 
-            {/* Chat bubble */}
-            <button
-              onClick={() => setPreviewOpen(!previewOpen)}
-              className={`absolute bottom-3 z-10 flex h-11 w-11 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-110 ${
-                config.position === "bottom-right" ? "right-3" : "left-3"
-              }`}
+                    {/* User bubble — clickable */}
+                    <div
+                      onClick={() => setEditingZone("user-bubble")}
+                      className="group relative mb-3 flex justify-end cursor-pointer"
+                    >
+                      <div
+                        className={`max-w-[85%] px-3 py-2 text-xs relative transition-all ${
+                          editingZone === "user-bubble" ? "ring-2 ring-primary" : ""
+                        }`}
+                        style={{
+                          backgroundColor: config.accent_color,
+                          color: config.user_message_text_color,
+                          borderRadius: radiusCss,
+                          borderBottomRightRadius: config.border_radius === "full" ? "4px" : "2px",
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <Pencil className="h-3 w-3 text-white drop-shadow" />
+                        </div>
+                        I'd like to book an appointment
+                      </div>
+                    </div>
+
+                    {/* Another bot bubble — clickable */}
+                    <div
+                      onClick={() => setEditingZone("bot-bubble")}
+                      className="group relative mb-3 flex justify-start cursor-pointer"
+                    >
+                      <div
+                        className={`max-w-[85%] px-3 py-2 text-xs relative transition-all ${
+                          editingZone === "bot-bubble" ? "ring-2 ring-primary" : ""
+                        }`}
+                        style={{
+                          backgroundColor: config.bot_message_bg,
+                          color: config.bot_message_text_color,
+                          borderRadius: radiusCss,
+                          borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <Pencil className="h-3 w-3 text-foreground/50" />
+                        </div>
+                        Of course! I'd be happy to help you schedule an appointment. What date works best for you?
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* INPUT — clickable zone */}
+                  <div
+                    onClick={() => setEditingZone("input")}
+                    className={`group relative flex items-center gap-1.5 border-t px-3 py-2.5 cursor-pointer transition-all ${
+                      editingZone === "input" ? "ring-2 ring-primary ring-inset" : ""
+                    }`}
+                    style={{
+                      borderColor: config.input_border_color,
+                      backgroundColor: config.chat_bg_color,
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
+                      <Pencil className="h-3.5 w-3.5 text-foreground/40" />
+                    </div>
+                    {config.voice_enabled && (
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400">
+                        <Mic className="h-3.5 w-3.5" />
+                      </div>
+                    )}
+                    <div
+                      className="flex-1 rounded-full px-3 py-1.5 text-[11px]"
+                      style={{
+                        backgroundColor: config.input_bg_color,
+                        color: config.input_text_color + "80",
+                        border: `1px solid ${config.input_border_color}`,
+                      }}
+                    >
+                      {config.placeholder_text || "Type your message..."}
+                    </div>
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white"
+                      style={{ backgroundColor: config.accent_color }}
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                    </div>
+                  </div>
+
+                  {/* BRANDING — clickable zone */}
+                  {config.show_branding && (
+                    <div
+                      onClick={() => setEditingZone("branding")}
+                      className={`group relative cursor-pointer border-t py-1.5 text-center transition-all ${
+                        editingZone === "branding" ? "ring-2 ring-primary ring-inset" : ""
+                      }`}
+                      style={{
+                        borderColor: config.input_border_color + "40",
+                        backgroundColor: config.chat_bg_color,
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <Pencil className="h-3 w-3 text-foreground/30" />
+                      </div>
+                      <span className="text-[9px] text-gray-300">Powered by AI</span>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ── Chat Bubble Button — clickable zone ── */}
+            <motion.button
+              onClick={() => {
+                if (!previewOpen) {
+                  setPreviewOpen(true);
+                } else {
+                  setEditingZone("bubble-btn");
+                }
+              }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className={`absolute bottom-4 z-10 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all ${
+                config.position === "bottom-right" ? "right-4" : "left-4"
+              } ${editingZone === "bubble-btn" ? "ring-2 ring-primary ring-offset-2" : ""}`}
               style={{ backgroundColor: config.accent_color }}
             >
               {previewOpen ? (
@@ -593,7 +949,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
               ) : (
                 <MessageSquare className="h-5 w-5 text-white" />
               )}
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>
