@@ -10,36 +10,11 @@ const FeaturesSection = () => {
     offset: ["start end", "end start"]
   });
 
-  const y1 = useTransform(scrollYProgress, [0, 1], [100, -100]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [50, -150]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-
-  const features = [
-    {
-      title: "24/7",
-      subtitle: "Always On",
-      description: "Your AI never sleeps, never takes breaks, never calls in sick. Every call answered, every time.",
-      visual: "availability",
-    },
-    {
-      title: "< 2s",
-      subtitle: "Response Time",
-      description: "Instant pickup. No hold music. No 'please wait'. Your callers get immediate attention.",
-      visual: "speed",
-    },
-    {
-      title: "22+",
-      subtitle: "Languages",
-      description: "Native-quality conversations in Dutch, German, Spanish, French, and more. Truly global reach.",
-      visual: "languages",
-    },
-  ];
-
   return (
     <section id="features" ref={containerRef} className="relative pt-24 pb-32 md:pt-32 md:pb-48 overflow-hidden bg-background">
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
-        {/* Section header - Editorial style */}
+        {/* Section header */}
         <div className="max-w-5xl mx-auto mb-24 md:mb-32">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -56,8 +31,8 @@ const FeaturesSection = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-6xl lg:text-7xl font-serif leading-[1.1] text-foreground"
           >
-            The reception desk,{" "}
-            <span className="italic text-gradient">reimagined</span>
+            Your website,{" "}
+            <span className="italic text-gradient">supercharged</span>
           </motion.h2>
         </div>
 
@@ -98,11 +73,11 @@ const FeaturesSection = () => {
                     24/7
                   </span>
                   <p className="text-xl md:text-2xl text-white/60 mt-4 font-light">
-                    Always On
+                    Always Online
                   </p>
                 </div>
                 <p className="text-white/50 text-lg leading-relaxed max-w-md">
-                  Your AI never sleeps, never takes breaks, never calls in sick. Every call answered, every time.
+                  Your AI assistant never sleeps. Every visitor gets instant help, every question gets an answer, day or night.
                 </p>
               </div>
             </div>
@@ -123,14 +98,14 @@ const FeaturesSection = () => {
                 
                 <div className="relative z-10">
                   <div className="flex items-baseline gap-2 mb-3">
-                    <span className="text-5xl md:text-6xl font-serif text-foreground">&lt;2</span>
+                    <span className="text-5xl md:text-6xl font-serif text-foreground">&lt;1</span>
                     <span className="text-2xl text-primary font-medium">sec</span>
                   </div>
                   <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground mb-4">
                     Response Time
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Instant pickup. No hold music. No waiting.
+                    Instant replies. No waiting, no queue. Your visitors get answers immediately.
                   </p>
                 </div>
               </div>
@@ -172,7 +147,7 @@ const FeaturesSection = () => {
                     Languages
                   </p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Native-quality conversations worldwide.
+                    Chat with visitors in their language, automatically.
                   </p>
                 </div>
               </div>
@@ -191,8 +166,8 @@ const FeaturesSection = () => {
           <div className="relative rounded-[2rem] overflow-hidden bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 border border-border/30 p-8 md:p-12">
             <div className="grid md:grid-cols-3 gap-8 md:gap-12">
               {[
-                { metric: "50,000+", label: "Calls handled this month" },
-                { metric: "98%", label: "Caller satisfaction rate" },
+                { metric: "50,000+", label: "Conversations this month" },
+                { metric: "98%", label: "Visitor satisfaction rate" },
                 { metric: "4.9★", label: "Average customer rating" },
               ].map((stat, idx) => (
                 <motion.div

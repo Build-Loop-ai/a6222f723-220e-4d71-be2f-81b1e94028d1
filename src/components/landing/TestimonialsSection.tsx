@@ -17,30 +17,30 @@ const TestimonialsSection = () => {
 
   const testimonials = [
     {
-      quote: `${config.name} has completely transformed how we handle patient calls. We went from missing 30% of calls to zero. The ROI was positive within two weeks.`,
+      quote: `${config.name} has completely transformed how we engage with website visitors. We went from losing 40% of leads to capturing nearly every one. The ROI was positive within a week.`,
       author: "Dr. Sarah van den Berg",
       role: "Owner & Lead Dentist",
       clinic: "Amsterdam Dental Care",
-      metric: "30%",
-      metricLabel: "fewer missed calls",
+      metric: "40%",
+      metricLabel: "more leads captured",
       image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&h=200&fit=crop&crop=face",
     },
     {
-      quote: "My staff used to spend 4 hours a day on the phone. Now they focus on patients in the clinic. The AI handles scheduling better than we ever did.",
+      quote: "My staff used to spend hours answering the same questions. Now the AI handles it all on the website. Visitors get instant answers and we get more bookings.",
       author: "Michael de Vries",
       role: "Practice Manager",
       clinic: "Rotterdam Family Dentistry",
-      metric: "4hrs",
-      metricLabel: "saved daily",
+      metric: "3x",
+      metricLabel: "more bookings",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face",
     },
     {
-      quote: "I was skeptical about AI, but the natural conversations surprised me. Patients often don't realize they're talking to an AI. That's exactly what we wanted.",
+      quote: "I was skeptical about chatbots, but this is different. It actually knows our services and answers intelligently. Visitors love it — our satisfaction scores went up.",
       author: "Dr. Emma Jansen",
       role: "Founder",
       clinic: "SmileBright Utrecht",
       metric: "92%",
-      metricLabel: "patient satisfaction",
+      metricLabel: "visitor satisfaction",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face",
     },
   ];
@@ -191,7 +191,7 @@ const TestimonialsSection = () => {
           className="mt-24 md:mt-32"
         >
           <p className="text-center text-xs uppercase tracking-[0.3em] text-muted-foreground mb-8">
-            Trusted by leading dental practices
+            Trusted by leading businesses
           </p>
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-40">
             {["Dental Care Plus", "SmileBright Clinics", "HealthFirst", "MediCare Pro", "VitalHealth"].map((name, idx) => (

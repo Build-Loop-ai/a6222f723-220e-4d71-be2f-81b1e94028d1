@@ -11,11 +11,11 @@
 
 export const siteConfig = {
   // Brand - Update these in Admin Panel → Site Config
-  name: "AI Receptionist",
-  tagline: "Your AI receptionist, always ready",
-  logoUrl: "", // Logo for dark backgrounds (light logo) - upload in Admin Panel
-  logoUrlDark: "", // Logo for light backgrounds (dark logo) - upload in Admin Panel
-  description: "Never miss a call again. AI that answers, books, and delights your customers 24/7.",
+  name: "AI Assistant",
+  tagline: "Your AI website assistant, always online",
+  logoUrl: "",
+  logoUrlDark: "",
+  description: "Engage every visitor. Answer every question. Book every appointment. AI chat assistant trained on your website, ready in minutes.",
   
   // Contact - Update in Admin Panel → Site Config
   supportEmail: "support@example.com",
@@ -49,8 +49,8 @@ export const siteConfig = {
   // Demo page
   demo: {
     enabled: true,
-    title: "Hear Your AI Receptionist",
-    subtitle: "Experience the future of customer service in 30 seconds",
+    title: "Try the AI Assistant",
+    subtitle: "Chat with our AI and see how it works in real time",
   },
 } as const;
 

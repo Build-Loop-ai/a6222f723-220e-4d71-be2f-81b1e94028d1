@@ -10,6 +10,7 @@ import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ContactDialog from "./ContactDialog";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
+
 const FAQSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -18,39 +19,39 @@ const FAQSection = () => {
 
   const faqs = [
     {
-      question: "How does the AI receptionist work?",
+      question: "How does the AI website assistant work?",
       answer:
-        "Our AI uses advanced natural language processing to understand callers and respond naturally. It can answer common questions, book appointments by checking your calendar availability, and transfer urgent calls to your team. The AI learns your business's specific needs during onboarding.",
+        "Our AI crawls your website to learn about your business, services, and content. It then uses that knowledge to chat with visitors in real time — answering questions, recommending pages, and booking appointments. No manual training required.",
     },
     {
       question: "Can the AI actually book appointments?",
       answer:
-        "Yes! The AI integrates with popular calendar systems like Google Calendar. It checks real-time availability, asks for patient information, confirms the booking, and sends confirmation notifications. You can set buffer times, appointment types, and duration rules.",
+        "Yes! The AI integrates with popular calendar systems like Google Calendar. It checks real-time availability, collects visitor information, confirms the booking, and sends confirmation notifications. You can set buffer times, appointment types, and duration rules.",
     },
     {
       question: `What languages does ${config.name} support?`,
       answer:
-        `${config.name} supports 20+ languages including English, Dutch, German, French, Spanish, Portuguese, Italian, and more. The AI can automatically detect the caller's language and respond accordingly, or you can set a primary language for your clinic.`,
+        `${config.name} supports 20+ languages including English, Dutch, German, French, Spanish, Portuguese, Italian, and more. The AI can automatically detect the visitor's language and respond accordingly, or you can set a primary language.`,
     },
     {
       question: "How long does setup take?",
       answer:
-        "Most clinics are up and running in under 15 minutes. Our onboarding wizard guides you through setting up your business hours, services, AI personality, and phone number. No technical knowledge is required.",
+        "Most businesses are up and running in under 5 minutes. Just enter your website URL, let the AI crawl your content, customize the widget appearance, and embed a single line of code. No technical knowledge is required.",
     },
     {
-      question: "Can I keep my existing phone number?",
+      question: "How do I add the widget to my website?",
       answer:
-        `Absolutely! You have two options: forward your existing number to your ${config.name} AI number, or port your number directly to ${config.name}. We provide step-by-step instructions for both options, and our support team can help with the process.`,
+        `Simply copy a one-line script tag from your ${config.name} dashboard and paste it into your website's HTML. It works with any website — WordPress, Shopify, Wix, Squarespace, or custom-built. You can also use the iframe embed option.`,
     },
     {
-      question: "What happens if the AI can't handle a call?",
+      question: "What happens if the AI can't answer a question?",
       answer:
-        "You can set up fallback rules for any scenario. The AI can transfer calls to your team, take a message, or schedule a callback. For medical emergencies, you can configure immediate transfer to specific numbers.",
+        "You can set up fallback responses for any scenario. The AI can suggest contacting you directly, display your contact information, or collect the visitor's details for a callback. It will never make up information — it only answers from your website content.",
     },
     {
-      question: "Is my patient data secure?",
+      question: "Is my data secure?",
       answer:
-        "Yes, we take data security very seriously. All data is encrypted in transit and at rest. We're GDPR compliant, and we never share or sell your data. Call recordings are securely stored and can be automatically deleted based on your retention policy.",
+        "Yes, we take data security very seriously. All data is encrypted in transit and at rest. We're GDPR compliant, and we never share or sell your data. Conversation logs are securely stored and can be automatically deleted based on your retention policy.",
     },
     {
       question: "Can I cancel anytime?",
