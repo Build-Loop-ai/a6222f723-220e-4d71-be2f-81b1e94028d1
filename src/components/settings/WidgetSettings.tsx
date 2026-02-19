@@ -1,12 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,15 +21,21 @@ import {
   MessageSquare,
   Code,
   Shield,
-  Eye,
   Smartphone,
   Monitor,
   Pencil,
-  Check,
   Type,
   Palette,
   Mic,
   Send,
+  Sparkles,
+  ChevronRight,
+  Layers,
+  MousePointerClick,
+  Wand2,
+  LayoutGrid,
+  Globe,
+  CircleDot,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -84,55 +83,110 @@ type EditingZone =
   | "bubble-btn";
 
 const PRESET_COLORS = [
-  "#0d9488", "#6366f1", "#2563eb", "#dc2626",
-  "#ea580c", "#d97706", "#16a34a", "#7c3aed",
-  "#db2777", "#0891b2", "#4f46e5", "#059669",
+  "#34D77B", "#0d9488", "#6366f1", "#2563eb",
+  "#dc2626", "#ea580c", "#d97706", "#16a34a",
+  "#7c3aed", "#db2777", "#0891b2", "#059669",
 ];
 
 const FONT_OPTIONS = [
-  { value: "DM Sans", label: "DM Sans" },
-  { value: "Inter", label: "Inter" },
-  { value: "Syne", label: "Syne" },
-  { value: "Space Grotesk", label: "Space Grotesk" },
-  { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans" },
-  { value: "system-ui", label: "System Default" },
+  { value: "DM Sans", label: "DM Sans", preview: "Aa" },
+  { value: "Inter", label: "Inter", preview: "Aa" },
+  { value: "Syne", label: "Syne", preview: "Aa" },
+  { value: "Space Grotesk", label: "Space Grotesk", preview: "Aa" },
+  { value: "Plus Jakarta Sans", label: "Jakarta", preview: "Aa" },
+  { value: "system-ui", label: "System", preview: "Aa" },
 ];
 
 const RADIUS_OPTIONS = [
-  { value: "none", label: "Square", css: "0px" },
-  { value: "sm", label: "Subtle", css: "8px" },
-  { value: "rounded", label: "Rounded", css: "16px" },
-  { value: "full", label: "Pill", css: "9999px" },
+  { value: "none", label: "Sharp", css: "0px", icon: "□" },
+  { value: "sm", label: "Soft", css: "8px", icon: "▢" },
+  { value: "rounded", label: "Round", css: "16px", icon: "◻" },
+  { value: "full", label: "Pill", css: "9999px", icon: "◯" },
 ];
 
-function ColorInput({
-  label,
+/* ── Inline color swatch + picker ── */
+function ColorSwatch({
   value,
   onChange,
+  label,
 }: {
-  label: string;
   value: string;
   onChange: (v: string) => void;
+  label: string;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="space-y-1.5">
-      <Label className="text-xs">{label}</Label>
+    <div className="space-y-1">
+      <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">
+        {label}
+      </span>
       <div className="flex items-center gap-2">
+        <button
+          onClick={() => setOpen(!open)}
+          className="relative h-7 w-7 rounded-lg border border-border/50 transition-all hover:scale-110 hover:shadow-md active:scale-95 shrink-0"
+          style={{ backgroundColor: value }}
+        >
+          {open && (
+            <motion.div
+              layoutId="color-ring"
+              className="absolute -inset-[3px] rounded-[10px] border-2 border-primary"
+            />
+          )}
+        </button>
         <input
-          type="color"
+          type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="h-8 w-8 cursor-pointer rounded-lg border border-border"
-        />
-        <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="flex-1 font-mono text-xs h-8"
+          className="flex-1 h-7 bg-transparent border-0 border-b border-border/30 text-[11px] font-mono text-foreground/70 outline-none focus:border-primary/50 transition-colors px-0"
         />
       </div>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-1.5 flex items-center gap-2">
+              <input
+                type="color"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="h-7 w-7 cursor-pointer rounded-lg border-0 bg-transparent p-0"
+              />
+              <div className="flex flex-wrap gap-1">
+                {PRESET_COLORS.slice(0, 8).map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => { onChange(c); setOpen(false); }}
+                    className={`h-4 w-4 rounded-full transition-all hover:scale-125 ${
+                      value === c ? "ring-1 ring-primary ring-offset-1 ring-offset-background" : ""
+                    }`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+/* ── Zone label mapping ── */
+const ZONE_LABELS: Record<string, { title: string; icon: React.ReactNode; desc: string }> = {
+  header: { title: "Header", icon: <Layers className="h-3.5 w-3.5" />, desc: "Title, subtitle & colors" },
+  welcome: { title: "Welcome", icon: <Sparkles className="h-3.5 w-3.5" />, desc: "First impression message" },
+  "bot-bubble": { title: "Bot Messages", icon: <MessageSquare className="h-3.5 w-3.5" />, desc: "AI response styling" },
+  "user-bubble": { title: "User Messages", icon: <Send className="h-3.5 w-3.5" />, desc: "Visitor message styling" },
+  input: { title: "Input", icon: <Type className="h-3.5 w-3.5" />, desc: "Text field appearance" },
+  branding: { title: "Branding", icon: <CircleDot className="h-3.5 w-3.5" />, desc: "Footer attribution" },
+  "bubble-btn": { title: "Chat Button", icon: <MousePointerClick className="h-3.5 w-3.5" />, desc: "Floating trigger button" },
+};
 
 export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [config, setConfig] = useState<WidgetConfig | null>(null);
@@ -142,8 +196,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [previewOpen, setPreviewOpen] = useState(true);
   const [editingZone, setEditingZone] = useState<EditingZone>(null);
-  const [showEmbed, setShowEmbed] = useState(false);
-  const [showDomains, setShowDomains] = useState(false);
+  const [activePanel, setActivePanel] = useState<"style" | "embed" | "domains">("style");
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -226,733 +279,851 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
   if (loading)
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="h-32 animate-pulse rounded-xl bg-muted" />
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center h-[600px]">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-3"
+        >
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="text-xs text-muted-foreground">Loading builder…</span>
+        </motion.div>
+      </div>
     );
 
   if (!config) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="p-16 text-center">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex items-center justify-center h-[600px]"
+      >
+        <div className="text-center max-w-md">
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="mx-auto mb-8 relative"
           >
-            <MessageSquare className="h-10 w-10 text-primary" />
+            <div className="h-24 w-24 mx-auto rounded-[28px] glass border-glow flex items-center justify-center">
+              <Wand2 className="h-10 w-10 text-primary" />
+            </div>
+            <div className="absolute -inset-4 rounded-[36px] bg-primary/5 blur-xl -z-10" />
           </motion.div>
-          <h3 className="mb-2 text-xl font-semibold">Build Your Chat Widget</h3>
-          <p className="mx-auto mb-8 max-w-sm text-muted-foreground">
-            Create a beautiful, fully customizable chat widget. Click any element in the preview to edit it.
-          </p>
-          <Button onClick={handleCreate} disabled={creating} size="lg">
-            {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Start Building
-          </Button>
-        </CardContent>
-      </Card>
+          <motion.h3
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-2xl font-bold font-heading mb-2"
+          >
+            Widget Builder
+          </motion.h3>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-sm text-muted-foreground mb-8"
+          >
+            Design your chat widget visually. Click any element to customize it in real-time.
+          </motion.p>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Button
+              onClick={handleCreate}
+              disabled={creating}
+              size="lg"
+              className="rounded-2xl px-8 h-12 text-sm font-semibold gap-2"
+            >
+              {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Start Building
+            </Button>
+          </motion.div>
+        </div>
+      </motion.div>
     );
   }
 
-  return (
-    <div className="flex gap-6 min-h-[720px]">
-      {/* ─── Left: Context-sensitive editor panel ─── */}
-      <div className="w-[340px] shrink-0 space-y-4 overflow-y-auto max-h-[720px] pr-1">
-        {/* Instruction */}
-        <div className="flex items-center gap-2 rounded-xl border border-dashed border-primary/30 bg-primary/5 px-3 py-2">
-          <Pencil className="h-4 w-4 text-primary shrink-0" />
-          <p className="text-xs text-primary">
-            Click any element in the preview to edit it
-          </p>
+  /* ── Zone editor content ── */
+  const renderZoneEditor = () => {
+    if (!editingZone) return null;
+    const zone = ZONE_LABELS[editingZone];
+
+    return (
+      <motion.div
+        key={editingZone}
+        initial={{ opacity: 0, x: -12 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 12 }}
+        transition={{ type: "spring", damping: 25, stiffness: 400 }}
+        className="space-y-4"
+      >
+        {/* Zone header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              {zone.icon}
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold">{zone.title}</h4>
+              <p className="text-[10px] text-muted-foreground">{zone.desc}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setEditingZone(null)}
+            className="h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
         </div>
 
-        {/* ── Global settings (always visible) ── */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Palette className="h-4 w-4" />
-              Global Style
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {/* Color presets */}
-            <div className="space-y-1.5">
-              <Label className="text-xs">Brand Color</Label>
-              <div className="flex flex-wrap gap-1.5">
-                {PRESET_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => u("accent_color", c)}
-                    className={`h-6 w-6 rounded-full border-2 transition-all hover:scale-110 ${
-                      config.accent_color === c
-                        ? "border-foreground ring-2 ring-ring ring-offset-1 ring-offset-background"
-                        : "border-transparent"
-                    }`}
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={config.accent_color}
-                  onChange={(e) => u("accent_color", e.target.value)}
-                  className="h-8 w-8 cursor-pointer rounded-lg border border-border"
-                />
-                <Input
-                  value={config.accent_color}
-                  onChange={(e) => u("accent_color", e.target.value)}
-                  className="flex-1 font-mono text-xs h-8"
-                />
-              </div>
-            </div>
+        <div className="h-px bg-border/50" />
 
-            {/* Font */}
-            <div className="space-y-1.5">
-              <Label className="text-xs">Font Family</Label>
-              <Select value={config.font_family} onValueChange={(v) => uNow("font_family", v)}>
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {FONT_OPTIONS.map((f) => (
-                    <SelectItem key={f.value} value={f.value} style={{ fontFamily: f.value }}>
-                      {f.label}
-                    </SelectItem>
+        {/* Zone-specific controls */}
+        <div className="space-y-3">
+          {editingZone === "header" && (
+            <>
+              <FieldInput label="Title" value={config.widget_title} onChange={(v) => u("widget_title", v)} />
+              <FieldInput label="Subtitle" value={config.header_subtitle} onChange={(v) => u("header_subtitle", v)} />
+              <ColorSwatch label="Background" value={config.accent_color} onChange={(v) => u("accent_color", v)} />
+              <ColorSwatch label="Text Color" value={config.header_text_color} onChange={(v) => u("header_text_color", v)} />
+              <FieldInput label="Avatar URL" value={config.avatar_url || ""} onChange={(v) => u("avatar_url", v || null)} placeholder="https://..." />
+            </>
+          )}
+
+          {editingZone === "welcome" && (
+            <>
+              <FieldInput label="Bot Name" value={config.bot_name} onChange={(v) => u("bot_name", v)} />
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">Welcome Message</span>
+                <Textarea
+                  value={config.welcome_message}
+                  onChange={(e) => u("welcome_message", e.target.value)}
+                  rows={3}
+                  className="text-xs bg-transparent border-border/30 focus:border-primary/50 resize-none"
+                />
+              </div>
+            </>
+          )}
+
+          {editingZone === "bot-bubble" && (
+            <>
+              <ColorSwatch label="Background" value={config.bot_message_bg} onChange={(v) => u("bot_message_bg", v)} />
+              <ColorSwatch label="Text Color" value={config.bot_message_text_color} onChange={(v) => u("bot_message_text_color", v)} />
+              <ColorSwatch label="Chat Background" value={config.chat_bg_color} onChange={(v) => u("chat_bg_color", v)} />
+            </>
+          )}
+
+          {editingZone === "user-bubble" && (
+            <>
+              <ColorSwatch label="Background" value={config.accent_color} onChange={(v) => u("accent_color", v)} />
+              <ColorSwatch label="Text Color" value={config.user_message_text_color} onChange={(v) => u("user_message_text_color", v)} />
+            </>
+          )}
+
+          {editingZone === "input" && (
+            <>
+              <FieldInput label="Placeholder" value={config.placeholder_text} onChange={(v) => u("placeholder_text", v)} />
+              <ColorSwatch label="Background" value={config.input_bg_color} onChange={(v) => u("input_bg_color", v)} />
+              <ColorSwatch label="Text Color" value={config.input_text_color} onChange={(v) => u("input_text_color", v)} />
+              <ColorSwatch label="Border" value={config.input_border_color} onChange={(v) => u("input_border_color", v)} />
+            </>
+          )}
+
+          {editingZone === "branding" && (
+            <div className="flex items-center justify-between py-1">
+              <span className="text-xs text-muted-foreground">Show "Powered by" text</span>
+              <Switch checked={config.show_branding} onCheckedChange={(v) => uNow("show_branding", v)} />
+            </div>
+          )}
+
+          {editingZone === "bubble-btn" && (
+            <>
+              <ColorSwatch label="Button Color" value={config.accent_color} onChange={(v) => u("accent_color", v)} />
+              <div className="space-y-1.5">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">Position</span>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {(["bottom-right", "bottom-left"] as const).map((pos) => (
+                    <button
+                      key={pos}
+                      onClick={() => uNow("position", pos)}
+                      className={`relative rounded-xl p-3 text-[10px] font-medium transition-all ${
+                        config.position === pos
+                          ? "bg-primary/10 text-primary border border-primary/30"
+                          : "bg-muted/50 text-muted-foreground border border-transparent hover:border-border/50"
+                      }`}
+                    >
+                      <div className="relative h-8 w-full rounded-md border border-current/10 bg-current/5 mb-1.5">
+                        <div
+                          className={`absolute bottom-1 h-2.5 w-2.5 rounded-full bg-current ${
+                            pos === "bottom-right" ? "right-1" : "left-1"
+                          }`}
+                        />
+                      </div>
+                      {pos === "bottom-right" ? "Right" : "Left"}
+                    </button>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Border Radius */}
-            <div className="space-y-1.5">
-              <Label className="text-xs">Corner Style</Label>
-              <div className="grid grid-cols-4 gap-1.5">
-                {RADIUS_OPTIONS.map((r) => (
-                  <button
-                    key={r.value}
-                    onClick={() => uNow("border_radius", r.value)}
-                    className={`flex flex-col items-center gap-1 rounded-lg border-2 p-2 text-[10px] transition-all ${
-                      config.border_radius === r.value
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border hover:border-primary/30"
-                    }`}
-                  >
-                    <div
-                      className="h-5 w-5 border-2 border-current"
-                      style={{ borderRadius: r.css }}
-                    />
-                    {r.label}
-                  </button>
-                ))}
+                </div>
               </div>
-            </div>
-
-            {/* Position */}
-            <div className="space-y-1.5">
-              <Label className="text-xs">Position</Label>
-              <div className="grid grid-cols-2 gap-1.5">
-                {(["bottom-right", "bottom-left"] as const).map((pos) => (
-                  <button
-                    key={pos}
-                    onClick={() => uNow("position", pos)}
-                    className={`flex items-center justify-center gap-1.5 rounded-lg border-2 p-2 text-[11px] transition-all ${
-                      config.position === pos
-                        ? "border-primary bg-primary/5 text-primary"
-                        : "border-border hover:border-primary/30"
-                    }`}
-                  >
-                    <div className="relative h-6 w-10 rounded border border-current/20 bg-current/5">
-                      <div
-                        className={`absolute bottom-0.5 h-2 w-2 rounded-full bg-current ${
-                          pos === "bottom-right" ? "right-0.5" : "left-0.5"
-                        }`}
-                      />
-                    </div>
-                    {pos === "bottom-right" ? "Right" : "Left"}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Toggles */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs">Voice Input</Label>
-                <Switch
-                  checked={config.voice_enabled}
-                  onCheckedChange={(v) => uNow("voice_enabled", v)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label className="text-xs">Show Branding</Label>
-                <Switch
-                  checked={config.show_branding}
-                  onCheckedChange={(v) => uNow("show_branding", v)}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* ── Zone-specific editor (shows on click) ── */}
-        <AnimatePresence mode="wait">
-          {editingZone && (
-            <motion.div
-              key={editingZone}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Card className="border-primary/30 shadow-md">
-                <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                  <CardTitle className="text-sm">
-                    {editingZone === "header" && "Header"}
-                    {editingZone === "welcome" && "Welcome Message"}
-                    {editingZone === "bot-bubble" && "Bot Messages"}
-                    {editingZone === "user-bubble" && "User Messages"}
-                    {editingZone === "input" && "Input Field"}
-                    {editingZone === "branding" && "Branding Footer"}
-                    {editingZone === "bubble-btn" && "Chat Button"}
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={() => setEditingZone(null)}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {editingZone === "header" && (
-                    <>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Title</Label>
-                        <Input
-                          value={config.widget_title}
-                          onChange={(e) => u("widget_title", e.target.value)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Subtitle</Label>
-                        <Input
-                          value={config.header_subtitle}
-                          onChange={(e) => u("header_subtitle", e.target.value)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <ColorInput
-                        label="Background Color"
-                        value={config.accent_color}
-                        onChange={(v) => u("accent_color", v)}
-                      />
-                      <ColorInput
-                        label="Text Color"
-                        value={config.header_text_color}
-                        onChange={(v) => u("header_text_color", v)}
-                      />
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Avatar URL</Label>
-                        <Input
-                          value={config.avatar_url || ""}
-                          onChange={(e) => u("avatar_url", e.target.value || null)}
-                          placeholder="https://..."
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {editingZone === "welcome" && (
-                    <>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Bot Name</Label>
-                        <Input
-                          value={config.bot_name}
-                          onChange={(e) => u("bot_name", e.target.value)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Welcome Message</Label>
-                        <Textarea
-                          value={config.welcome_message}
-                          onChange={(e) => u("welcome_message", e.target.value)}
-                          rows={3}
-                          className="text-xs"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {editingZone === "bot-bubble" && (
-                    <>
-                      <ColorInput
-                        label="Background"
-                        value={config.bot_message_bg}
-                        onChange={(v) => u("bot_message_bg", v)}
-                      />
-                      <ColorInput
-                        label="Text Color"
-                        value={config.bot_message_text_color}
-                        onChange={(v) => u("bot_message_text_color", v)}
-                      />
-                      <ColorInput
-                        label="Chat Background"
-                        value={config.chat_bg_color}
-                        onChange={(v) => u("chat_bg_color", v)}
-                      />
-                    </>
-                  )}
-
-                  {editingZone === "user-bubble" && (
-                    <>
-                      <ColorInput
-                        label="Background"
-                        value={config.accent_color}
-                        onChange={(v) => u("accent_color", v)}
-                      />
-                      <ColorInput
-                        label="Text Color"
-                        value={config.user_message_text_color}
-                        onChange={(v) => u("user_message_text_color", v)}
-                      />
-                    </>
-                  )}
-
-                  {editingZone === "input" && (
-                    <>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Placeholder Text</Label>
-                        <Input
-                          value={config.placeholder_text}
-                          onChange={(e) => u("placeholder_text", e.target.value)}
-                          className="h-8 text-xs"
-                        />
-                      </div>
-                      <ColorInput
-                        label="Background"
-                        value={config.input_bg_color}
-                        onChange={(v) => u("input_bg_color", v)}
-                      />
-                      <ColorInput
-                        label="Text Color"
-                        value={config.input_text_color}
-                        onChange={(v) => u("input_text_color", v)}
-                      />
-                      <ColorInput
-                        label="Border Color"
-                        value={config.input_border_color}
-                        onChange={(v) => u("input_border_color", v)}
-                      />
-                    </>
-                  )}
-
-                  {editingZone === "branding" && (
-                    <div className="flex items-center justify-between">
-                      <Label className="text-xs">Show "Powered by" text</Label>
-                      <Switch
-                        checked={config.show_branding}
-                        onCheckedChange={(v) => uNow("show_branding", v)}
-                      />
-                    </div>
-                  )}
-
-                  {editingZone === "bubble-btn" && (
-                    <>
-                      <ColorInput
-                        label="Button Color"
-                        value={config.accent_color}
-                        onChange={(v) => u("accent_color", v)}
-                      />
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Position</Label>
-                        <Select
-                          value={config.position}
-                          onValueChange={(v) => uNow("position", v)}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                            <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
+            </>
           )}
-        </AnimatePresence>
+        </div>
+      </motion.div>
+    );
+  };
 
-        {/* ── Quick actions ── */}
-        <div className="flex gap-2">
-          <Button
-            variant={showEmbed ? "default" : "outline"}
-            size="sm"
-            className="gap-1.5 flex-1 text-xs"
-            onClick={() => { setShowEmbed(!showEmbed); setShowDomains(false); }}
-          >
-            <Code className="h-3.5 w-3.5" />
-            Embed Code
-          </Button>
-          <Button
-            variant={showDomains ? "default" : "outline"}
-            size="sm"
-            className="gap-1.5 flex-1 text-xs"
-            onClick={() => { setShowDomains(!showDomains); setShowEmbed(false); }}
-          >
-            <Shield className="h-3.5 w-3.5" />
-            Domains
-          </Button>
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex gap-0 min-h-[740px] -mx-6 -mt-2 rounded-2xl overflow-hidden border border-border/50"
+    >
+      {/* ━━━━ Left Panel — Glass sidebar ━━━━ */}
+      <div className="w-[300px] shrink-0 flex flex-col border-r border-border/50 bg-card/50">
+        {/* Panel header with tabs */}
+        <div className="px-4 pt-4 pb-2 border-b border-border/30">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Wand2 className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <span className="text-xs font-semibold">Widget Builder</span>
+            <div className="ml-auto flex items-center gap-1">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              <span className="text-[9px] text-primary font-medium">Auto-saving</span>
+            </div>
+          </div>
+
+          {/* Tab pills */}
+          <div className="flex gap-0.5 p-0.5 rounded-xl bg-muted/50">
+            {([
+              { key: "style", icon: <Palette className="h-3 w-3" />, label: "Design" },
+              { key: "embed", icon: <Code className="h-3 w-3" />, label: "Embed" },
+              { key: "domains", icon: <Globe className="h-3 w-3" />, label: "Domains" },
+            ] as const).map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActivePanel(tab.key)}
+                className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-medium transition-all ${
+                  activePanel === tab.key
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <AnimatePresence>
-          {showEmbed && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Install on Your Website</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <EmbedCodeSnippet apiKey={config.api_key} />
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-          {showDomains && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm">Allowed Domains</CardTitle>
-                  <CardDescription className="text-xs">Leave empty to allow everywhere.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="example.com"
-                      value={newDomain}
-                      onChange={(e) => setNewDomain(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && addDomain()}
-                      className="h-8 text-xs"
-                    />
-                    <Button variant="outline" size="sm" onClick={addDomain}>
-                      <Plus className="h-3.5 w-3.5" />
-                    </Button>
+        {/* Panel content */}
+        <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4">
+          <AnimatePresence mode="wait">
+            {activePanel === "style" && (
+              <motion.div
+                key="style"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-5"
+              >
+                {/* Click instruction */}
+                <div className="flex items-center gap-2.5 rounded-xl bg-primary/5 border border-primary/10 px-3 py-2.5">
+                  <MousePointerClick className="h-4 w-4 text-primary shrink-0" />
+                  <div>
+                    <p className="text-[11px] font-medium text-primary">Click to edit</p>
+                    <p className="text-[10px] text-primary/60">Tap any element in the preview</p>
                   </div>
-                  {(config.allowed_domains || []).length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {config.allowed_domains.map((d) => (
-                        <Badge key={d} variant="secondary" className="gap-1 pr-1 text-xs">
-                          {d}
-                          <button onClick={() => removeDomain(d)} className="ml-1 hover:text-destructive">
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
+                </div>
+
+                {/* Zone-specific editor */}
+                <AnimatePresence mode="wait">
+                  {editingZone ? (
+                    renderZoneEditor()
                   ) : (
-                    <p className="text-[11px] text-muted-foreground italic">No restrictions.</p>
+                    <motion.div
+                      key="global"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="space-y-5"
+                    >
+                      {/* ── Brand Color ── */}
+                      <div className="space-y-2">
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold flex items-center gap-1.5">
+                          <Palette className="h-3 w-3" />
+                          Brand Color
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {PRESET_COLORS.map((c) => (
+                            <motion.button
+                              key={c}
+                              whileHover={{ scale: 1.2 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => u("accent_color", c)}
+                              className={`h-7 w-7 rounded-full transition-all ${
+                                config.accent_color === c
+                                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg"
+                                  : "hover:shadow-md"
+                              }`}
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <input
+                            type="color"
+                            value={config.accent_color}
+                            onChange={(e) => u("accent_color", e.target.value)}
+                            className="h-7 w-7 cursor-pointer rounded-lg border-0 bg-transparent p-0"
+                          />
+                          <input
+                            type="text"
+                            value={config.accent_color}
+                            onChange={(e) => u("accent_color", e.target.value)}
+                            className="flex-1 h-7 bg-transparent border-0 border-b border-border/30 text-[11px] font-mono text-foreground/70 outline-none focus:border-primary/50 px-0"
+                          />
+                        </div>
+                      </div>
+
+                      {/* ── Typography ── */}
+                      <div className="space-y-2">
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold flex items-center gap-1.5">
+                          <Type className="h-3 w-3" />
+                          Typography
+                        </span>
+                        <div className="grid grid-cols-3 gap-1">
+                          {FONT_OPTIONS.map((f) => (
+                            <button
+                              key={f.value}
+                              onClick={() => uNow("font_family", f.value)}
+                              className={`flex flex-col items-center gap-0.5 rounded-xl p-2 text-[9px] font-medium transition-all ${
+                                config.font_family === f.value
+                                  ? "bg-primary/10 text-primary border border-primary/20"
+                                  : "bg-muted/30 text-muted-foreground border border-transparent hover:border-border/40 hover:bg-muted/50"
+                              }`}
+                            >
+                              <span className="text-base font-bold" style={{ fontFamily: f.value }}>
+                                {f.preview}
+                              </span>
+                              {f.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* ── Corner Style ── */}
+                      <div className="space-y-2">
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold flex items-center gap-1.5">
+                          <LayoutGrid className="h-3 w-3" />
+                          Corners
+                        </span>
+                        <div className="grid grid-cols-4 gap-1">
+                          {RADIUS_OPTIONS.map((r) => (
+                            <button
+                              key={r.value}
+                              onClick={() => uNow("border_radius", r.value)}
+                              className={`flex flex-col items-center gap-1 rounded-xl p-2.5 text-[9px] font-medium transition-all ${
+                                config.border_radius === r.value
+                                  ? "bg-primary/10 text-primary border border-primary/20"
+                                  : "bg-muted/30 text-muted-foreground border border-transparent hover:border-border/40"
+                              }`}
+                            >
+                              <div
+                                className="h-5 w-5 border-2 border-current"
+                                style={{ borderRadius: r.css === "9999px" ? "50%" : r.css }}
+                              />
+                              {r.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* ── Position ── */}
+                      <div className="space-y-2">
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
+                          Position
+                        </span>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          {(["bottom-right", "bottom-left"] as const).map((pos) => (
+                            <button
+                              key={pos}
+                              onClick={() => uNow("position", pos)}
+                              className={`relative rounded-xl p-3 text-[10px] font-medium transition-all ${
+                                config.position === pos
+                                  ? "bg-primary/10 text-primary border border-primary/30"
+                                  : "bg-muted/30 text-muted-foreground border border-transparent hover:border-border/40"
+                              }`}
+                            >
+                              <div className="relative h-8 w-full rounded-md border border-current/10 bg-current/5 mb-1">
+                                <div
+                                  className={`absolute bottom-1 h-2.5 w-2.5 rounded-full bg-current ${
+                                    pos === "bottom-right" ? "right-1" : "left-1"
+                                  }`}
+                                />
+                              </div>
+                              {pos === "bottom-right" ? "Right" : "Left"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* ── Toggles ── */}
+                      <div className="space-y-2">
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
+                          Features
+                        </span>
+                        <div className="space-y-1.5">
+                          {[
+                            { label: "Voice Input", key: "voice_enabled" as const, icon: <Mic className="h-3 w-3" /> },
+                            { label: "Show Branding", key: "show_branding" as const, icon: <CircleDot className="h-3 w-3" /> },
+                          ].map((toggle) => (
+                            <div
+                              key={toggle.key}
+                              className="flex items-center justify-between rounded-xl bg-muted/20 px-3 py-2"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">{toggle.icon}</span>
+                                <span className="text-xs text-foreground/80">{toggle.label}</span>
+                              </div>
+                              <Switch
+                                checked={config[toggle.key] as boolean}
+                                onCheckedChange={(v) => uNow(toggle.key, v)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* ── Clickable zone map ── */}
+                      <div className="space-y-2">
+                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-semibold">
+                          Quick Edit Zones
+                        </span>
+                        <div className="space-y-0.5">
+                          {(Object.entries(ZONE_LABELS) as [EditingZone, typeof ZONE_LABELS[string]][]).map(([key, zone]) => (
+                            <button
+                              key={key}
+                              onClick={() => setEditingZone(key as EditingZone)}
+                              className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2 text-left transition-all hover:bg-muted/50 group"
+                            >
+                              <span className="text-muted-foreground group-hover:text-primary transition-colors">{zone.icon}</span>
+                              <div className="flex-1 min-w-0">
+                                <span className="text-xs font-medium group-hover:text-foreground">{zone.title}</span>
+                              </div>
+                              <ChevronRight className="h-3 w-3 text-muted-foreground/40 group-hover:text-foreground/60 transition-colors" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
                   )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </AnimatePresence>
+              </motion.div>
+            )}
+
+            {activePanel === "embed" && (
+              <motion.div
+                key="embed"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+              >
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-xs font-semibold mb-1">Install on Your Website</h4>
+                    <p className="text-[10px] text-muted-foreground">
+                      Add this snippet before the closing {'</body>'} tag.
+                    </p>
+                  </div>
+                  <EmbedCodeSnippet apiKey={config.api_key} />
+                </div>
+              </motion.div>
+            )}
+
+            {activePanel === "domains" && (
+              <motion.div
+                key="domains"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-4"
+              >
+                <div>
+                  <h4 className="text-xs font-semibold mb-1">Allowed Domains</h4>
+                  <p className="text-[10px] text-muted-foreground">
+                    Restrict where your widget can appear. Leave empty for no restrictions.
+                  </p>
+                </div>
+                <div className="flex gap-1.5">
+                  <Input
+                    placeholder="example.com"
+                    value={newDomain}
+                    onChange={(e) => setNewDomain(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addDomain()}
+                    className="h-8 text-xs bg-transparent border-border/30"
+                  />
+                  <Button variant="outline" size="sm" onClick={addDomain} className="h-8 w-8 p-0 shrink-0">
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                {(config.allowed_domains || []).length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {config.allowed_domains.map((d) => (
+                      <Badge key={d} variant="secondary" className="gap-1 pr-1 text-[10px] rounded-lg">
+                        {d}
+                        <button onClick={() => removeDomain(d)} className="ml-1 hover:text-destructive">
+                          <X className="h-2.5 w-2.5" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border/40 py-6 text-center">
+                    <Shield className="h-5 w-5 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-[10px] text-muted-foreground/50">No domain restrictions</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* ─── Right: Interactive Live Preview ─── */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Live Preview</span>
-            <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-              Click to edit
-            </span>
+      {/* ━━━━ Right: Immersive Canvas ━━━━ */}
+      <div className="flex-1 flex flex-col min-w-0 bg-gradient-to-br from-muted/20 via-background to-muted/10">
+        {/* Canvas toolbar */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border/30">
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 font-semibold">Preview</span>
+            {editingZone && (
+              <motion.div
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-1.5 bg-primary/10 text-primary rounded-full px-2.5 py-0.5"
+              >
+                <Pencil className="h-2.5 w-2.5" />
+                <span className="text-[10px] font-medium">{ZONE_LABELS[editingZone]?.title}</span>
+              </motion.div>
+            )}
           </div>
-          <div className="flex items-center gap-1 rounded-lg border border-border p-0.5">
-            <button
-              onClick={() => setPreviewDevice("desktop")}
-              className={`rounded-md p-1.5 transition-colors ${
-                previewDevice === "desktop"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Monitor className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => setPreviewDevice("mobile")}
-              className={`rounded-md p-1.5 transition-colors ${
-                previewDevice === "mobile"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Smartphone className="h-3.5 w-3.5" />
-            </button>
+          <div className="flex items-center gap-1 rounded-xl bg-muted/30 p-0.5">
+            {([
+              { key: "desktop", icon: <Monitor className="h-3 w-3" /> },
+              { key: "mobile", icon: <Smartphone className="h-3 w-3" /> },
+            ] as const).map((d) => (
+              <button
+                key={d.key}
+                onClick={() => setPreviewDevice(d.key)}
+                className={`rounded-lg p-1.5 transition-all ${
+                  previewDevice === d.key
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {d.icon}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div
-          className={`relative mx-auto overflow-hidden rounded-2xl border-2 border-border bg-muted/20 shadow-lg transition-all duration-300 ${
-            previewDevice === "mobile" ? "w-[360px] h-[700px]" : "w-full h-[700px]"
-          }`}
-        >
-          {/* Browser chrome */}
-          <div className="flex h-7 items-center gap-1.5 bg-muted px-3">
-            <div className="h-2 w-2 rounded-full bg-destructive/40" />
-            <div className="h-2 w-2 rounded-full bg-warning/40" />
-            <div className="h-2 w-2 rounded-full bg-success/40" />
-            <div className="ml-2 h-3.5 flex-1 rounded bg-background" />
-          </div>
+        {/* Canvas area */}
+        <div className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
+          {/* Subtle grid background */}
+          <div className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: "radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
+          />
 
-          {/* Page content */}
-          <div className="relative h-[calc(100%-1.75rem)] overflow-hidden bg-white">
-            <div className="space-y-3 p-5 opacity-40">
-              <div className="h-6 w-3/4 rounded bg-gray-200" />
-              <div className="h-3 w-full rounded bg-gray-100" />
-              <div className="h-3 w-5/6 rounded bg-gray-100" />
-              <div className="h-28 w-full rounded-lg bg-gray-100" />
-              <div className="h-3 w-full rounded bg-gray-100" />
-              <div className="h-3 w-2/3 rounded bg-gray-100" />
-              <div className="h-20 w-full rounded-lg bg-gray-50" />
-              <div className="h-3 w-4/5 rounded bg-gray-100" />
-              <div className="h-3 w-3/5 rounded bg-gray-100" />
+          {/* Device frame */}
+          <motion.div
+            layout
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className={`relative overflow-hidden rounded-[20px] border border-border/40 bg-white shadow-2xl ${
+              previewDevice === "mobile" ? "w-[375px] h-[680px]" : "w-[640px] h-[680px]"
+            }`}
+            style={{
+              boxShadow: "0 25px 80px -12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)",
+            }}
+          >
+            {/* Browser chrome */}
+            <div className="flex h-8 items-center gap-1.5 bg-[#f5f5f5] px-3 border-b border-gray-200/50">
+              <div className="flex gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+                <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+                <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+              </div>
+              <div className="ml-3 flex-1 h-4 rounded-md bg-white border border-gray-200/60 flex items-center px-2">
+                <span className="text-[8px] text-gray-400">yourwebsite.com</span>
+              </div>
             </div>
 
-            {/* ── Widget Chat Panel ── */}
-            <AnimatePresence>
-              {previewOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                  transition={{ type: "spring", damping: 25, stiffness: 350 }}
-                  className={`absolute z-10 flex flex-col overflow-hidden shadow-2xl ${
-                    config.position === "bottom-right" ? "right-4" : "left-4"
-                  } bottom-[72px]`}
-                  style={{
-                    width: previewDevice === "mobile" ? "300px" : "340px",
-                    height: previewDevice === "mobile" ? "420px" : "460px",
-                    fontFamily: `'${config.font_family}', system-ui, sans-serif`,
-                    borderRadius: config.border_radius === "full" ? "24px" : config.border_radius === "rounded" ? "16px" : config.border_radius === "sm" ? "8px" : "0px",
-                  }}
-                >
-                  {/* HEADER — clickable zone */}
-                  <div
-                    onClick={() => setEditingZone("header")}
-                    className={`group relative flex items-center gap-2.5 px-4 py-3 cursor-pointer transition-all ${
-                      editingZone === "header" ? "ring-2 ring-primary ring-inset" : ""
-                    }`}
-                    style={{ backgroundColor: config.accent_color }}
-                  >
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                      <Pencil className="h-4 w-4 text-white drop-shadow" />
-                    </div>
-                    {config.avatar_url && (
-                      <img
-                        src={config.avatar_url}
-                        alt=""
-                        className="h-8 w-8 rounded-full border-2 border-white/30 object-cover"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3
-                        className="truncate text-sm font-semibold"
-                        style={{ color: config.header_text_color }}
-                      >
-                        {config.widget_title || "Chat with us"}
-                      </h3>
-                      <p
-                        className="text-[11px]"
-                        style={{ color: config.header_text_color + "b3" }}
-                      >
-                        {config.header_subtitle || "Online"}
-                      </p>
-                    </div>
-                    <button className="rounded p-0.5 hover:bg-white/10">
-                      <X className="h-4 w-4" style={{ color: config.header_text_color + "b3" }} />
-                    </button>
-                  </div>
+            {/* Page content skeleton */}
+            <div className="relative h-[calc(100%-2rem)] overflow-hidden bg-white">
+              <div className="space-y-3 p-6 opacity-30">
+                <div className="h-7 w-2/3 rounded-lg bg-gray-200" />
+                <div className="h-3 w-full rounded bg-gray-100" />
+                <div className="h-3 w-5/6 rounded bg-gray-100" />
+                <div className="h-3 w-4/5 rounded bg-gray-100" />
+                <div className="h-32 w-full rounded-xl bg-gray-100 mt-4" />
+                <div className="h-3 w-full rounded bg-gray-100 mt-4" />
+                <div className="h-3 w-3/4 rounded bg-gray-100" />
+                <div className="h-3 w-2/3 rounded bg-gray-100" />
+                <div className="h-24 w-full rounded-xl bg-gray-50 mt-4" />
+                <div className="h-3 w-4/5 rounded bg-gray-100 mt-4" />
+              </div>
 
-                  {/* MESSAGES AREA */}
-                  <div
-                    className="flex-1 overflow-y-auto px-4 py-3"
-                    style={{ backgroundColor: config.chat_bg_color }}
-                  >
-                    {/* Welcome / bot bubble — clickable */}
-                    <div
-                      onClick={() => setEditingZone("welcome")}
-                      className={`group relative mb-3 flex justify-start cursor-pointer`}
-                    >
-                      <div
-                        className={`max-w-[85%] px-3 py-2 text-xs relative transition-all ${
-                          editingZone === "welcome" ? "ring-2 ring-primary" : ""
-                        }`}
-                        style={{
-                          backgroundColor: config.bot_message_bg,
-                          color: config.bot_message_text_color,
-                          borderRadius: radiusCss,
-                          borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
-                        }}
-                      >
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Pencil className="h-3 w-3 text-foreground/50" />
-                        </div>
-                        {config.welcome_message || "Hi! How can I help you today?"}
-                      </div>
-                    </div>
-
-                    {/* User bubble — clickable */}
-                    <div
-                      onClick={() => setEditingZone("user-bubble")}
-                      className="group relative mb-3 flex justify-end cursor-pointer"
-                    >
-                      <div
-                        className={`max-w-[85%] px-3 py-2 text-xs relative transition-all ${
-                          editingZone === "user-bubble" ? "ring-2 ring-primary" : ""
-                        }`}
-                        style={{
-                          backgroundColor: config.accent_color,
-                          color: config.user_message_text_color,
-                          borderRadius: radiusCss,
-                          borderBottomRightRadius: config.border_radius === "full" ? "4px" : "2px",
-                        }}
-                      >
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Pencil className="h-3 w-3 text-white drop-shadow" />
-                        </div>
-                        I'd like to book an appointment
-                      </div>
-                    </div>
-
-                    {/* Another bot bubble — clickable */}
-                    <div
-                      onClick={() => setEditingZone("bot-bubble")}
-                      className="group relative mb-3 flex justify-start cursor-pointer"
-                    >
-                      <div
-                        className={`max-w-[85%] px-3 py-2 text-xs relative transition-all ${
-                          editingZone === "bot-bubble" ? "ring-2 ring-primary" : ""
-                        }`}
-                        style={{
-                          backgroundColor: config.bot_message_bg,
-                          color: config.bot_message_text_color,
-                          borderRadius: radiusCss,
-                          borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
-                        }}
-                      >
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Pencil className="h-3 w-3 text-foreground/50" />
-                        </div>
-                        Of course! I'd be happy to help you schedule an appointment. What date works best for you?
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* INPUT — clickable zone */}
-                  <div
-                    onClick={() => setEditingZone("input")}
-                    className={`group relative flex items-center gap-1.5 border-t px-3 py-2.5 cursor-pointer transition-all ${
-                      editingZone === "input" ? "ring-2 ring-primary ring-inset" : ""
-                    }`}
+              {/* ── Widget Chat Panel ── */}
+              <AnimatePresence>
+                {previewOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 24, scale: 0.92 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 24, scale: 0.92 }}
+                    transition={{ type: "spring", damping: 28, stiffness: 380 }}
+                    className={`absolute z-10 flex flex-col overflow-hidden ${
+                      config.position === "bottom-right" ? "right-4" : "left-4"
+                    } bottom-[68px]`}
                     style={{
-                      borderColor: config.input_border_color,
-                      backgroundColor: config.chat_bg_color,
+                      width: previewDevice === "mobile" ? "310px" : "340px",
+                      height: previewDevice === "mobile" ? "400px" : "440px",
+                      fontFamily: `'${config.font_family}', system-ui, sans-serif`,
+                      borderRadius: config.border_radius === "full" ? "24px" : config.border_radius === "rounded" ? "16px" : config.border_radius === "sm" ? "8px" : "2px",
+                      boxShadow: "0 20px 60px -12px rgba(0,0,0,0.25), 0 8px 24px -8px rgba(0,0,0,0.12)",
                     }}
                   >
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
-                      <Pencil className="h-3.5 w-3.5 text-foreground/40" />
-                    </div>
-                    {config.voice_enabled && (
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400">
-                        <Mic className="h-3.5 w-3.5" />
-                      </div>
-                    )}
+                    {/* HEADER */}
                     <div
-                      className="flex-1 rounded-full px-3 py-1.5 text-[11px]"
-                      style={{
-                        backgroundColor: config.input_bg_color,
-                        color: config.input_text_color + "80",
-                        border: `1px solid ${config.input_border_color}`,
-                      }}
-                    >
-                      {config.placeholder_text || "Type your message..."}
-                    </div>
-                    <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white"
+                      onClick={() => setEditingZone("header")}
+                      className={`group relative flex items-center gap-2.5 px-4 py-3 cursor-pointer transition-all ${
+                        editingZone === "header" ? "ring-2 ring-primary ring-inset" : ""
+                      }`}
                       style={{ backgroundColor: config.accent_color }}
                     >
-                      <Send className="h-3.5 w-3.5" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <Pencil className="h-3.5 w-3.5 text-white drop-shadow" />
+                      </div>
+                      {config.avatar_url && (
+                        <img src={config.avatar_url} alt="" className="h-8 w-8 rounded-full border-2 border-white/20 object-cover" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="truncate text-sm font-semibold" style={{ color: config.header_text_color }}>
+                          {config.widget_title || "Chat with us"}
+                        </h3>
+                        <p className="text-[10px]" style={{ color: config.header_text_color + "99" }}>
+                          {config.header_subtitle || "Online"}
+                        </p>
+                      </div>
+                      <button className="rounded p-0.5 hover:bg-white/10">
+                        <X className="h-4 w-4" style={{ color: config.header_text_color + "80" }} />
+                      </button>
                     </div>
-                  </div>
 
-                  {/* BRANDING — clickable zone */}
-                  {config.show_branding && (
+                    {/* MESSAGES */}
+                    <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5" style={{ backgroundColor: config.chat_bg_color }}>
+                      {/* Welcome */}
+                      <div
+                        onClick={() => setEditingZone("welcome")}
+                        className={`group relative flex justify-start cursor-pointer`}
+                      >
+                        <div
+                          className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed relative transition-all ${
+                            editingZone === "welcome" ? "ring-2 ring-primary" : ""
+                          }`}
+                          style={{
+                            backgroundColor: config.bot_message_bg,
+                            color: config.bot_message_text_color,
+                            borderRadius: radiusCss,
+                            borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <Pencil className="h-3 w-3 text-foreground/50" />
+                          </div>
+                          {config.welcome_message || "Hi! How can I help you today?"}
+                        </div>
+                      </div>
+
+                      {/* User message */}
+                      <div
+                        onClick={() => setEditingZone("user-bubble")}
+                        className="group relative flex justify-end cursor-pointer"
+                      >
+                        <div
+                          className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed relative transition-all ${
+                            editingZone === "user-bubble" ? "ring-2 ring-primary" : ""
+                          }`}
+                          style={{
+                            backgroundColor: config.accent_color,
+                            color: config.user_message_text_color,
+                            borderRadius: radiusCss,
+                            borderBottomRightRadius: config.border_radius === "full" ? "4px" : "2px",
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <Pencil className="h-3 w-3 text-white drop-shadow" />
+                          </div>
+                          I'd like to book an appointment
+                        </div>
+                      </div>
+
+                      {/* Bot reply */}
+                      <div
+                        onClick={() => setEditingZone("bot-bubble")}
+                        className="group relative flex justify-start cursor-pointer"
+                      >
+                        <div
+                          className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed relative transition-all ${
+                            editingZone === "bot-bubble" ? "ring-2 ring-primary" : ""
+                          }`}
+                          style={{
+                            backgroundColor: config.bot_message_bg,
+                            color: config.bot_message_text_color,
+                            borderRadius: radiusCss,
+                            borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <Pencil className="h-3 w-3 text-foreground/50" />
+                          </div>
+                          Of course! I'd be happy to help. What date works best for you?
+                        </div>
+                      </div>
+
+                      {/* Typing indicator */}
+                      <div className="flex justify-start">
+                        <div
+                          className="flex gap-1 px-3.5 py-2.5"
+                          style={{
+                            backgroundColor: config.bot_message_bg,
+                            borderRadius: radiusCss,
+                            borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
+                          }}
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                          <span className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                          <span className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* INPUT */}
                     <div
-                      onClick={() => setEditingZone("branding")}
-                      className={`group relative cursor-pointer border-t py-1.5 text-center transition-all ${
-                        editingZone === "branding" ? "ring-2 ring-primary ring-inset" : ""
+                      onClick={() => setEditingZone("input")}
+                      className={`group relative flex items-center gap-1.5 border-t px-3 py-2.5 cursor-pointer transition-all ${
+                        editingZone === "input" ? "ring-2 ring-primary ring-inset" : ""
                       }`}
                       style={{
                         borderColor: config.input_border_color + "40",
                         backgroundColor: config.chat_bg_color,
                       }}
                     >
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <Pencil className="h-3 w-3 text-foreground/30" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
+                        <Pencil className="h-3 w-3 text-foreground/40" />
                       </div>
-                      <span className="text-[9px] text-gray-300">Powered by AI</span>
+                      {config.voice_enabled && (
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-400">
+                          <Mic className="h-3.5 w-3.5" />
+                        </div>
+                      )}
+                      <div
+                        className="flex-1 rounded-full px-3 py-1.5 text-[11px]"
+                        style={{
+                          backgroundColor: config.input_bg_color,
+                          color: config.input_text_color + "80",
+                          border: `1px solid ${config.input_border_color}`,
+                        }}
+                      >
+                        {config.placeholder_text || "Type your message..."}
+                      </div>
+                      <div
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white"
+                        style={{ backgroundColor: config.accent_color }}
+                      >
+                        <Send className="h-3 w-3" />
+                      </div>
                     </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
 
-            {/* ── Chat Bubble Button — clickable zone ── */}
-            <motion.button
-              onClick={() => {
-                if (!previewOpen) {
-                  setPreviewOpen(true);
-                } else {
-                  setEditingZone("bubble-btn");
-                }
-              }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className={`absolute bottom-4 z-10 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all ${
-                config.position === "bottom-right" ? "right-4" : "left-4"
-              } ${editingZone === "bubble-btn" ? "ring-2 ring-primary ring-offset-2" : ""}`}
-              style={{ backgroundColor: config.accent_color }}
-            >
-              {previewOpen ? (
-                <X className="h-5 w-5 text-white" />
-              ) : (
-                <MessageSquare className="h-5 w-5 text-white" />
-              )}
-            </motion.button>
-          </div>
+                    {/* BRANDING */}
+                    {config.show_branding && (
+                      <div
+                        onClick={() => setEditingZone("branding")}
+                        className={`group relative cursor-pointer border-t py-1.5 text-center transition-all ${
+                          editingZone === "branding" ? "ring-2 ring-primary ring-inset" : ""
+                        }`}
+                        style={{
+                          borderColor: config.input_border_color + "20",
+                          backgroundColor: config.chat_bg_color,
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <Pencil className="h-2.5 w-2.5 text-foreground/30" />
+                        </div>
+                        <span className="text-[9px] text-gray-300">Powered by AI</span>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* ── Chat Bubble ── */}
+              <motion.button
+                onClick={() => {
+                  if (!previewOpen) setPreviewOpen(true);
+                  else setEditingZone("bubble-btn");
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className={`absolute bottom-3 z-10 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all ${
+                  config.position === "bottom-right" ? "right-4" : "left-4"
+                } ${editingZone === "bubble-btn" ? "ring-2 ring-primary ring-offset-2" : ""}`}
+                style={{
+                  backgroundColor: config.accent_color,
+                  boxShadow: `0 8px 24px -4px ${config.accent_color}60`,
+                }}
+              >
+                {previewOpen ? (
+                  <X className="h-5 w-5 text-white" />
+                ) : (
+                  <MessageSquare className="h-5 w-5 text-white" />
+                )}
+              </motion.button>
+            </div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
+
+/* ── Reusable field input ── */
+function FieldInput({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <div className="space-y-1">
+      <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">
+        {label}
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full h-8 bg-transparent border-0 border-b border-border/30 text-xs text-foreground outline-none focus:border-primary/50 transition-colors px-0 placeholder:text-muted-foreground/30"
+      />
+    </div>
+  );
+}
