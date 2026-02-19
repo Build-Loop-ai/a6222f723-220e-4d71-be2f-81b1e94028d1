@@ -1,36 +1,55 @@
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 
 const pages = ["Home", "Services", "Pricing", "Contact", "About", "FAQ", "Team", "Blog", "Testimonials", "Careers", "Locations", "Gallery", "Appointments", "Insurance", "Emergency", "Hygiene", "Implants", "Orthodontics", "Whitening", "Pediatric", "Cosmetic", "Crowns", "Root Canal", "Dentures"];
 
 const DemoSection = () => {
-  const ref = useRef(null);
+  const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const particles = useMemo(() => 
-    Array.from({ length: 10 }, (_, i) => ({
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+
+  const bgY = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+
+  const particles = useMemo(() =>
+    Array.from({ length: 18 }, (_, i) => ({
       left: `${Math.random() * 100}%`,
       size: 2 + Math.random() * 3,
       duration: 10 + Math.random() * 15,
       delay: Math.random() * 10,
-      opacity: 0.2 + Math.random() * 0.4,
+      opacity: 0.15 + Math.random() * 0.4,
     })),
   []);
 
   return (
-    <section ref={ref} className="relative py-32 md:py-40 overflow-hidden">
-      {/* Immersive background */}
+    <section ref={ref} className="relative py-32 md:py-44 overflow-hidden">
+      {/* THE MOST IMMERSIVE SECTION — deep green underwater feel */}
       <div className="absolute inset-0 pointer-events-none" style={{
-        background: `
-          linear-gradient(180deg, #070810 0%, #0A1A12 50%, #070810 100%)
-        `,
-      }} />
-      <div className="absolute inset-0 pointer-events-none" style={{
-        background: "radial-gradient(ellipse 900px 700px at 50% 50%, rgba(52,215,123,0.12) 0%, transparent 70%)",
+        background: "linear-gradient(180deg, #070810 0%, #082A16 25%, #0A3520 50%, #082A16 75%, #070810 100%)",
       }} />
 
-      {/* Floating particles */}
+      {/* Giant centered glow */}
+      <motion.div
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1600px] h-[1000px] pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse, rgba(52,215,123,0.20) 0%, rgba(0,194,224,0.06) 30%, transparent 65%)",
+          y: bgY,
+        }}
+      />
+
+      {/* Side accents */}
+      <div className="absolute top-0 left-[-200px] w-[500px] h-full pointer-events-none" style={{
+        background: "radial-gradient(ellipse at center, rgba(0,194,224,0.08) 0%, transparent 70%)",
+      }} />
+      <div className="absolute top-0 right-[-200px] w-[500px] h-full pointer-events-none" style={{
+        background: "radial-gradient(ellipse at center, rgba(52,215,123,0.08) 0%, transparent 70%)",
+      }} />
+
+      {/* Floating particles — underwater effect */}
       <div className="particles-container">
         {particles.map((p, i) => (
           <div
@@ -48,6 +67,9 @@ const DemoSection = () => {
           />
         ))}
       </div>
+
+      {/* Separator glow */}
+      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent 5%, rgba(52,215,123,0.4) 50%, transparent 95%)" }} />
 
       <div className="max-w-[1140px] mx-auto px-6 md:px-12 relative z-10">
         {/* Header */}
@@ -70,7 +92,7 @@ const DemoSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-lg text-[hsl(240,4%,65%)]"
+            className="text-lg text-muted-foreground"
           >
             Watch Greet learn a real website in real-time.
           </motion.p>
@@ -78,19 +100,19 @@ const DemoSection = () => {
 
         {/* Browser mockup */}
         <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 80, scale: 0.95 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-3xl mx-auto"
         >
-          <div className="rounded-[28px] overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)" }}>
+          <div className="rounded-[28px] overflow-hidden border-glow" style={{ border: "1px solid rgba(52,215,123,0.15)", background: "rgba(255,255,255,0.03)" }}>
             {/* Browser bar */}
             <div className="flex items-center gap-2 px-5 py-4" style={{ background: "rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
               <div className="w-3 h-3 rounded-full" style={{ background: "rgba(255,255,255,0.09)" }} />
               <div className="w-3 h-3 rounded-full" style={{ background: "rgba(255,255,255,0.09)" }} />
               <div className="w-3 h-3 rounded-full" style={{ background: "rgba(255,255,255,0.09)" }} />
-              <div className="ml-3 flex-1 px-4 py-1.5 rounded-lg font-mono text-[11px] text-[hsl(240,4%,45%)]" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <div className="ml-3 flex-1 px-4 py-1.5 rounded-lg font-mono text-[11px] text-muted-foreground" style={{ background: "rgba(255,255,255,0.03)" }}>
                 vandermolen-tandartsen.nl
               </div>
             </div>
@@ -99,7 +121,7 @@ const DemoSection = () => {
             <div className="p-8 md:p-12" style={{ background: "linear-gradient(180deg, #0D0D0F 0%, #111113 100%)" }}>
               {/* URL input */}
               <div className="flex items-center gap-3 mb-8">
-                <div className="flex-1 px-4 py-3 rounded-xl text-sm text-foreground" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div className="flex-1 px-4 py-3 rounded-xl text-sm text-foreground glass">
                   vandermolen.nl
                 </div>
                 <div className="px-5 py-3 rounded-xl text-sm font-medium" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%) 0%, hsl(190 100% 44%) 100%)", color: "white" }}>
@@ -108,7 +130,7 @@ const DemoSection = () => {
               </div>
 
               {/* Crawling visualization */}
-              <div className="space-y-2 mb-8">
+              <div className="space-y-2 mb-8 max-h-[300px] overflow-hidden">
                 {pages.map((page, idx) => (
                   <motion.div
                     key={idx}
@@ -118,7 +140,7 @@ const DemoSection = () => {
                     className="flex items-center gap-2"
                   >
                     <span className="text-primary text-xs">●</span>
-                    <span className="text-sm text-[hsl(240,4%,65%)]">{page}...</span>
+                    <span className="text-sm text-muted-foreground">{page}...</span>
                   </motion.div>
                 ))}
               </div>
@@ -149,7 +171,7 @@ const DemoSection = () => {
               className="px-8 py-4 rounded-[14px] text-base font-medium text-primary-foreground transition-all duration-200 hover:scale-[1.02]"
               style={{
                 background: "linear-gradient(135deg, hsl(148 68% 52%) 0%, hsl(190 100% 44%) 100%)",
-                boxShadow: "0 4px 20px hsla(148, 68%, 52%, 0.3)",
+                boxShadow: "0 4px 30px hsla(148, 68%, 52%, 0.4)",
               }}
             >
               Try it with your own website →

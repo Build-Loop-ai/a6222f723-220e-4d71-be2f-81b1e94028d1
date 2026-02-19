@@ -11,7 +11,7 @@ import Footer from "@/components/landing/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen" style={{ background: "#050506" }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ background: "#050506" }}>
       <Navbar />
       <HeroSection />
       <SocialProofBar />

@@ -21,7 +21,17 @@ const FAQSection = () => {
   const [contactOpen, setContactOpen] = useState(false);
 
   return (
-    <section id="faq" ref={ref} className="py-32 md:py-40 relative overflow-hidden bg-background">
+    <section id="faq" ref={ref} className="py-32 md:py-44 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: "linear-gradient(180deg, #070810 0%, #0A0B10 50%, #070810 100%)",
+      }} />
+
+      {/* Subtle green accent bottom */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none" style={{
+        background: "radial-gradient(ellipse, rgba(52,215,123,0.05) 0%, transparent 70%)",
+      }} />
+
       {/* Top separator */}
       <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)" }} />
 
@@ -44,7 +54,7 @@ const FAQSection = () => {
                 <AccordionTrigger className="text-left font-display font-[600] text-foreground hover:text-primary py-6 text-base hover:no-underline tracking-[-0.01em]">
                   {faq.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-[hsl(240,4%,65%)] pb-6 leading-relaxed">
+                <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
@@ -60,7 +70,7 @@ const FAQSection = () => {
             </div>
             <div className="text-center sm:text-left flex-1">
               <p className="font-display font-[600] text-foreground">Still have questions?</p>
-              <p className="text-sm text-[hsl(240,4%,65%)]">Our team is here to help.</p>
+              <p className="text-sm text-muted-foreground">Our team is here to help.</p>
             </div>
             <button onClick={() => setContactOpen(true)} className="px-6 py-2.5 rounded-xl text-sm font-medium border border-foreground/10 text-foreground hover:border-foreground/20 transition-colors">
               Contact Support
