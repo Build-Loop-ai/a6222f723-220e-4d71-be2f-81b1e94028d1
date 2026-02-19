@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -12,103 +11,40 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+import { Progress } from "@/components/ui/progress";
 import {
-  Phone,
   Building,
-  Clock,
-  Stethoscope,
-  Mic,
+  Globe,
+  MessageSquareText,
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
   Sparkles,
   Loader2,
-  Plus,
+  FileText,
+  ExternalLink,
+  Palette,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 import { useQueryClient } from "@tanstack/react-query";
-import { VoicePreview } from "@/components/VoicePreview";
+import { cn } from "@/lib/utils";
 
 const STEPS = [
   { id: 1, title: "Business Basics", icon: Building },
-  { id: 2, title: "Opening Hours", icon: Clock },
-  { id: 3, title: "Services", icon: Stethoscope },
-  { id: 4, title: "AI Personality", icon: Mic },
+  { id: 2, title: "Crawl Your Site", icon: Globe },
+  { id: 3, title: "Customize Widget", icon: Palette },
 ];
 
-const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
+type BusinessType = "dental_clinic" | "medical_practice" | "salon" | "restaurant" | "other";
 
-// Dynamic services based on business type
-const SERVICES_BY_TYPE: Record<string, string[]> = {
-  dental_clinic: [
-    "Checkup",
-    "Cleaning",
-    "Filling",
-    "Root Canal",
-    "Whitening",
-    "Emergency",
-    "Implants",
-    "Orthodontics",
-    "Crown",
-    "Extraction",
-  ],
-  medical_practice: [
-    "Consultation",
-    "Follow-up",
-    "Physical Exam",
-    "Vaccination",
-    "Blood Test",
-    "X-Ray",
-    "Specialist Referral",
-    "Prescription Renewal",
-    "Health Screening",
-    "Urgent Care",
-  ],
-  salon: [
-    "Haircut",
-    "Hair Coloring",
-    "Styling",
-    "Manicure",
-    "Pedicure",
-    "Facial",
-    "Massage",
-    "Waxing",
-    "Makeup",
-    "Extensions",
-  ],
-  restaurant: [
-    "Table Reservation",
-    "Private Event",
-    "Catering Inquiry",
-    "Takeout Order",
-    "Birthday Party",
-    "Corporate Event",
-    "Wedding Reception",
-    "Menu Question",
-  ],
-  other: [
-    "Consultation",
-    "Appointment",
-    "Follow-up",
-    "General Inquiry",
-    "Quote Request",
-    "Callback Request",
-  ],
-};
-
-type BusinessType = 'dental_clinic' | 'medical_practice' | 'salon' | 'restaurant' | 'other';
+interface CrawledPage {
+  url: string;
+  title: string | null;
+  summary: string | null;
+}
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -116,61 +52,40 @@ const Onboarding = () => {
   const { toast } = useToast();
   const { config } = useSiteConfigTransformed();
   const queryClient = useQueryClient();
-  
+
   const [currentStep, setCurrentStep] = useState(1);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [customService, setCustomService] = useState("");
 
-  // Form state
+  // Step 1: Business Basics
   const [businessData, setBusinessData] = useState({
     name: "",
-    address: "",
-    city: "",
-    postalCode: "",
-    phone: "",
     website: "",
-    type: "dental_clinic" as BusinessType,
+    type: "other" as BusinessType,
+    phone: "",
   });
 
-  const [hours, setHours] = useState<
-    Record<string, { isOpen: boolean; open: string; close: string }>
-  >(
-    DAYS.reduce(
-      (acc, day) => ({
-        ...acc,
-        [day]: { isOpen: day !== "Sunday", open: "09:00", close: "17:00" },
-      }),
-      {}
-    )
-  );
+  // Step 2: Crawl state
+  const [isCrawling, setIsCrawling] = useState(false);
+  const [crawlProgress, setCrawlProgress] = useState(0);
+  const [crawledPages, setCrawledPages] = useState<CrawledPage[]>([]);
+  const [crawlDone, setCrawlDone] = useState(false);
 
-  const [services, setServices] = useState<string[]>([]);
-  const [suggestedServices, setSuggestedServices] = useState<string[]>(SERVICES_BY_TYPE.dental_clinic);
-
-  const [aiConfig, setAiConfig] = useState({
-    voice: "en-US-AriaNeural",
-    voiceProvider: "azure" as "azure" | "11labs" | "playht",
-    language: "en-US",
-    greeting: "Hello! Thank you for calling. How can I help you today?",
+  // Step 3: Widget customization
+  const [widgetConfig, setWidgetConfig] = useState({
+    widget_title: "Chat with us",
+    welcome_message: "Hi there! 👋 How can I help you today?",
+    accent_color: "#0d9488",
+    position: "bottom-right",
+    theme: "auto",
   });
-
-  const [assistantId, setAssistantId] = useState<string | null>(null);
-
-  // Update suggested services when business type changes
-  useEffect(() => {
-    const newSuggestions = SERVICES_BY_TYPE[businessData.type] || SERVICES_BY_TYPE.other;
-    setSuggestedServices(newSuggestions);
-    // Reset selected services to first 3 of new type
-    setServices(newSuggestions.slice(0, 3));
-  }, [businessData.type]);
 
   // Load saved clinic name from signup
   useEffect(() => {
-    const savedClinicName = sessionStorage.getItem('pendingClinicName');
+    const savedClinicName = sessionStorage.getItem("pendingClinicName");
     if (savedClinicName) {
-      setBusinessData(prev => ({ ...prev, name: savedClinicName }));
-      sessionStorage.removeItem('pendingClinicName');
+      setBusinessData((prev) => ({ ...prev, name: savedClinicName }));
+      sessionStorage.removeItem("pendingClinicName");
     }
   }, []);
 
@@ -185,81 +100,113 @@ const Onboarding = () => {
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       if (!user) return;
-      
       const { data: profile } = await supabase
-        .from('profiles')
-        .select('onboarding_completed, organization_id')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("onboarding_completed, organization_id")
+        .eq("id", user.id)
         .maybeSingle();
-      
       if (profile?.onboarding_completed && profile?.organization_id) {
-        navigate('/dashboard');
+        navigate("/dashboard");
       }
     };
-    
     checkOnboardingStatus();
   }, [user, navigate]);
 
-  const handleAddCustomService = () => {
-    const trimmed = customService.trim();
-    if (trimmed && !services.includes(trimmed)) {
-      setServices([...services, trimmed]);
-      // Also add to suggested services so it shows up in the grid
-      if (!suggestedServices.includes(trimmed)) {
-        setSuggestedServices([...suggestedServices, trimmed]);
-      }
-      setCustomService("");
+  const handleCrawl = async () => {
+    if (!businessData.website) {
+      toast({ variant: "destructive", title: "Website URL is required" });
+      return;
+    }
+
+    setIsCrawling(true);
+    setCrawlProgress(10);
+
+    try {
+      // Simulate progress while crawling
+      const progressInterval = setInterval(() => {
+        setCrawlProgress((prev) => Math.min(prev + 5, 85));
+      }, 1500);
+
+      const { data, error } = await supabase.functions.invoke("crawl-site", {
+        body: {
+          websiteUrl: businessData.website,
+          onboardingMode: true, // Will be handled after org creation
+        },
+      });
+
+      clearInterval(progressInterval);
+
+      if (error) throw error;
+
+      setCrawlProgress(100);
+      setCrawledPages(data?.pages || []);
+      setCrawlDone(true);
+
+      toast({
+        title: "Site crawled!",
+        description: `Found ${data?.pagesProcessed || 0} pages on your website.`,
+      });
+    } catch (err: any) {
+      console.error("Crawl error:", err);
+      toast({
+        variant: "destructive",
+        title: "Crawl failed",
+        description: err.message || "Could not crawl your website. You can try again later.",
+      });
+      // Allow skipping on error
+      setCrawlDone(true);
+    } finally {
+      setIsCrawling(false);
     }
   };
 
   const handleNext = () => {
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
+    if (currentStep === 1) {
+      if (!businessData.name.trim()) {
+        toast({ variant: "destructive", title: "Business name is required" });
+        return;
+      }
+      if (!businessData.website.trim()) {
+        toast({ variant: "destructive", title: "Website URL is required" });
+        return;
+      }
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
+      setCurrentStep(3);
     } else {
       handleComplete();
     }
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
   const handleComplete = async () => {
     if (!user) return;
-    
     setIsSaving(true);
-    
+
     try {
-      // Use edge function with service role to bypass RLS
-      const { data, error } = await supabase.functions.invoke('complete-onboarding', {
+      const { data, error } = await supabase.functions.invoke("complete-onboarding", {
         body: {
           businessData,
-          hours,
-          services,
-          aiConfig,
+          widgetConfig,
+          crawledPages,
         },
       });
 
       if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || 'Onboarding failed');
-
-      if (data.assistantId) {
-        setAssistantId(data.assistantId);
-      }
+      if (!data?.success) throw new Error(data?.error || "Onboarding failed");
 
       toast({
         title: "Setup complete!",
-        description: "Your AI receptionist is ready to go.",
+        description: "Your AI widget is ready to go.",
       });
-      
-      // Invalidate profile query so ProtectedRoute sees updated onboarding_completed
-      await queryClient.invalidateQueries({ queryKey: ['profile'] });
-      
+
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
       setIsCompleted(true);
     } catch (error: any) {
-      console.error('Onboarding error:', error);
+      console.error("Onboarding error:", error);
       toast({
         variant: "destructive",
         title: "Setup failed",
@@ -268,10 +215,6 @@ const Onboarding = () => {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleLaunch = () => {
-    navigate("/dashboard");
   };
 
   if (authLoading) {
@@ -289,14 +232,11 @@ const Onboarding = () => {
           <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-gradient-to-br from-teal to-teal-light flex items-center justify-center">
             <Sparkles className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-serif text-foreground mb-4">
-            You're all set!
-          </h1>
+          <h1 className="text-4xl font-serif text-foreground mb-4">You're all set!</h1>
           <p className="text-lg text-muted-foreground mb-8">
-            Your AI receptionist is ready to start taking calls. Let's go to
-            your dashboard and see it in action.
+            Your AI website assistant is ready. Add the embed code to your site and start helping visitors instantly.
           </p>
-          <Button variant="hero" size="xl" onClick={handleLaunch}>
+          <Button variant="hero" size="xl" onClick={() => navigate("/dashboard")}>
             Go to Dashboard
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
@@ -312,41 +252,41 @@ const Onboarding = () => {
         <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal to-teal-light flex items-center justify-center">
-              <Phone className="w-5 h-5 text-white" />
+              <MessageSquareText className="w-5 h-5 text-white" />
             </div>
             <span className="font-serif text-xl font-medium text-foreground">
               {config.name}
             </span>
           </div>
-          <div className="text-sm text-muted-foreground">
-            Step {currentStep} of 4
-          </div>
+          <div className="text-sm text-muted-foreground">Step {currentStep} of 3</div>
         </div>
       </header>
 
       {/* Progress Bar */}
       <div className="bg-background border-b border-border">
         <div className="container mx-auto px-4 md:px-6 py-6">
-          <div className="flex items-center justify-between max-w-3xl mx-auto">
+          <div className="flex items-center justify-between max-w-2xl mx-auto">
             {STEPS.map((step, idx) => (
               <div key={step.id} className="flex items-center">
                 <div
-                  className={`flex items-center gap-2 ${
+                  className={cn(
+                    "flex items-center gap-2",
                     step.id < currentStep
                       ? "text-primary"
                       : step.id === currentStep
                       ? "text-foreground"
                       : "text-muted-foreground"
-                  }`}
+                  )}
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                    className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center transition-all",
                       step.id < currentStep
                         ? "bg-primary text-primary-foreground"
                         : step.id === currentStep
                         ? "bg-primary/10 text-primary border-2 border-primary"
                         : "bg-muted text-muted-foreground"
-                    }`}
+                    )}
                   >
                     {step.id < currentStep ? (
                       <CheckCircle2 className="w-5 h-5" />
@@ -354,15 +294,14 @@ const Onboarding = () => {
                       <step.icon className="w-5 h-5" />
                     )}
                   </div>
-                  <span className="hidden md:block text-sm font-medium">
-                    {step.title}
-                  </span>
+                  <span className="hidden md:block text-sm font-medium">{step.title}</span>
                 </div>
                 {idx < STEPS.length - 1 && (
                   <div
-                    className={`w-12 md:w-20 h-0.5 mx-2 ${
+                    className={cn(
+                      "w-12 md:w-20 h-0.5 mx-2",
                       step.id < currentStep ? "bg-primary" : "bg-muted"
-                    }`}
+                    )}
                   />
                 )}
               </div>
@@ -381,7 +320,7 @@ const Onboarding = () => {
                 Tell us about your business
               </h2>
               <p className="text-muted-foreground mb-8">
-                This information helps your AI greet callers appropriately.
+                We'll use your website to train your AI assistant.
               </p>
 
               <div className="space-y-6">
@@ -421,261 +360,251 @@ const Onboarding = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Street Address</Label>
+                  <Label htmlFor="website">Website URL *</Label>
                   <Input
-                    id="address"
-                    placeholder="123 Main Street"
-                    value={businessData.address}
+                    id="website"
+                    placeholder="https://example.com"
+                    value={businessData.website}
                     onChange={(e) =>
-                      setBusinessData({ ...businessData, address: e.target.value })
+                      setBusinessData({ ...businessData, website: e.target.value })
                     }
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      placeholder="Your City"
-                      value={businessData.city}
-                      onChange={(e) =>
-                        setBusinessData({ ...businessData, city: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="postalCode">Postal Code</Label>
-                    <Input
-                      id="postalCode"
-                      placeholder="12345"
-                      value={businessData.postalCode}
-                      onChange={(e) =>
-                        setBusinessData({
-                          ...businessData,
-                          postalCode: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Current Phone Number</Label>
-                    <Input
-                      id="phone"
-                      placeholder="+1 555 123 4567"
-                      value={businessData.phone}
-                      onChange={(e) =>
-                        setBusinessData({ ...businessData, phone: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="website">Website (optional)</Label>
-                    <Input
-                      id="website"
-                      placeholder="https://example.com"
-                      value={businessData.website}
-                      onChange={(e) =>
-                        setBusinessData({ ...businessData, website: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Opening Hours */}
-          {currentStep === 2 && (
-            <div className="bg-card rounded-3xl p-8 shadow-lg border border-border/50 animate-fade-in-up">
-              <h2 className="text-2xl font-serif text-foreground mb-2">
-                Set your opening hours
-              </h2>
-              <p className="text-muted-foreground mb-8">
-                Your AI will know when to offer appointments and when to take
-                messages.
-              </p>
-
-              <div className="space-y-4">
-                {DAYS.map((day) => (
-                  <div
-                    key={day}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-muted/50"
-                  >
-                    <Switch
-                      checked={hours[day].isOpen}
-                      onCheckedChange={(checked) =>
-                        setHours({
-                          ...hours,
-                          [day]: { ...hours[day], isOpen: checked },
-                        })
-                      }
-                    />
-                    <span className="w-24 font-medium text-foreground">
-                      {day}
-                    </span>
-                    {hours[day].isOpen ? (
-                      <div className="flex items-center gap-2 flex-1">
-                        <Select
-                          value={hours[day].open}
-                          onValueChange={(value) =>
-                            setHours({
-                              ...hours,
-                              [day]: { ...hours[day], open: value },
-                            })
-                          }
-                        >
-                          <SelectTrigger className="w-28">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 24 }, (_, i) => (
-                              <SelectItem
-                                key={i}
-                                value={`${i.toString().padStart(2, "0")}:00`}
-                              >
-                                {`${i.toString().padStart(2, "0")}:00`}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <span className="text-muted-foreground">to</span>
-                        <Select
-                          value={hours[day].close}
-                          onValueChange={(value) =>
-                            setHours({
-                              ...hours,
-                              [day]: { ...hours[day], close: value },
-                            })
-                          }
-                        >
-                          <SelectTrigger className="w-28">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Array.from({ length: 24 }, (_, i) => (
-                              <SelectItem
-                                key={i}
-                                value={`${i.toString().padStart(2, "0")}:00`}
-                              >
-                                {`${i.toString().padStart(2, "0")}:00`}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">Closed</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Services */}
-          {currentStep === 3 && (
-            <div className="bg-card rounded-3xl p-8 shadow-lg border border-border/50 animate-fade-in-up">
-              <h2 className="text-2xl font-serif text-foreground mb-2">
-                What services do you offer?
-              </h2>
-              <p className="text-muted-foreground mb-8">
-                Select the services callers can book or ask about.
-              </p>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                {suggestedServices.map((service) => (
-                  <label
-                    key={service}
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      services.includes(service)
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <Checkbox
-                      checked={services.includes(service)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setServices([...services, service]);
-                        } else {
-                          setServices(services.filter((s) => s !== service));
-                        }
-                      }}
-                    />
-                    <span className="text-sm font-medium text-foreground">
-                      {service}
-                    </span>
-                  </label>
-                ))}
-              </div>
-
-              <div className="flex gap-2">
-                <Input 
-                  placeholder="Add custom service..." 
-                  value={customService}
-                  onChange={(e) => setCustomService(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddCustomService();
-                    }
-                  }}
-                />
-                <Button 
-                  variant="outline" 
-                  onClick={handleAddCustomService}
-                  disabled={!customService.trim()}
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Add
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: AI Personality */}
-          {currentStep === 4 && (
-            <div className="bg-card rounded-3xl p-8 shadow-lg border border-border/50 animate-fade-in-up">
-              <h2 className="text-2xl font-serif text-foreground mb-2">
-                Customize your AI personality
-              </h2>
-              <p className="text-muted-foreground mb-8">
-                Choose the language and voice for your AI receptionist.
-              </p>
-
-              <div className="space-y-8">
-                {/* Language & Voice selection */}
-                <VoicePreview
-                  selectedVoice={aiConfig.voice}
-                  onSelectVoice={(voiceId, provider) => setAiConfig(prev => ({ ...prev, voice: voiceId, voiceProvider: provider }))}
-                  selectedLanguage={aiConfig.language}
-                  onSelectLanguage={(lang) => setAiConfig(prev => ({ ...prev, language: lang }))}
-                  greeting={aiConfig.greeting}
-                  onGreetingChange={(greeting) => setAiConfig(prev => ({ ...prev, greeting }))}
-                  businessName={businessData.name || "your business"}
-                  showLanguageSelector={true}
-                />
-
-                {/* Greeting */}
-                <div className="space-y-2">
-                  <Label>Custom Greeting</Label>
-                  <Textarea
-                    placeholder="Hello! Thank you for calling..."
-                    value={aiConfig.greeting}
-                    onChange={(e) =>
-                      setAiConfig({ ...aiConfig, greeting: e.target.value })
-                    }
-                    rows={3}
+                    required
                   />
                   <p className="text-xs text-muted-foreground">
-                    This is the first message your AI will say when answering a call.
+                    We'll crawl your website to train your AI assistant with your content.
                   </p>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number (optional)</Label>
+                  <Input
+                    id="phone"
+                    placeholder="+1 555 123 4567"
+                    value={businessData.phone}
+                    onChange={(e) =>
+                      setBusinessData({ ...businessData, phone: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Crawl Your Site */}
+          {currentStep === 2 && (
+            <div className="bg-card rounded-3xl p-8 shadow-lg border border-border/50 animate-fade-in-up">
+              <h2 className="text-2xl font-serif text-foreground mb-2">
+                Let's learn about your website
+              </h2>
+              <p className="text-muted-foreground mb-8">
+                We'll crawl <span className="font-medium text-foreground">{businessData.website}</span> to
+                train your AI with your content.
+              </p>
+
+              {!crawlDone ? (
+                <div className="space-y-6">
+                  {isCrawling ? (
+                    <div className="space-y-4 py-8">
+                      <div className="flex items-center justify-center gap-3 mb-4">
+                        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                        <span className="text-lg font-medium text-foreground">
+                          Crawling your website...
+                        </span>
+                      </div>
+                      <Progress value={crawlProgress} className="h-3 max-w-md mx-auto" />
+                      <p className="text-center text-sm text-muted-foreground">
+                        Discovering pages and extracting content
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center">
+                        <Globe className="w-8 h-8 text-primary" />
+                      </div>
+                      <p className="text-muted-foreground mb-6">
+                        Click below to scan your website. We'll find your key pages and use them to answer visitor questions.
+                      </p>
+                      <Button onClick={handleCrawl} size="lg" className="gap-2">
+                        <Globe className="w-5 h-5" />
+                        Start Crawling
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-success mb-4">
+                    <CheckCircle2 className="w-5 h-5" />
+                    <span className="font-medium">
+                      {crawledPages.length} pages discovered
+                    </span>
+                  </div>
+
+                  {crawledPages.length > 0 && (
+                    <div className="space-y-2 max-h-72 overflow-y-auto rounded-xl border border-border p-1">
+                      {crawledPages.slice(0, 15).map((page, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <FileText className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {page.title || page.url}
+                            </p>
+                            {page.summary && (
+                              <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                                {page.summary}
+                              </p>
+                            )}
+                          </div>
+                          <a
+                            href={page.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-foreground shrink-0"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      ))}
+                      {crawledPages.length > 15 && (
+                        <p className="text-center text-xs text-muted-foreground py-2">
+                          + {crawledPages.length - 15} more pages
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <Button variant="outline" size="sm" onClick={handleCrawl} disabled={isCrawling} className="gap-2">
+                    <Globe className="w-4 h-4" />
+                    Re-crawl
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 3: Customize Widget */}
+          {currentStep === 3 && (
+            <div className="bg-card rounded-3xl p-8 shadow-lg border border-border/50 animate-fade-in-up">
+              <h2 className="text-2xl font-serif text-foreground mb-2">
+                Customize your chat widget
+              </h2>
+              <p className="text-muted-foreground mb-8">
+                Choose how your widget looks on your website.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Settings */}
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label>Widget Title</Label>
+                    <Input
+                      value={widgetConfig.widget_title}
+                      onChange={(e) =>
+                        setWidgetConfig({ ...widgetConfig, widget_title: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Welcome Message</Label>
+                    <Textarea
+                      value={widgetConfig.welcome_message}
+                      onChange={(e) =>
+                        setWidgetConfig({ ...widgetConfig, welcome_message: e.target.value })
+                      }
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Accent Color</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={widgetConfig.accent_color}
+                        onChange={(e) =>
+                          setWidgetConfig({ ...widgetConfig, accent_color: e.target.value })
+                        }
+                        className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+                      />
+                      <Input
+                        value={widgetConfig.accent_color}
+                        onChange={(e) =>
+                          setWidgetConfig({ ...widgetConfig, accent_color: e.target.value })
+                        }
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Position</Label>
+                    <Select
+                      value={widgetConfig.position}
+                      onValueChange={(v) =>
+                        setWidgetConfig({ ...widgetConfig, position: v })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                        <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Live Preview */}
+                <div className="flex flex-col items-center">
+                  <Label className="mb-3 self-start">Preview</Label>
+                  <div className="relative w-full max-w-[280px] h-[360px] bg-muted/50 rounded-2xl border border-border overflow-hidden">
+                    {/* Mini chat panel preview */}
+                    <div className="absolute inset-2 bg-card rounded-xl border border-border shadow-lg flex flex-col overflow-hidden">
+                      {/* Header */}
+                      <div
+                        className="px-4 py-3 flex items-center gap-2"
+                        style={{ backgroundColor: widgetConfig.accent_color }}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                          <MessageSquareText className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-white text-sm font-medium truncate">
+                          {widgetConfig.widget_title}
+                        </span>
+                      </div>
+
+                      {/* Messages */}
+                      <div className="flex-1 p-3 space-y-2 overflow-hidden">
+                        <div className="bg-muted rounded-lg rounded-tl-none px-3 py-2 text-xs text-foreground max-w-[85%]">
+                          {widgetConfig.welcome_message}
+                        </div>
+                      </div>
+
+                      {/* Input */}
+                      <div className="p-2 border-t border-border">
+                        <div className="bg-muted rounded-lg px-3 py-2 text-xs text-muted-foreground">
+                          Type a message...
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Floating bubble preview */}
+                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                    <div
+                      className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center"
+                      style={{ backgroundColor: widgetConfig.accent_color }}
+                    >
+                      <MessageSquareText className="w-6 h-6 text-white" />
+                    </div>
+                    <span>Chat bubble</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -692,20 +621,24 @@ const Onboarding = () => {
               <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
-            <Button 
-              variant="hero" 
-              size="lg" 
-              onClick={handleNext} 
+            <Button
+              variant="hero"
+              size="lg"
+              onClick={handleNext}
               className="gap-2"
-              disabled={isSaving || (currentStep === 1 && !businessData.name.trim())}
+              disabled={
+                isSaving ||
+                isCrawling ||
+                (currentStep === 1 && (!businessData.name.trim() || !businessData.website.trim()))
+              }
             >
               {isSaving ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
+                  Setting up...
                 </>
-              ) : currentStep === 4 ? (
-                "Launch Your AI"
+              ) : currentStep === 3 ? (
+                "Launch Your Widget"
               ) : (
                 "Continue"
               )}
