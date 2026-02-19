@@ -976,13 +976,26 @@ export type Database = {
           allowed_domains: string[] | null
           api_key: string
           avatar_url: string | null
+          border_radius: string
+          bot_message_bg: string
+          bot_message_text_color: string
+          bot_name: string
+          chat_bg_color: string
           created_at: string
+          font_family: string
+          header_subtitle: string
+          header_text_color: string
           id: string
+          input_bg_color: string
+          input_border_color: string
+          input_text_color: string
           organization_id: string
           placeholder_text: string
           position: string
+          show_branding: boolean
           theme: string
           updated_at: string
+          user_message_text_color: string
           voice_enabled: boolean
           welcome_message: string
           widget_title: string
@@ -992,13 +1005,26 @@ export type Database = {
           allowed_domains?: string[] | null
           api_key?: string
           avatar_url?: string | null
+          border_radius?: string
+          bot_message_bg?: string
+          bot_message_text_color?: string
+          bot_name?: string
+          chat_bg_color?: string
           created_at?: string
+          font_family?: string
+          header_subtitle?: string
+          header_text_color?: string
           id?: string
+          input_bg_color?: string
+          input_border_color?: string
+          input_text_color?: string
           organization_id: string
           placeholder_text?: string
           position?: string
+          show_branding?: boolean
           theme?: string
           updated_at?: string
+          user_message_text_color?: string
           voice_enabled?: boolean
           welcome_message?: string
           widget_title?: string
@@ -1008,13 +1034,26 @@ export type Database = {
           allowed_domains?: string[] | null
           api_key?: string
           avatar_url?: string | null
+          border_radius?: string
+          bot_message_bg?: string
+          bot_message_text_color?: string
+          bot_name?: string
+          chat_bg_color?: string
           created_at?: string
+          font_family?: string
+          header_subtitle?: string
+          header_text_color?: string
           id?: string
+          input_bg_color?: string
+          input_border_color?: string
+          input_text_color?: string
           organization_id?: string
           placeholder_text?: string
           position?: string
+          show_branding?: boolean
           theme?: string
           updated_at?: string
+          user_message_text_color?: string
           voice_enabled?: boolean
           welcome_message?: string
           widget_title?: string
