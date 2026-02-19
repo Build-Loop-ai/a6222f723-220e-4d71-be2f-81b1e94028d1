@@ -44,7 +44,7 @@ const InsightsPanel = ({
   if (insights.length === 0) return null;
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-6 shadow-card">
+    <div className="rounded-2xl glass-light p-6">
       <div className="flex items-center gap-2 mb-4">
         <Lightbulb className="w-5 h-5 text-warning" />
         <h2 className="text-lg font-semibold">Insights</h2>

@@ -31,7 +31,7 @@ const formatTime = (dateStr: string | null) => {
 const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
   if (isLoading) {
     return (
-      <div className="rounded-2xl bg-card border border-border p-6 shadow-card">
+      <div className="rounded-2xl glass-light p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="h-6 w-32 bg-muted animate-pulse rounded" />
           <div className="h-4 w-16 bg-muted animate-pulse rounded" />
@@ -52,7 +52,7 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
   }
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-6 shadow-card">
+    <div className="rounded-2xl glass-light p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold">Recent Conversations</h2>
         <Link to="/dashboard/conversations">

@@ -31,7 +31,7 @@ const actions = [
 
 const QuickActions = () => {
   return (
-    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+    <div className="rounded-xl glass-light p-5 space-y-4">
       <h3 className="text-sm font-semibold text-foreground">Quick Actions</h3>
       <div className="grid grid-cols-2 gap-2">
         {actions.map((action) => (
