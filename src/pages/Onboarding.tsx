@@ -199,7 +199,9 @@ const Onboarding = () => {
         description: "Your AI widget is ready to go.",
       });
 
+      // Invalidate profile cache so ProtectedRoute sees the update
       await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      await queryClient.refetchQueries({ queryKey: ["profile", user.id] });
       setIsCompleted(true);
     } catch (error: any) {
       console.error("Onboarding error:", error);

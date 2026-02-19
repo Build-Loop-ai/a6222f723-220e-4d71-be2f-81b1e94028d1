@@ -69,11 +69,16 @@ serve(async (req) => {
 
     if (roleError) throw new Error('Failed to create user role: ' + roleError.message);
 
-    // 4. Update profile
+    // 4. Upsert profile (handles case where trigger hasn't created it yet)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .update({ organization_id: org.id, onboarding_completed: true })
-      .eq('id', user.id);
+      .upsert({
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+        organization_id: org.id,
+        onboarding_completed: true,
+      }, { onConflict: 'id' });
 
     if (profileError) throw new Error('Failed to update profile: ' + profileError.message);
 
