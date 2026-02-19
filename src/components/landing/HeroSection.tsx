@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Send, Mic, ArrowRight, Globe } from "lucide-react";
+import { Send, Mic, ArrowRight, Globe, MessageCircle, Phone } from "lucide-react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 
@@ -22,6 +22,9 @@ const HeroSection = () => {
   const [urlValue, setUrlValue] = useState("");
   const [isTypingUrl, setIsTypingUrl] = useState(false);
   const [showWidget, setShowWidget] = useState(false);
+  const [widgetTab, setWidgetTab] = useState<"chat" | "voice">("chat");
+  const [voiceActive, setVoiceActive] = useState(false);
+  const [voiceSeconds, setVoiceSeconds] = useState(0);
 
   // Rotate words
   useEffect(() => {
@@ -49,6 +52,31 @@ const HeroSection = () => {
     }, 2000);
     return () => clearTimeout(timeout);
   }, []);
+
+  // Auto-activate voice demo after tab switch
+  useEffect(() => {
+    if (widgetTab === "voice") {
+      const t = setTimeout(() => setVoiceActive(true), 600);
+      return () => clearTimeout(t);
+    } else {
+      setVoiceActive(false);
+      setVoiceSeconds(0);
+    }
+  }, [widgetTab]);
+
+  // Voice timer
+  useEffect(() => {
+    if (!voiceActive) return;
+    const i = setInterval(() => setVoiceSeconds((s) => s + 1), 1000);
+    return () => clearInterval(i);
+  }, [voiceActive]);
+
+  // Auto-toggle to voice tab after chat is shown
+  useEffect(() => {
+    if (!showWidget) return;
+    const t = setTimeout(() => setWidgetTab("voice"), 5000);
+    return () => clearTimeout(t);
+  }, [showWidget]);
 
   const letterVariants = {
     hidden: { opacity: 0, y: 80, rotateX: -90 },
@@ -327,34 +355,160 @@ const HeroSection = () => {
                   </div>
                 </div>
 
-                {/* Messages */}
-                <div className="px-5 py-5 space-y-2.5" style={{ background: "#0D0D0F" }}>
-                  <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 }}>
-                    <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-bl-md text-[13px] leading-relaxed text-foreground glass">
-                      Hi! Hoe kan ik je helpen? 👋
-                    </div>
-                  </motion.div>
-                  <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.2 }} className="flex justify-end">
-                    <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-br-md text-[13px] leading-relaxed text-white" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }}>
-                      Wat kost een kroon?
-                    </div>
-                  </motion.div>
-                  <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 2 }}>
-                    <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-bl-md text-[13px] leading-relaxed text-foreground glass">
-                      Tussen €350–€750. Afspraak maken?
-                    </div>
-                  </motion.div>
+                {/* Tab toggle */}
+                <div className="flex px-3 pt-2 gap-1" style={{ background: "#0D0D0F" }}>
+                  {(["chat", "voice"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setWidgetTab(tab)}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-semibold transition-all"
+                      style={{
+                        background: widgetTab === tab ? "rgba(52,215,123,0.1)" : "transparent",
+                        color: widgetTab === tab ? "hsl(148 68% 52%)" : "rgba(255,255,255,0.35)",
+                      }}
+                    >
+                      {tab === "chat" ? <MessageCircle className="w-3 h-3" /> : <Phone className="w-3 h-3" />}
+                      {tab === "chat" ? "Chat" : "Voice"}
+                    </button>
+                  ))}
                 </div>
+
+                {/* Chat messages */}
+                <AnimatePresence mode="wait">
+                  {widgetTab === "chat" ? (
+                    <motion.div
+                      key="chat"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="px-5 py-5 space-y-2.5"
+                      style={{ background: "#0D0D0F" }}
+                    >
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+                        <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-bl-md text-[13px] leading-relaxed text-foreground glass">
+                          Hi! Hoe kan ik je helpen? 👋
+                        </div>
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 }} className="flex justify-end">
+                        <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-br-md text-[13px] leading-relaxed text-white" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }}>
+                          Wat kost een kroon?
+                        </div>
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.6 }}>
+                        <div className="max-w-[85%] px-4 py-3 rounded-2xl rounded-bl-md text-[13px] leading-relaxed text-foreground glass">
+                          Tussen €350–€750. Afspraak maken?
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="voice"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex flex-col items-center justify-center py-8 gap-5"
+                      style={{ background: "#0D0D0F" }}
+                    >
+                      {/* Voice orb */}
+                      <div className="relative">
+                        <motion.div
+                          className="w-20 h-20 rounded-full flex items-center justify-center"
+                          style={{
+                            background: voiceActive
+                              ? "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))"
+                              : "rgba(255,255,255,0.06)",
+                          }}
+                          animate={
+                            voiceActive
+                              ? { scale: [1, 1.08, 1], boxShadow: ["0 0 0px rgba(52,215,123,0.3)", "0 0 40px rgba(52,215,123,0.4)", "0 0 0px rgba(52,215,123,0.3)"] }
+                              : {}
+                          }
+                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          <Phone className="w-7 h-7 text-white" />
+                        </motion.div>
+                        {/* Pulse rings */}
+                        {voiceActive && (
+                          <>
+                            <motion.div
+                              className="absolute inset-0 rounded-full border border-primary/30"
+                              animate={{ scale: [1, 2.2], opacity: [0.5, 0] }}
+                              transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                            />
+                            <motion.div
+                              className="absolute inset-0 rounded-full border border-primary/20"
+                              animate={{ scale: [1, 2.6], opacity: [0.3, 0] }}
+                              transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
+                            />
+                          </>
+                        )}
+                      </div>
+
+                      {/* Waveform bars */}
+                      {voiceActive && (
+                        <div className="flex items-center gap-[3px] h-8">
+                          {Array.from({ length: 16 }).map((_, i) => (
+                            <motion.div
+                              key={i}
+                              className="w-[3px] rounded-full"
+                              style={{ background: "linear-gradient(to top, hsl(148 68% 52%), hsl(190 100% 44%))" }}
+                              animate={{
+                                height: [4, 8 + Math.random() * 22, 4],
+                              }}
+                              transition={{
+                                duration: 0.4 + Math.random() * 0.4,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                                delay: i * 0.05,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="text-center">
+                        <p className="text-[13px] font-medium text-foreground">
+                          {voiceActive ? "AI is speaking…" : "Connecting…"}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+                          {voiceActive
+                            ? `0:${voiceSeconds.toString().padStart(2, "0")}`
+                            : "Starting call"}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Input */}
                 <div className="px-4 py-3 flex items-center gap-2" style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-                  <div className="flex-1 px-3 py-2.5 rounded-xl text-[12px] text-muted-foreground glass">Stel een vraag...</div>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(52,215,123,0.1)" }}>
-                    <Mic className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }}>
-                    <Send className="w-3.5 h-3.5 text-white" />
-                  </div>
+                  {widgetTab === "chat" ? (
+                    <>
+                      <div className="flex-1 px-3 py-2.5 rounded-xl text-[12px] text-muted-foreground glass">Stel een vraag...</div>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5" style={{ background: "rgba(52,215,123,0.1)" }} onClick={() => setWidgetTab("voice")}>
+                        <Mic className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }}>
+                        <Send className="w-3.5 h-3.5 text-white" />
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      className="w-full py-2.5 rounded-xl text-[12px] font-semibold transition-all"
+                      style={{
+                        background: voiceActive ? "rgba(239,68,68,0.15)" : "rgba(52,215,123,0.1)",
+                        color: voiceActive ? "#ef4444" : "hsl(148 68% 52%)",
+                      }}
+                      onClick={() => {
+                        setVoiceActive(!voiceActive);
+                        if (voiceActive) setVoiceSeconds(0);
+                      }}
+                    >
+                      {voiceActive ? "End Call" : "Start Call"}
+                    </button>
+                  )}
                 </div>
               </div>
 
