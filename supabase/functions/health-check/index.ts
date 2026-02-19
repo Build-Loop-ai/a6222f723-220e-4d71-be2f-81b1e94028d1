@@ -23,7 +23,6 @@ serve(async (req) => {
 
     // Check Vapi
     const vapiApiKey = Deno.env.get("VAPI_API_KEY");
-    const vapiPublicKey = Deno.env.get("VAPI_PUBLIC_KEY");
     const vapiStatus: IntegrationStatus = {
       name: "Vapi (Voice AI)",
       configured: !!vapiApiKey,
@@ -50,43 +49,16 @@ serve(async (req) => {
     }
     results.push(vapiStatus);
 
-    // Check Twilio
-    const twilioSid = Deno.env.get("TWILIO_ACCOUNT_SID");
-    const twilioToken = Deno.env.get("TWILIO_AUTH_TOKEN");
-    const twilioApiKey = Deno.env.get("TWILIO_API_KEY");
-    const twilioApiSecret = Deno.env.get("TWILIO_API_SECRET");
-    const twilioStatus: IntegrationStatus = {
-      name: "Twilio (Phone Numbers)",
-      configured: !!(twilioSid && twilioToken),
+    // Check Firecrawl
+    const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
+    const firecrawlStatus: IntegrationStatus = {
+      name: "Firecrawl (Website Crawling)",
+      configured: !!firecrawlKey,
       connected: null,
       error: null,
-      secrets: ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_API_KEY", "TWILIO_API_SECRET"],
+      secrets: ["FIRECRAWL_API_KEY"],
     };
-    
-    if (twilioSid && twilioToken) {
-      try {
-        const auth = btoa(`${twilioSid}:${twilioToken}`);
-        const res = await fetch(
-          `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}.json`,
-          { headers: { Authorization: `Basic ${auth}` } }
-        );
-        twilioStatus.connected = res.ok;
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          twilioStatus.error = data.message || `HTTP ${res.status}`;
-        }
-      } catch (e) {
-        twilioStatus.connected = false;
-        twilioStatus.error = e instanceof Error ? e.message : "Connection failed";
-      }
-    }
-    
-    // Add warning if API key not configured (needed for Vapi import)
-    if (!twilioApiKey || !twilioApiSecret) {
-      twilioStatus.error = (twilioStatus.error || "") + 
-        " Note: TWILIO_API_KEY and TWILIO_API_SECRET are required for Vapi phone number integration.";
-    }
-    results.push(twilioStatus);
+    results.push(firecrawlStatus);
 
     // Check Stripe
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -117,7 +89,7 @@ serve(async (req) => {
     
     if (!stripeWebhook) {
       stripeStatus.error = (stripeStatus.error || "") + 
-        " Warning: STRIPE_WEBHOOK_SECRET not configured. Webhooks will not be verified.";
+        " Warning: STRIPE_WEBHOOK_SECRET not configured.";
     }
     results.push(stripeStatus);
 
@@ -154,37 +126,11 @@ serve(async (req) => {
     const googleStatus: IntegrationStatus = {
       name: "Google (Calendar)",
       configured: !!(googleClientId && googleClientSecret),
-      connected: null, // Can't test OAuth without user flow
+      connected: null,
       error: null,
       secrets: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
     };
     results.push(googleStatus);
-
-    // Check ElevenLabs
-    const elevenLabsKey = Deno.env.get("ELEVENLABS_API_KEY");
-    const elevenLabsStatus: IntegrationStatus = {
-      name: "ElevenLabs (Voice Synthesis)",
-      configured: !!elevenLabsKey,
-      connected: null,
-      error: null,
-      secrets: ["ELEVENLABS_API_KEY"],
-    };
-    
-    if (elevenLabsKey) {
-      try {
-        const res = await fetch("https://api.elevenlabs.io/v1/voices", {
-          headers: { "xi-api-key": elevenLabsKey },
-        });
-        elevenLabsStatus.connected = res.ok;
-        if (!res.ok) {
-          elevenLabsStatus.error = `HTTP ${res.status}`;
-        }
-      } catch (e) {
-        elevenLabsStatus.connected = false;
-        elevenLabsStatus.error = e instanceof Error ? e.message : "Connection failed";
-      }
-    }
-    results.push(elevenLabsStatus);
 
     // Summary
     const configured = results.filter(r => r.configured).length;
