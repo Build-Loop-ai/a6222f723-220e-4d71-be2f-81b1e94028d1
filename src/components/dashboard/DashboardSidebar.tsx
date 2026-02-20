@@ -49,18 +49,22 @@ const DashboardSidebar = () => {
           ) : config.logoUrl ? (
             <img src={config.logoUrl} alt={config.name} className="h-9 w-auto object-contain" />
           ) : (
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-primary/25 ring-2 ring-white/50">
-              <MessageSquare className="w-5 h-5 text-white" />
+            <span className="text-2xl font-black tracking-tight bg-gradient-to-br from-primary via-emerald-500 to-teal-500 bg-clip-text text-transparent">
+              Greet
+            </span>
+          )}
+          {(config.logoUrl || config.logoUrlDark) && (
+            <div className="flex flex-col">
+              <span className="font-serif text-lg font-bold text-foreground leading-tight">
+                {config.name}
+              </span>
             </div>
           )}
-          <div className="flex flex-col">
-            <span className="font-serif text-lg font-bold text-foreground leading-tight">
-              {config.name}
-            </span>
+          {!config.logoUrl && !config.logoUrlDark && (
             <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-foreground/35">
               Dashboard
             </span>
-          </div>
+          )}
         </Link>
       </div>
 
