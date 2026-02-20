@@ -7,7 +7,6 @@ import {
   LogOut,
   BookOpen,
   Sparkles,
-  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,11 +14,11 @@ import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard", badge: null },
-  { icon: MessageSquare, label: "Conversations", href: "/dashboard/conversations", badge: null },
-  { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics", badge: null },
-  { icon: BookOpen, label: "Knowledge Base", href: "/dashboard/settings", badge: null },
-  { icon: Settings, label: "Settings", href: "/dashboard/settings", badge: null },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: MessageSquare, label: "Conversations", href: "/dashboard/conversations" },
+  { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
+  { icon: BookOpen, label: "Knowledge Base", href: "/dashboard/settings" },
+  { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];
 
 const DashboardSidebar = () => {
@@ -37,12 +36,10 @@ const DashboardSidebar = () => {
   const displayName = user?.email?.split("@")[0] || "User";
 
   return (
-    <aside className="hidden md:flex h-screen sticky top-0 transition-all duration-300 flex-col w-[272px] relative">
-      {/* Glassmorphic background with gradient edge */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/70 to-white/60 backdrop-blur-[80px] border-r border-white/50" />
+    <aside className="hidden md:flex h-screen sticky top-0 transition-all duration-300 flex-col w-[272px] glass-sidebar">
       {/* Ambient glow from primary */}
-      <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-primary/[0.04] to-transparent pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-primary/[0.03] to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-primary/[0.06] to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-primary/[0.04] to-transparent pointer-events-none" />
 
       {/* Logo */}
       <div className="relative p-6 pb-5">
@@ -86,37 +83,33 @@ const DashboardSidebar = () => {
               className={cn(
                 "relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-[13px] group",
                 isActive
-                  ? "text-white font-semibold"
+                  ? "text-foreground font-semibold bg-foreground/[0.05]"
                   : "text-foreground/55 hover:text-foreground hover:bg-foreground/[0.04]"
               )}
             >
-              {/* Active background */}
+              {/* Left accent bar for active item */}
               {isActive && (
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary via-emerald-500 to-teal-500 shadow-lg shadow-primary/20" />
-              )}
-              {/* Active glow bleed */}
-              {isActive && (
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary via-emerald-500 to-teal-500 opacity-20 blur-xl scale-110 pointer-events-none" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-gradient-to-b from-primary to-emerald-500 shadow-sm shadow-primary/30" />
               )}
               
               <item.icon className={cn(
-                "w-[18px] h-[18px] flex-shrink-0 relative z-10 transition-transform duration-200",
-                isActive && "drop-shadow-sm",
-                !isActive && "group-hover:scale-110"
+                "w-[18px] h-[18px] flex-shrink-0 transition-all duration-200",
+                isActive ? "text-primary" : "group-hover:scale-110 group-hover:text-primary/70"
               )} />
-              <span className="relative z-10 flex-1">{item.label}</span>
+              <span className="flex-1">{item.label}</span>
               
-              {isActive && (
-                <ChevronRight className="w-3.5 h-3.5 relative z-10 opacity-60" />
+              {/* Hover dot for inactive */}
+              {!isActive && (
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/0 group-hover:bg-primary/40 transition-all duration-200" />
               )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Upgrade CTA card */}
+      {/* Upgrade CTA card – shimmer border */}
       <div className="relative px-4 pb-3">
-        <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-primary/10 via-emerald-500/5 to-teal-500/5 border border-primary/10">
+        <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-primary/10 via-emerald-500/5 to-teal-500/5 border border-primary/10 shimmer-border">
           <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-primary/15 to-transparent rounded-bl-full pointer-events-none" />
           <div className="relative flex items-start gap-3">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shrink-0 shadow-md shadow-primary/20">
@@ -136,11 +129,15 @@ const DashboardSidebar = () => {
       {/* User Card + Logout */}
       <div className="relative p-4 space-y-2">
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-foreground/[0.03] transition-colors cursor-default">
-          <Avatar className="h-9 w-9 ring-2 ring-primary/15 ring-offset-2 ring-offset-white/80">
-            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-emerald-500/10 text-primary text-xs font-bold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-9 w-9 ring-2 ring-primary/20 ring-offset-2 ring-offset-white/80">
+              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-emerald-500/10 text-primary text-xs font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            {/* Online status ring */}
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-success border-2 border-white" />
+          </div>
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-semibold text-foreground truncate capitalize">
               {displayName}

@@ -431,6 +431,88 @@
 
   .snap-x-mandatory { scroll-snap-type: x mandatory; }
   .snap-center { scroll-snap-align: center; }
+
+  /* ━━ Premium Glass Card – hover-lift + inner glow ━━ */
+  .glass-card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.58) 50%, rgba(240,248,255,0.48) 100%);
+    backdrop-filter: blur(60px) saturate(200%);
+    -webkit-backdrop-filter: blur(60px) saturate(200%);
+    border: 1px solid rgba(255,255,255,0.65);
+    border-radius: 20px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.30) inset,
+      0 2px 8px -2px rgb(0 0 0 / 0.06),
+      0 12px 40px -12px rgb(0 0 0 / 0.08);
+    transition: border-color 0.3s ease, box-shadow 0.4s cubic-bezier(0.22,1,0.36,1), transform 0.4s cubic-bezier(0.22,1,0.36,1);
+  }
+  .glass-card:hover {
+    border-color: rgba(255,255,255,0.90);
+    transform: translateY(-3px);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.50) inset,
+      0 0 24px -4px hsl(148 68% 52% / 0.06),
+      0 20px 60px -16px rgb(0 0 0 / 0.12);
+  }
+
+  /* ━━ Glass Sidebar – frosted panel with gradient edge ━━ */
+  .glass-sidebar {
+    background: linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.70) 50%, rgba(248,250,252,0.65) 100%);
+    backdrop-filter: blur(80px) saturate(220%);
+    -webkit-backdrop-filter: blur(80px) saturate(220%);
+    border-right: 1px solid rgba(255,255,255,0.50);
+    position: relative;
+  }
+  .glass-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, hsl(148 68% 45%) 0%, hsl(190 100% 44%) 50%, hsl(148 68% 45%) 100%);
+    opacity: 0.7;
+  }
+
+  /* ━━ Gradient top border accent ━━ */
+  .gradient-border-top {
+    position: relative;
+  }
+  .gradient-border-top::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, hsl(148 68% 45%) 0%, hsl(190 100% 44%) 100%);
+    opacity: 0.6;
+  }
+
+  /* ━━ Shimmer animation ━━ */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .shimmer-border {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer-border::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(90deg, transparent 0%, hsl(148 68% 52% / 0.4) 25%, hsl(190 100% 44% / 0.4) 50%, hsl(148 68% 52% / 0.4) 75%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
 }
 
 /* Animations */

@@ -30,14 +30,14 @@ const DashboardHeader = ({ userName, isLive, widgetId }: DashboardHeaderProps) =
       <div className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
           {getGreeting()}{userName ? `, ${userName.split(" ")[0]}` : ""}
-          <span className="inline-block ml-2 text-2xl md:text-3xl">👋</span>
         </h1>
         <div className="flex items-center gap-3">
           <div className={cn(
             "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold",
+            "backdrop-blur-md",
             isLive
-              ? "bg-success/15 text-success border border-success/20"
-              : "bg-muted text-muted-foreground border border-border"
+              ? "bg-success/10 text-success border border-success/15 shadow-sm shadow-success/10"
+              : "bg-foreground/5 text-muted-foreground border border-foreground/10"
           )}>
             <span className={cn(
               "w-2 h-2 rounded-full",
@@ -46,7 +46,7 @@ const DashboardHeader = ({ userName, isLive, widgetId }: DashboardHeaderProps) =
             {isLive ? "Widget Live" : "Offline"}
           </div>
           {isLive && (
-            <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/50">
+            <span className="flex items-center gap-1.5 text-xs font-medium text-foreground/45 bg-warning/8 px-2.5 py-1 rounded-full border border-warning/10">
               <Zap className="w-3.5 h-3.5 text-warning" />
               AI Active
             </span>
@@ -56,12 +56,12 @@ const DashboardHeader = ({ userName, isLive, widgetId }: DashboardHeaderProps) =
 
       <div className="flex items-center gap-2">
         {widgetId && (
-          <Button variant="outline" size="sm" onClick={handleCopyEmbed} className="bg-white/60 backdrop-blur-sm border-border text-foreground hover:bg-white/80">
+          <Button variant="outline" size="sm" onClick={handleCopyEmbed} className="glass-light-subtle border-white/50 text-foreground hover:border-primary/30 hover:shadow-md transition-all">
             <Copy className="w-4 h-4" />
             <span className="hidden sm:inline">Copy Embed</span>
           </Button>
         )}
-        <Button variant="outline" size="sm" asChild className="bg-white/60 backdrop-blur-sm border-border text-foreground hover:bg-white/80">
+        <Button variant="outline" size="sm" asChild className="glass-light-subtle border-white/50 text-foreground hover:border-primary/30 hover:shadow-md transition-all">
           <Link to="/dashboard/settings">
             <Settings className="w-4 h-4" />
             <span className="hidden sm:inline">Settings</span>

@@ -38,6 +38,9 @@ const BottomNav = () => {
                 active && "scale-110"
               )} />
               <span className="text-[10px] font-semibold">{item.label}</span>
+              {active && (
+                <span className="absolute bottom-1.5 w-4 h-[2px] rounded-full bg-primary" />
+              )}
             </Link>
           );
         })}

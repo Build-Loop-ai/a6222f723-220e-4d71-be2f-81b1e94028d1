@@ -7,9 +7,9 @@ interface PerformanceCardProps {
 }
 
 const COLORS = [
-  "hsl(148 68% 42%)",  // success/resolved
-  "hsl(38 92% 50%)",   // warning/escalated
-  "hsl(225 12% 65%)",  // muted/abandoned
+  "hsl(148 68% 42%)",
+  "hsl(38 92% 50%)",
+  "hsl(225 12% 65%)",
 ];
 
 const PerformanceCard = ({ resolved, escalated, abandoned }: PerformanceCardProps) => {
@@ -25,12 +25,14 @@ const PerformanceCard = ({ resolved, escalated, abandoned }: PerformanceCardProp
   const hasData = total > 0;
 
   return (
-    <div className="rounded-2xl glass-light p-5 space-y-4">
+    <div className="rounded-2xl glass-card gradient-border-top p-5 space-y-4">
       <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Performance</h3>
 
       {hasData ? (
         <div className="flex items-center gap-6">
           <div className="relative w-28 h-28 shrink-0">
+            {/* Gradient ring behind the chart */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/15 via-emerald-500/10 to-cyan-500/15 blur-sm" />
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -74,6 +76,14 @@ const PerformanceCard = ({ resolved, escalated, abandoned }: PerformanceCardProp
         </div>
       ) : (
         <div className="py-10 text-center">
+          {/* Pulsing placeholder ring */}
+          <div className="relative w-20 h-20 mx-auto mb-4">
+            <div className="absolute inset-0 rounded-full border-4 border-dashed border-primary/15 animate-spin" style={{ animationDuration: '12s' }} />
+            <div className="absolute inset-2 rounded-full border-2 border-primary/10" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-sm font-bold text-foreground/25">0%</span>
+            </div>
+          </div>
           <p className="text-sm text-foreground/40 font-medium">No conversation data yet</p>
         </div>
       )}

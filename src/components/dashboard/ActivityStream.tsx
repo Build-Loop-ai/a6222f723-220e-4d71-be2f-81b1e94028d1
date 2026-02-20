@@ -31,7 +31,7 @@ const formatTime = (dateStr: string | null) => {
 const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
   if (isLoading) {
     return (
-      <div className="rounded-2xl glass-light p-6">
+      <div className="rounded-2xl glass-card gradient-border-top p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="h-6 w-32 bg-foreground/5 animate-pulse rounded-lg" />
           <div className="h-4 w-16 bg-foreground/5 animate-pulse rounded-lg" />
@@ -52,7 +52,7 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
   }
 
   return (
-    <div className="rounded-2xl glass-light p-6">
+    <div className="rounded-2xl glass-card gradient-border-top p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-bold text-foreground">Recent Conversations</h2>
         <Link to="/dashboard/conversations">
@@ -65,8 +65,16 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
 
       {conversations.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-            <MessageSquare className="w-8 h-8 text-primary/60" />
+          {/* Concentric rings illustration */}
+          <div className="relative w-24 h-24 mx-auto mb-5">
+            <div className="absolute inset-0 rounded-full border-2 border-primary/10 animate-ping" style={{ animationDuration: '3s' }} />
+            <div className="absolute inset-3 rounded-full border-2 border-primary/15 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
+            <div className="absolute inset-6 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-emerald-500/10 flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-primary/60" />
+              </div>
+            </div>
           </div>
           <p className="text-foreground/70 text-sm font-medium">No conversations yet today</p>
           <p className="text-foreground/40 text-xs mt-1">
@@ -86,6 +94,7 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
                 className={cn(
                   "flex items-center gap-4 p-3 -mx-3 rounded-xl transition-all",
                   "hover:bg-white/60 cursor-pointer group",
+                  "border-l-2 border-transparent hover:border-primary/40",
                   "animate-fade-in"
                 )}
                 style={{ animationDelay: `${index * 0.05}s` }}
