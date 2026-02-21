@@ -95,6 +95,7 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
     name: "",
     business_type: "",
     phone: "",
+    website: "",
     timezone: "",
     description: "",
     address: {
@@ -120,6 +121,7 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
         name: data.formData.name,
         business_type: data.formData.business_type as any,
         phone: data.formData.phone,
+        website: data.formData.website || null,
         timezone: data.formData.timezone,
         description: data.formData.description,
         address: data.formData.address as unknown as Json,
@@ -200,6 +202,7 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
             name: org.name || "",
             business_type: org.business_type || "",
             phone: org.phone || "",
+            website: org.website || "",
             timezone: org.timezone || "Europe/Amsterdam",
             description: org.description || "",
             address: {
@@ -397,6 +400,21 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
                     }
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <Label>Website URL</Label>
+                </div>
+                <Input
+                  type="url"
+                  value={formData.website}
+                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                  placeholder="https://www.example.com"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Used for crawling your site to build the AI knowledge base.
+                </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
