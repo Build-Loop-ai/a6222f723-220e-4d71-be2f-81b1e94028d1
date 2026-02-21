@@ -125,7 +125,7 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
       if (error) throw error;
       toast({
         title: "Website crawled",
-        description: `Successfully indexed ${data?.pagesProcessed || 0} pages. Your AI is now learning from your website.`,
+        description: `Successfully indexed ${data?.pages_scraped || 0} pages. Your AI is now learning from your website.`,
       });
     } catch (err: any) {
       toast({
