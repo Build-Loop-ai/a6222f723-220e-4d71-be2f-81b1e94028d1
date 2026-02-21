@@ -10,14 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Building,
-  Bot,
+  
   Users,
   CreditCard,
   Plus,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BusinessSettings } from "@/components/settings/BusinessSettings";
-import { AIAssistantSettings } from "@/components/settings/AIAssistantSettings";
+
 import { InviteMemberDialog } from "@/components/settings/InviteMemberDialog";
 import { TeamMembersList } from "@/components/settings/TeamMembersList";
 import { BillingCard } from "@/components/settings/BillingCard";
@@ -169,10 +169,6 @@ const DashboardSettings = () => {
             <Building className="w-4 h-4" />
             My Business
           </TabsTrigger>
-          <TabsTrigger value="ai" className="gap-2">
-            <Bot className="w-4 h-4" />
-            AI Assistant
-          </TabsTrigger>
           <TabsTrigger value="team" className="gap-2">
             <Users className="w-4 h-4" />
             Team
@@ -185,10 +181,6 @@ const DashboardSettings = () => {
 
         <TabsContent value="business" className="space-y-6">
           {organizationId && <BusinessSettings organizationId={organizationId} />}
-        </TabsContent>
-
-        <TabsContent value="ai" className="space-y-6">
-          <AIAssistantSettings organizationId={organizationId || undefined} />
         </TabsContent>
 
         <TabsContent value="team" className="space-y-6">
