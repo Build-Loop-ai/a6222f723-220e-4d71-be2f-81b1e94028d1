@@ -647,8 +647,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     >
       {/* ━━━━ Glassy Top Bar – connected to sidebar ━━━━ */}
       <div className="absolute top-0 left-0 right-0 z-30">
-        {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-emerald-500/40 to-cyan-500/30 z-10" />
+        {/* Top accent line removed – now handled by DashboardLayout full-width line */}
         
         {/* Main bar – matches sidebar glass */}
         <div className="relative h-14 glass-toolbar flex items-center px-4 gap-0 border-l-0">
