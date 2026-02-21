@@ -1,86 +1,71 @@
 
 
-# Premium Dashboard Redesign -- "Apple Vision Pro meets Linear"
+# Glassy Top Bar for Widget Builder
 
-The current dashboard looks flat and template-like: truncated metric labels, uniform white cards with no depth hierarchy, and a sidebar that blends into the background. This plan elevates every element to feel like a $200/mo SaaS product.
+## Overview
 
-## Problems Identified
+Replace the right-side builder panel with a floating glassy top toolbar. This maximizes the canvas area and creates a more modern, Figma/Canva-style editing experience. The canvas fills the entire viewport while a translucent toolbar hovers at the top with all controls accessible via tab sections and expandable dropdowns/popovers.
 
-1. **Metric cards** -- labels are truncated ("CONVER...", "LIVE VIS..."), values show "0" with no visual weight, cards are all same size/style
-2. **Sidebar** -- white-on-white, no visual separation from the main content, "Upgrade to Pro" card is bland
-3. **Content cards** -- "Recent Conversations" and "AI Performance" are flat rectangles with no personality
-4. **Quick Actions** -- tiny, cramped, look like an afterthought
-5. **Overall** -- no color accents, no depth layers, no motion, nothing feels "premium"
+## Layout Change
 
-## Design Direction
+**Current**: Navigation sidebar (left) | Canvas (center) | Builder panel 300px (right)
 
-Inspired by: Linear's dashboard density, Apple Vision Pro's layered glass, and Vercel's subtle gradient accents. The key principle: **depth through layered translucency + strategic color pops**.
+**New**: Navigation sidebar (left) | Full canvas with glassy top bar overlay
 
-## Changes
+## Design Details
 
-### 1. Richer Ambient Background (index.css)
-- Upgrade the `.gradient-mesh` with larger, more vivid orbs and a subtle animated float
-- Add a new `.glass-card` utility with hover-lift and inner glow for premium card feel
-- Add `.glass-sidebar` with a distinct frosted tint so it separates from content
+### Glassy Top Bar
+- Fixed to the top of the canvas area, full width
+- Glassmorphism: `backdrop-blur-xl bg-white/70 border-b border-white/30 shadow-lg`
+- Height: ~56px for the main bar
+- Contains:
+  - Left: Widget Builder label + Wand2 icon + auto-save indicator
+  - Center: Tab pills (Design / Embed / Domains) -- same as current but horizontal
+  - Right: Preview button + position toggle (left/right)
 
-### 2. Sidebar Overhaul (DashboardSidebar.tsx)
-- Add a thin gradient accent line on the left edge (primary-to-cyan vertical strip)
-- Make the logo area larger with a subtle gradient badge background
-- Active nav item gets a left accent bar (3px gradient) instead of full background fill, keeping text dark
-- Inactive items get a dot indicator on hover
-- "Upgrade to Pro" card becomes a gradient-bordered card with a shimmer animation
-- User section gets a status ring around the avatar
+### Design Tab -- Inline Controls
+When "Design" is active, the top bar shows a compact horizontal control strip:
+- Brand color swatches (the preset circles) inline
+- Color picker input
+- Font selector as a small dropdown/popover
+- Corner style as a small dropdown/popover
+- Feature toggles (Voice, Branding) as icon buttons
+- A "More" or zone-specific editing via a dropdown panel that slides down from the bar when a zone is clicked on the canvas
 
-### 3. Metric Cards Rewrite (MetricCardsRow.tsx)
-- Fix truncated labels -- use full words, reduce font size slightly if needed
-- Top 2 metrics (Conversations, Live Visitors) get a larger "hero metric" treatment spanning more width
-- Each card gets a unique accent icon color (not just foreground/50)
-- Add subtle trend indicators (even if static for now, e.g. a small up-arrow)
-- Live Visitors card gets the pulsing green ring treatment
-- Cards get individual hover effects with a colored glow matching their accent
+### Zone Editing
+When a user clicks a zone on the canvas preview, a slim dropdown panel slides down from the top bar (still glassy) showing the zone-specific fields (text inputs, color pickers). Clicking away or pressing the back button closes it.
 
-### 4. Dashboard Header (DashboardHeader.tsx)
-- Clean up the greeting -- remove the wave emoji, use a more sophisticated "Welcome back" style
-- Status badges get a glass treatment instead of flat pills
-- Action buttons get subtle gradient borders
+### Embed/Domains Tabs
+These open a centered popover/dropdown panel below the top bar (not a full sidebar) with the embed code snippet or domain management UI.
 
-### 5. Activity Stream (ActivityStream.tsx)
-- Empty state gets an illustration-like treatment with concentric rings
-- Add a subtle gradient top-border to the card (green-to-cyan thin line)
-- Each conversation row gets a left-colored accent on hover
+## Technical Plan
 
-### 6. Performance Card (PerformanceCard.tsx)
-- Add a gradient ring around the donut chart
-- Empty state becomes more inviting with a pulsing placeholder ring
+### File: `src/components/settings/WidgetSettings.tsx`
 
-### 7. Quick Actions (QuickActions.tsx)
-- Increase card size, add colored icon backgrounds (small circle behind each icon)
-- Each card gets a unique gradient top-border accent
-- Hover effect: card lifts + icon color intensifies
+1. **Remove** the right panel `<div className="w-[300px]">` and all its contents (lines 821-1139)
+2. **Add** a new `<div>` as the first child inside the canvas container, positioned as an overlay at the top:
+   - Glassmorphism styling with `backdrop-blur-xl`, semi-transparent background
+   - Contains the tab navigation, inline design controls, and action buttons
+3. **Add** a collapsible dropdown panel below the top bar for:
+   - Zone-specific editors (triggered by clicking canvas zones)
+   - Embed code display
+   - Domains management
+4. **Reorganize** the Design controls into a horizontal layout:
+   - Color swatches displayed inline as a row
+   - Font, corners, and toggles as small popover triggers
+5. **Adjust** canvas padding to account for the top bar height (~56px top padding or margin)
 
-### 8. Layout Polish (DashboardLayout.tsx)
-- Add a subtle top-bar with a thin gradient line at the very top of the viewport
-- Content area gets slightly more padding for breathing room
+### File: `src/layouts/DashboardLayout.tsx`
+- No changes needed -- the full-bleed route already works correctly
 
-## Technical Details
+### New UI Pattern
+- Use Radix `Popover` components for font/corner/feature dropdowns
+- Use `AnimatePresence` + `motion.div` for the slide-down panel animation
+- Keep the existing state management (`activePanel`, `editingZone`, config updates) -- only the rendering layout changes
 
-### Files to modify:
-- `src/index.css` -- new utility classes, richer mesh, shimmer animation
-- `src/components/dashboard/DashboardSidebar.tsx` -- accent bar nav, gradient edge, shimmer CTA
-- `src/components/dashboard/MetricCardsRow.tsx` -- full labels, hero metrics, accent colors, hover glows
-- `src/components/dashboard/DashboardHeader.tsx` -- refined greeting, glass badges, gradient buttons
-- `src/components/dashboard/ActivityStream.tsx` -- gradient border, enhanced empty state, row accents
-- `src/components/dashboard/PerformanceCard.tsx` -- gradient chart ring, refined empty state
-- `src/components/dashboard/QuickActions.tsx` -- larger cards, icon circles, gradient accents
-- `src/components/dashboard/BottomNav.tsx` -- active indicator dot below icon
-- `src/layouts/DashboardLayout.tsx` -- gradient top line
-
-### New CSS additions:
-- `@keyframes shimmer` -- for the upgrade CTA card
-- `.glass-card` -- elevated glass with hover lift + inner glow
-- `.glass-sidebar` -- distinct frosted panel with left gradient edge
-- `.gradient-border-top` -- thin accent line utility
-
-### No new dependencies needed
-All styling uses existing Tailwind classes, CSS custom properties, and the already-installed `recharts` for the donut chart.
-
+## What Stays the Same
+- All the config state, auto-save logic, and data fetching
+- The canvas with website iframe/screenshot background
+- The chat panel preview and bubble positioning
+- Zone click detection on the canvas
+- Embed code snippet and domain management functionality
