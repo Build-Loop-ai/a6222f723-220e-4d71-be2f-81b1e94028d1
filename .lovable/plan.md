@@ -1,75 +1,109 @@
 
 
-## Fix VAPI Voice Call -- "[object Object]" Error and Immediate Close
+## Dramatically Improve AI Agent Quality
 
-### Root Causes
+### Problem Summary
 
-**Problem 1: `vapi.start()` is called outside user gesture context**
+There are two major quality gaps in how the AI agents answer questions:
 
-The current flow is:
-1. User clicks phone button -> `getUserMedia()` runs (good -- user gesture)
-2. `setInCall(true)` triggers React re-render
-3. `VoiceCallOverlay` mounts -> `useEffect` fires -> `vapi.start()` is called
+1. **Voice Agent (Vapi)**: The system prompt includes business hours, services, and address, but has absolutely no knowledge of the actual website content (site_pages). If a caller asks "What do you offer?" or "Tell me about your pricing", the voice agent has nothing to work with.
 
-By the time `useEffect` runs, the browser no longer considers it a user gesture. The Vapi SDK internally needs microphone access via Daily.co, and this second mic request is blocked because the gesture context was lost across the React render boundary. The pre-acquired `micStream` from step 1 is never passed to Vapi -- it's wasted.
+2. **Chat Agent (widget-chat)**: Uses a very basic keyword search (splitting on spaces, filtering words > 3 chars) which misses many relevant pages. It also truncates each page to only 1,000 characters, losing important details.
 
-**Problem 2: "[object Object]" error display**
+### Plan
 
-The error handler does:
-```typescript
-const msg = err instanceof Error ? err.message : String(err);
-```
+#### 1. Inject website knowledge into the Vapi voice agent
 
-The Vapi SDK's `error` event passes a plain object (not an `Error` instance), so `String({some: "data"})` produces `"[object Object]"`. This gets displayed as the error message.
+**File: `supabase/functions/create-vapi-assistant/index.ts`**
 
-### Fix Plan
+- After fetching org and settings, also fetch all `site_pages` for the organization
+- Build a condensed knowledge base from site page summaries and key content (up to ~4,000 tokens to stay within Vapi's system prompt limits)
+- Add a new "## Website Knowledge Base" section to the system prompt containing:
+  - Page titles and their summaries
+  - Key content snippets from the most important pages (home, about, services, pricing, contact, FAQ)
+- Prioritize pages by relevance: pages with titles containing "about", "services", "pricing", "FAQ", "contact" come first
 
-**File: `src/components/embed/ChatPanel.tsx`**
-- Remove the pre-emptive `getUserMedia()` call from the phone button click handler (it's unnecessary -- Vapi handles mic access internally)
-- Instead, create the Vapi instance and call `vapi.start()` directly inside the click handler (preserving user gesture context)
-- Pass the already-started Vapi instance to `VoiceCallOverlay` as a prop instead of passing keys/IDs
+#### 2. Improve chat agent content retrieval
 
-**File: `src/components/embed/VoiceCallOverlay.tsx`**
-- Accept a `vapiInstance` prop (already started) instead of `vapiPublicKey` / `vapiAssistantId`
-- Remove the `useEffect` that creates the client and calls `vapi.start()` -- the call is already in progress
-- Keep the `useEffect` only for attaching event listeners (`call-start`, `call-end`, `speech-start`, `speech-end`, `error`) and cleaning them up on unmount
-- Fix error serialization: use `JSON.stringify(err)` for non-Error objects so the actual error details are shown instead of "[object Object]"
+**File: `supabase/functions/widget-chat/index.ts`**
 
-**File: `src/lib/vapi-client.ts`**
-- No changes needed -- `createFreshVapiClient` already works correctly
+- Replace the naive keyword search with a smarter approach:
+  - Normalize search terms: lowercase, remove common stop words (the, is, a, an, etc.)
+  - Score pages using term frequency (count occurrences, not just boolean includes)
+  - Boost title/summary matches higher than body matches (3x weight)
+  - Include bi-grams (two-word phrases) for better matching
+- Increase content preview from 1,000 to 3,000 characters per page
+- Increase max relevant pages from 5 to 8
+- When no keyword matches are found, include more fallback pages (up to 5 instead of 3)
+
+#### 3. Enhance the chat system prompt
+
+**File: `supabase/functions/widget-chat/index.ts`**
+
+- Fetch additional business context: organization_settings (business_hours, services, extracted_business_data)
+- Include this structured data in the system prompt so the chat agent can answer questions about hours, services, and pricing even when the page search misses
+- Improve the system prompt instructions to be more helpful:
+  - Encourage providing specific, detailed answers rather than just pointing to URLs
+  - Include business hours and services directly so common questions can be answered instantly
+  - Add instructions to handle greetings, thanks, and small talk naturally
+
+#### 4. Keep Vapi assistant in sync on re-crawl
+
+**File: `supabase/functions/crawl-site/index.ts`**
+
+- After crawling completes and summaries are generated, check if the org has a Vapi assistant
+- If yes, trigger `create-vapi-assistant` (which already handles update-or-create) to refresh the voice agent's knowledge with the new content
 
 ### Technical Details
 
-The restructured flow will be:
+**Voice agent knowledge injection (create-vapi-assistant):**
 
 ```text
-User clicks phone button
-  -> createFreshVapiClient(publicKey)     [still in gesture context]
-  -> vapi.start(assistantId)              [still in gesture context - mic allowed]
-  -> setVapiInstance(vapi)
-  -> setInCall(true)
-  -> VoiceCallOverlay mounts with running instance
-  -> useEffect attaches event listeners to track call status
+buildSystemPrompt() will be updated to:
+
+1. Query site_pages for the org
+2. Sort pages by priority (about/services/pricing/FAQ pages first)
+3. Build a condensed knowledge section:
+   - Each page: "Page: {title} | {summary}"
+   - For top 5 pages: include first 800 chars of content
+   - For remaining pages: summary only
+4. Insert as "## Website Knowledge Base" section in prompt
 ```
 
-This keeps `vapi.start()` in the synchronous call chain of the click event, which satisfies the browser's user gesture requirement.
+**Chat agent improved search:**
 
-### Error Display Fix
-
-```typescript
-// Before (broken):
-const msg = err instanceof Error ? err.message : String(err);
-// Shows: "[object Object]"
-
-// After (fixed):
-const msg = err instanceof Error
-  ? err.message
-  : (typeof err === 'object' ? JSON.stringify(err) : String(err));
-// Shows: actual error details like '{"error":"meeting has ended"}'
+```text
+Current: split message by spaces, filter len > 3, boolean includes
+New: 
+  - Remove stop words (the, is, a, an, what, how, do, can, etc.)
+  - Score = (title matches * 3) + (summary matches * 2) + (body matches * 1)
+  - Count occurrences, not just boolean
+  - Include bigrams: "business hours" matches better than "business" + "hours" separately
 ```
+
+**Prompt enhancement for chat:**
+
+```text
+Current system prompt context:
+  - Org name, description, special instructions
+  - Matched page content (truncated)
+
+New system prompt context:
+  - Org name, description, special instructions
+  - Business hours (formatted)
+  - Services list with descriptions
+  - Matched page content (larger, better ranked)
+  - Extracted business data (phone, address)
+```
+
+**Auto-sync after crawl:**
+
+After crawl-site finishes generating summaries, it will call the create-vapi-assistant function internally to update the voice agent's knowledge base with the fresh content.
 
 ### Expected Outcome
-- Voice calls will connect successfully because `vapi.start()` runs within user gesture context
-- Errors will display meaningful messages instead of "[object Object]"
-- The mic stream is managed entirely by Vapi (no redundant `getUserMedia` call)
+
+- Voice agent can answer detailed questions about the business based on actual website content
+- Chat agent finds more relevant pages and provides richer, more detailed answers
+- Both agents have access to structured business data (hours, services, contact info) for instant answers to common questions
+- Re-crawling the website automatically updates both the chat and voice agents
 
