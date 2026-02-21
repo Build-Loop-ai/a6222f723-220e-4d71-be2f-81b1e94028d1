@@ -80,11 +80,15 @@ export function VoiceCallOverlay({
     };
 
     const onError = (err: unknown) => {
-      console.error("[VoiceCall] Event: error", err);
-      const msg = err instanceof Error
-        ? err.message
-        : (typeof err === 'object' && err !== null ? JSON.stringify(err) : String(err));
-      doEndRef.current(msg || "Connection failed");
+      console.error("[VoiceCall] Event: error", JSON.stringify(err, null, 2));
+      let msg = "Connection failed";
+      if (err instanceof Error) {
+        msg = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        const e = err as Record<string, any>;
+        msg = e.error?.errorMsg || e.error?.message || e.errorMsg || e.message || "Call ended unexpectedly";
+      }
+      doEndRef.current(msg);
     };
 
     vapi.on("call-start", onCallStart);
