@@ -197,9 +197,9 @@ function ColorSwatch({
         side="bottom"
         align="start"
         sideOffset={8}
-        className="w-[260px] p-0 rounded-xl border-border/50 shadow-xl bg-popover/95 backdrop-blur-xl"
+        className="w-[260px] p-0 rounded-xl border-border/50 shadow-xl bg-popover backdrop-blur-xl"
       >
-        <div className="p-3 space-y-3">
+        <div className="p-3 space-y-3 text-popover-foreground">
           {/* Native picker + current value */}
           <div className="flex items-center gap-3">
             <button
@@ -220,15 +220,15 @@ function ColorSwatch({
               className="sr-only"
             />
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-medium text-foreground/70 mb-1">Custom color</div>
-              <div className="text-[10px] text-muted-foreground/50 font-mono uppercase">{value}</div>
+              <div className="text-[11px] font-medium text-popover-foreground mb-1">Custom color</div>
+              <div className="text-[10px] text-popover-foreground/60 font-mono uppercase">{value}</div>
             </div>
           </div>
 
           {/* Recent colors */}
           {recentColors.length > 0 && (
             <div>
-              <div className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium mb-1.5">Recent</div>
+              <div className="text-[9px] uppercase tracking-widest text-popover-foreground/50 font-medium mb-1.5">Recent</div>
               <div className="flex flex-wrap gap-1.5">
                 {recentColors.map((c, i) => (
                   <button
@@ -249,11 +249,11 @@ function ColorSwatch({
 
           {/* Palette groups */}
           <div className="border-t border-border/30 pt-2">
-            <div className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium mb-1.5">Palette</div>
+            <div className="text-[9px] uppercase tracking-widest text-popover-foreground/50 font-medium mb-1.5">Palette</div>
             <div className="space-y-1.5">
               {PALETTE_GROUPS.map((group) => (
                 <div key={group.label} className="flex items-center gap-1">
-                  <span className="text-[9px] text-muted-foreground/30 w-10 shrink-0 font-medium">{group.label}</span>
+                  <span className="text-[9px] text-popover-foreground/40 w-10 shrink-0 font-medium">{group.label}</span>
                   <div className="flex gap-1">
                     {group.colors.map((c) => (
                       <button
