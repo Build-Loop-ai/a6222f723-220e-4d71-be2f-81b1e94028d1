@@ -22,8 +22,12 @@ export function createFreshVapiClient(publicKey: string): Vapi {
     vapiInstance = null;
   }
 
-  console.log("[vapi-client] Creating fresh Vapi instance");
-  vapiInstance = new Vapi(publicKey);
+  // Use our edge function as a proxy to avoid Lovable preview fetch interception
+  // and to keep the VAPI_API_KEY server-side
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const apiBaseUrl = supabaseUrl ? `${supabaseUrl}/functions/v1/vapi-proxy` : undefined;
+  console.log("[vapi-client] Creating fresh Vapi instance, apiBaseUrl:", apiBaseUrl);
+  vapiInstance = new Vapi(publicKey, apiBaseUrl);
   return vapiInstance;
 }
 
