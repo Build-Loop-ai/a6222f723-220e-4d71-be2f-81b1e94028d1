@@ -20,6 +20,7 @@ import {
   Type,
   Palette,
   Mic,
+  Phone,
   Send,
   Sparkles,
   ChevronRight,
@@ -51,6 +52,7 @@ interface WidgetConfig {
   position: string;
   theme: string;
   voice_enabled: boolean;
+  voice_call_enabled: boolean;
   avatar_url: string | null;
   allowed_domains: string[];
   header_text_color: string;
@@ -309,11 +311,12 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [screenshotLoaded, setScreenshotLoaded] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [tryMode, setTryMode] = useState(false);
+  const [vapiAssistantId, setVapiAssistantId] = useState<string | null>(null);
   const iframeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
-      const [{ data: widgetData }, { data: orgData }] = await Promise.all([
+      const [{ data: widgetData }, { data: orgData }, { data: settingsData }] = await Promise.all([
         supabase
           .from("widget_configs")
           .select("*")
@@ -324,6 +327,11 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           .select("website")
           .eq("id", organizationId)
           .maybeSingle(),
+        supabase
+          .from("organization_settings")
+          .select("vapi_assistant_id")
+          .eq("organization_id", organizationId)
+          .maybeSingle(),
       ]);
       setConfig(widgetData);
       if (orgData?.website) {
@@ -332,6 +340,9 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           url = `https://${url}`;
         }
         setWebsiteUrl(url);
+      }
+      if (settingsData?.vapi_assistant_id) {
+        setVapiAssistantId(settingsData.vapi_assistant_id);
       }
       setLoading(false);
     };
@@ -755,6 +766,17 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                   <Mic className="h-3.5 w-3.5" />
                 </button>
                 <button
+                  onClick={() => uNow("voice_call_enabled", !config.voice_call_enabled)}
+                  className={`hidden md:flex h-7 w-7 rounded-xl items-center justify-center transition-all duration-200 ${
+                    config.voice_call_enabled
+                      ? "bg-primary/12 text-primary shadow-sm shadow-primary/10"
+                      : "bg-foreground/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-foreground/[0.07]"
+                  }`}
+                  title="Voice call (VAPI)"
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                </button>
+                <button
                   onClick={() => uNow("show_branding", !config.show_branding)}
                   className={`hidden md:flex h-7 w-7 rounded-xl items-center justify-center transition-all duration-200 ${
                     config.show_branding
@@ -1063,6 +1085,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
               widgetTitle={config.widget_title}
               avatarUrl={config.avatar_url}
               voiceEnabled={config.voice_enabled}
+              vapiPublicKey={config.voice_call_enabled && vapiAssistantId ? import.meta.env.VITE_VAPI_PUBLIC_KEY : undefined}
+              vapiAssistantId={config.voice_call_enabled && vapiAssistantId ? vapiAssistantId : undefined}
             />
           </div>
         )}

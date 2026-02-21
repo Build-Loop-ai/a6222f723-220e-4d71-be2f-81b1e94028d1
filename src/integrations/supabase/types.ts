@@ -999,6 +999,7 @@ export type Database = {
           theme: string
           updated_at: string
           user_message_text_color: string
+          voice_call_enabled: boolean
           voice_enabled: boolean
           welcome_message: string
           widget_title: string
@@ -1028,6 +1029,7 @@ export type Database = {
           theme?: string
           updated_at?: string
           user_message_text_color?: string
+          voice_call_enabled?: boolean
           voice_enabled?: boolean
           welcome_message?: string
           widget_title?: string
@@ -1057,6 +1059,7 @@ export type Database = {
           theme?: string
           updated_at?: string
           user_message_text_color?: string
+          voice_call_enabled?: boolean
           voice_enabled?: boolean
           welcome_message?: string
           widget_title?: string

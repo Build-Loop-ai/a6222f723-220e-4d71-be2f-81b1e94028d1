@@ -12,6 +12,8 @@ export interface ChatWidgetProps {
   widgetTitle?: string;
   avatarUrl?: string | null;
   voiceEnabled?: boolean;
+  vapiPublicKey?: string;
+  vapiAssistantId?: string;
 }
 
 export function ChatWidget({
@@ -24,6 +26,8 @@ export function ChatWidget({
   widgetTitle = "Chat with us",
   avatarUrl = null,
   voiceEnabled = false,
+  vapiPublicKey,
+  vapiAssistantId,
 }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
@@ -66,6 +70,8 @@ export function ChatWidget({
           supabaseUrl={supabaseUrl}
           onClose={closeWidget}
           isClosing={isClosing}
+          vapiPublicKey={vapiPublicKey}
+          vapiAssistantId={vapiAssistantId}
         />
       )}
       <ChatBubble
