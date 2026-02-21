@@ -194,7 +194,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newDomain, setNewDomain] = useState("");
-  const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
+  // previewDevice removed — widget renders at real size
   const [previewOpen, setPreviewOpen] = useState(true);
   const [editingZone, setEditingZone] = useState<EditingZone>(null);
   const [activePanel, setActivePanel] = useState<"style" | "embed" | "domains">("style");
@@ -801,309 +801,253 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
         </div>
       </div>
 
-      {/* ━━━━ Right: Immersive Canvas ━━━━ */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#fafafa]">
-        {/* Canvas toolbar */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-white">
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Preview</span>
-            {editingZone && (
-              <motion.div
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-1.5 bg-primary/10 text-primary rounded-full px-2.5 py-0.5"
-              >
-                <Pencil className="h-2.5 w-2.5" />
-                <span className="text-[10px] font-medium">{ZONE_LABELS[editingZone]?.title}</span>
-              </motion.div>
-            )}
-          </div>
-          <div className="flex items-center gap-1 rounded-xl bg-gray-100 p-0.5">
-            {([
-              { key: "desktop", icon: <Monitor className="h-3 w-3" /> },
-              { key: "mobile", icon: <Smartphone className="h-3 w-3" /> },
-            ] as const).map((d) => (
-              <button
-                key={d.key}
-                onClick={() => setPreviewDevice(d.key)}
-                className={`rounded-lg p-1.5 transition-all ${
-                  previewDevice === d.key
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-400 hover:text-gray-700"
-                }`}
-              >
-                {d.icon}
-              </button>
-            ))}
+      {/* ━━━━ Right: Live Canvas ━━━━ */}
+      <div className="flex-1 flex flex-col min-w-0 relative overflow-hidden bg-white">
+        {/* Subtle page skeleton background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="max-w-2xl mx-auto space-y-4 p-10 pt-16 opacity-[0.06]">
+            <div className="h-8 w-2/3 rounded-lg bg-gray-900" />
+            <div className="h-3 w-full rounded bg-gray-900" />
+            <div className="h-3 w-5/6 rounded bg-gray-900" />
+            <div className="h-3 w-4/5 rounded bg-gray-900" />
+            <div className="h-40 w-full rounded-xl bg-gray-900 mt-6" />
+            <div className="h-3 w-full rounded bg-gray-900 mt-6" />
+            <div className="h-3 w-3/4 rounded bg-gray-900" />
+            <div className="h-3 w-2/3 rounded bg-gray-900" />
+            <div className="h-32 w-full rounded-xl bg-gray-900 mt-6" />
+            <div className="h-3 w-4/5 rounded bg-gray-900 mt-6" />
+            <div className="h-3 w-full rounded bg-gray-900" />
+            <div className="h-3 w-3/5 rounded bg-gray-900" />
           </div>
         </div>
 
-        {/* Canvas area */}
-        <div className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
-          {/* Subtle grid background */}
-           <div className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage: "radial-gradient(circle, #9ca3af 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
-          />
-
-          {/* Device frame */}
+        {/* Editing zone indicator */}
+        {editingZone && (
           <motion.div
-            layout
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className={`relative overflow-hidden rounded-[20px] border border-gray-200 bg-white shadow-xl ${
-              previewDevice === "mobile" ? "w-[375px] h-[680px]" : "w-[640px] h-[680px]"
-            }`}
-            style={{
-              boxShadow: "0 25px 60px -12px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)",
-            }}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-full px-3 py-1.5 shadow-sm"
           >
-            {/* Browser chrome */}
-            <div className="flex h-8 items-center gap-1.5 bg-[#f5f5f5] px-3 border-b border-gray-200/50">
-              <div className="flex gap-1.5">
-                <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-                <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-                <div className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-              </div>
-              <div className="ml-3 flex-1 h-4 rounded-md bg-white border border-gray-200/60 flex items-center px-2">
-                <span className="text-[8px] text-gray-400">yourwebsite.com</span>
-              </div>
-            </div>
+            <Pencil className="h-2.5 w-2.5 text-primary" />
+            <span className="text-[10px] font-medium">Editing {ZONE_LABELS[editingZone]?.title}</span>
+          </motion.div>
+        )}
 
-            {/* Page content skeleton */}
-            <div className="relative h-[calc(100%-2rem)] overflow-hidden bg-white">
-              <div className="space-y-3 p-6 opacity-30">
-                <div className="h-7 w-2/3 rounded-lg bg-gray-200" />
-                <div className="h-3 w-full rounded bg-gray-100" />
-                <div className="h-3 w-5/6 rounded bg-gray-100" />
-                <div className="h-3 w-4/5 rounded bg-gray-100" />
-                <div className="h-32 w-full rounded-xl bg-gray-100 mt-4" />
-                <div className="h-3 w-full rounded bg-gray-100 mt-4" />
-                <div className="h-3 w-3/4 rounded bg-gray-100" />
-                <div className="h-3 w-2/3 rounded bg-gray-100" />
-                <div className="h-24 w-full rounded-xl bg-gray-50 mt-4" />
-                <div className="h-3 w-4/5 rounded bg-gray-100 mt-4" />
+        {/* ── Widget Chat Panel (real position) ── */}
+        <AnimatePresence>
+          {previewOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.92 }}
+              transition={{ type: "spring", damping: 28, stiffness: 380 }}
+              className={`absolute z-10 flex flex-col overflow-hidden ${
+                config.position === "bottom-right" ? "right-6" : "left-6"
+              } bottom-[76px]`}
+              style={{
+                width: "380px",
+                height: "480px",
+                fontFamily: `'${config.font_family}', system-ui, sans-serif`,
+                borderRadius: config.border_radius === "full" ? "24px" : config.border_radius === "rounded" ? "16px" : config.border_radius === "sm" ? "8px" : "2px",
+                boxShadow: "0 20px 60px -12px rgba(0,0,0,0.25), 0 8px 24px -8px rgba(0,0,0,0.12)",
+              }}
+            >
+              {/* HEADER */}
+              <div
+                onClick={() => setEditingZone("header")}
+                className={`group relative flex items-center gap-2.5 px-4 py-3 cursor-pointer transition-all ${
+                  editingZone === "header" ? "ring-2 ring-primary ring-inset" : ""
+                }`}
+                style={{ backgroundColor: config.accent_color }}
+              >
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <Pencil className="h-3.5 w-3.5 text-white drop-shadow" />
+                </div>
+                {config.avatar_url && (
+                  <img src={config.avatar_url} alt="" className="h-8 w-8 rounded-full border-2 border-white/20 object-cover" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="truncate text-sm font-semibold" style={{ color: config.header_text_color }}>
+                    {config.widget_title || "Chat with us"}
+                  </h3>
+                  <p className="text-[10px]" style={{ color: config.header_text_color + "99" }}>
+                    {config.header_subtitle || "Online"}
+                  </p>
+                </div>
+                <button className="rounded p-0.5 hover:bg-white/10">
+                  <X className="h-4 w-4" style={{ color: config.header_text_color + "80" }} />
+                </button>
               </div>
 
-              {/* ── Widget Chat Panel ── */}
-              <AnimatePresence>
-                {previewOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 24, scale: 0.92 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 24, scale: 0.92 }}
-                    transition={{ type: "spring", damping: 28, stiffness: 380 }}
-                    className={`absolute z-10 flex flex-col overflow-hidden ${
-                      config.position === "bottom-right" ? "right-4" : "left-4"
-                    } bottom-[68px]`}
+              {/* MESSAGES */}
+              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5" style={{ backgroundColor: config.chat_bg_color }}>
+                {/* Welcome */}
+                <div
+                  onClick={() => setEditingZone("welcome")}
+                  className={`group relative flex justify-start cursor-pointer`}
+                >
+                  <div
+                    className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed relative transition-all ${
+                      editingZone === "welcome" ? "ring-2 ring-primary" : ""
+                    }`}
                     style={{
-                      width: previewDevice === "mobile" ? "310px" : "340px",
-                      height: previewDevice === "mobile" ? "400px" : "440px",
-                      fontFamily: `'${config.font_family}', system-ui, sans-serif`,
-                      borderRadius: config.border_radius === "full" ? "24px" : config.border_radius === "rounded" ? "16px" : config.border_radius === "sm" ? "8px" : "2px",
-                      boxShadow: "0 20px 60px -12px rgba(0,0,0,0.25), 0 8px 24px -8px rgba(0,0,0,0.12)",
+                      backgroundColor: config.bot_message_bg,
+                      color: config.bot_message_text_color,
+                      borderRadius: radiusCss,
+                      borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
                     }}
                   >
-                    {/* HEADER */}
-                    <div
-                      onClick={() => setEditingZone("header")}
-                      className={`group relative flex items-center gap-2.5 px-4 py-3 cursor-pointer transition-all ${
-                        editingZone === "header" ? "ring-2 ring-primary ring-inset" : ""
-                      }`}
-                      style={{ backgroundColor: config.accent_color }}
-                    >
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <Pencil className="h-3.5 w-3.5 text-white drop-shadow" />
-                      </div>
-                      {config.avatar_url && (
-                        <img src={config.avatar_url} alt="" className="h-8 w-8 rounded-full border-2 border-white/20 object-cover" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="truncate text-sm font-semibold" style={{ color: config.header_text_color }}>
-                          {config.widget_title || "Chat with us"}
-                        </h3>
-                        <p className="text-[10px]" style={{ color: config.header_text_color + "99" }}>
-                          {config.header_subtitle || "Online"}
-                        </p>
-                      </div>
-                      <button className="rounded p-0.5 hover:bg-white/10">
-                        <X className="h-4 w-4" style={{ color: config.header_text_color + "80" }} />
-                      </button>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <Pencil className="h-3 w-3 text-foreground/50" />
                     </div>
+                    {config.welcome_message || "Hi! How can I help you today?"}
+                  </div>
+                </div>
 
-                    {/* MESSAGES */}
-                    <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5" style={{ backgroundColor: config.chat_bg_color }}>
-                      {/* Welcome */}
-                      <div
-                        onClick={() => setEditingZone("welcome")}
-                        className={`group relative flex justify-start cursor-pointer`}
-                      >
-                        <div
-                          className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed relative transition-all ${
-                            editingZone === "welcome" ? "ring-2 ring-primary" : ""
-                          }`}
-                          style={{
-                            backgroundColor: config.bot_message_bg,
-                            color: config.bot_message_text_color,
-                            borderRadius: radiusCss,
-                            borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
-                            <Pencil className="h-3 w-3 text-foreground/50" />
-                          </div>
-                          {config.welcome_message || "Hi! How can I help you today?"}
-                        </div>
-                      </div>
-
-                      {/* User message */}
-                      <div
-                        onClick={() => setEditingZone("user-bubble")}
-                        className="group relative flex justify-end cursor-pointer"
-                      >
-                        <div
-                          className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed relative transition-all ${
-                            editingZone === "user-bubble" ? "ring-2 ring-primary" : ""
-                          }`}
-                          style={{
-                            backgroundColor: config.accent_color,
-                            color: config.user_message_text_color,
-                            borderRadius: radiusCss,
-                            borderBottomRightRadius: config.border_radius === "full" ? "4px" : "2px",
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
-                            <Pencil className="h-3 w-3 text-white drop-shadow" />
-                          </div>
-                          I'd like to book an appointment
-                        </div>
-                      </div>
-
-                      {/* Bot reply */}
-                      <div
-                        onClick={() => setEditingZone("bot-bubble")}
-                        className="group relative flex justify-start cursor-pointer"
-                      >
-                        <div
-                          className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed relative transition-all ${
-                            editingZone === "bot-bubble" ? "ring-2 ring-primary" : ""
-                          }`}
-                          style={{
-                            backgroundColor: config.bot_message_bg,
-                            color: config.bot_message_text_color,
-                            borderRadius: radiusCss,
-                            borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
-                          }}
-                        >
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
-                            <Pencil className="h-3 w-3 text-foreground/50" />
-                          </div>
-                          Of course! I'd be happy to help. What date works best for you?
-                        </div>
-                      </div>
-
-                      {/* Typing indicator */}
-                      <div className="flex justify-start">
-                        <div
-                          className="flex gap-1 px-3.5 py-2.5"
-                          style={{
-                            backgroundColor: config.bot_message_bg,
-                            borderRadius: radiusCss,
-                            borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
-                          }}
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                          <span className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                          <span className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "300ms" }} />
-                        </div>
-                      </div>
+                {/* User message */}
+                <div
+                  onClick={() => setEditingZone("user-bubble")}
+                  className="group relative flex justify-end cursor-pointer"
+                >
+                  <div
+                    className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed relative transition-all ${
+                      editingZone === "user-bubble" ? "ring-2 ring-primary" : ""
+                    }`}
+                    style={{
+                      backgroundColor: config.accent_color,
+                      color: config.user_message_text_color,
+                      borderRadius: radiusCss,
+                      borderBottomRightRadius: config.border_radius === "full" ? "4px" : "2px",
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <Pencil className="h-3 w-3 text-white drop-shadow" />
                     </div>
+                    I'd like to book an appointment
+                  </div>
+                </div>
 
-                    {/* INPUT */}
-                    <div
-                      onClick={() => setEditingZone("input")}
-                      className={`group relative flex items-center gap-1.5 border-t px-3 py-2.5 cursor-pointer transition-all ${
-                        editingZone === "input" ? "ring-2 ring-primary ring-inset" : ""
-                      }`}
-                      style={{
-                        borderColor: config.input_border_color + "40",
-                        backgroundColor: config.chat_bg_color,
-                      }}
-                    >
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
-                        <Pencil className="h-3 w-3 text-foreground/40" />
-                      </div>
-                      {config.voice_enabled && (
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-400">
-                          <Mic className="h-3.5 w-3.5" />
-                        </div>
-                      )}
-                      <div
-                        className="flex-1 rounded-full px-3 py-1.5 text-[11px]"
-                        style={{
-                          backgroundColor: config.input_bg_color,
-                          color: config.input_text_color + "80",
-                          border: `1px solid ${config.input_border_color}`,
-                        }}
-                      >
-                        {config.placeholder_text || "Type your message..."}
-                      </div>
-                      <div
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white"
-                        style={{ backgroundColor: config.accent_color }}
-                      >
-                        <Send className="h-3 w-3" />
-                      </div>
+                {/* Bot reply */}
+                <div
+                  onClick={() => setEditingZone("bot-bubble")}
+                  className="group relative flex justify-start cursor-pointer"
+                >
+                  <div
+                    className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed relative transition-all ${
+                      editingZone === "bot-bubble" ? "ring-2 ring-primary" : ""
+                    }`}
+                    style={{
+                      backgroundColor: config.bot_message_bg,
+                      color: config.bot_message_text_color,
+                      borderRadius: radiusCss,
+                      borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors rounded-[inherit] flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <Pencil className="h-3 w-3 text-foreground/50" />
                     </div>
+                    Of course! I'd be happy to help. What date works best for you?
+                  </div>
+                </div>
 
-                    {/* BRANDING */}
-                    {config.show_branding && (
-                      <div
-                        onClick={() => setEditingZone("branding")}
-                        className={`group relative cursor-pointer border-t py-1.5 text-center transition-all ${
-                          editingZone === "branding" ? "ring-2 ring-primary ring-inset" : ""
-                        }`}
-                        style={{
-                          borderColor: config.input_border_color + "20",
-                          backgroundColor: config.chat_bg_color,
-                        }}
-                      >
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Pencil className="h-2.5 w-2.5 text-foreground/30" />
-                        </div>
-                        <span className="text-[9px] text-gray-300">Powered by AI</span>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                {/* Typing indicator */}
+                <div className="flex justify-start">
+                  <div
+                    className="flex gap-1 px-3.5 py-2.5"
+                    style={{
+                      backgroundColor: config.bot_message_bg,
+                      borderRadius: radiusCss,
+                      borderBottomLeftRadius: config.border_radius === "full" ? "4px" : "2px",
+                    }}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              </div>
 
-              {/* ── Chat Bubble ── */}
-              <motion.button
-                onClick={() => {
-                  if (!previewOpen) setPreviewOpen(true);
-                  else setEditingZone("bubble-btn");
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className={`absolute bottom-3 z-10 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all ${
-                  config.position === "bottom-right" ? "right-4" : "left-4"
-                } ${editingZone === "bubble-btn" ? "ring-2 ring-primary ring-offset-2" : ""}`}
+              {/* INPUT */}
+              <div
+                onClick={() => setEditingZone("input")}
+                className={`group relative flex items-center gap-1.5 border-t px-3 py-2.5 cursor-pointer transition-all ${
+                  editingZone === "input" ? "ring-2 ring-primary ring-inset" : ""
+                }`}
                 style={{
-                  backgroundColor: config.accent_color,
-                  boxShadow: `0 8px 24px -4px ${config.accent_color}60`,
+                  borderColor: config.input_border_color + "40",
+                  backgroundColor: config.chat_bg_color,
                 }}
               >
-                {previewOpen ? (
-                  <X className="h-5 w-5 text-white" />
-                ) : (
-                  <MessageSquare className="h-5 w-5 text-white" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
+                  <Pencil className="h-3 w-3 text-foreground/40" />
+                </div>
+                {config.voice_enabled && (
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-400">
+                    <Mic className="h-3.5 w-3.5" />
+                  </div>
                 )}
-              </motion.button>
-            </div>
-          </motion.div>
-        </div>
+                <div
+                  className="flex-1 rounded-full px-3 py-1.5 text-[11px]"
+                  style={{
+                    backgroundColor: config.input_bg_color,
+                    color: config.input_text_color + "80",
+                    border: `1px solid ${config.input_border_color}`,
+                  }}
+                >
+                  {config.placeholder_text || "Type your message..."}
+                </div>
+                <div
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white"
+                  style={{ backgroundColor: config.accent_color }}
+                >
+                  <Send className="h-3 w-3" />
+                </div>
+              </div>
+
+              {/* BRANDING */}
+              {config.show_branding && (
+                <div
+                  onClick={() => setEditingZone("branding")}
+                  className={`group relative cursor-pointer border-t py-1.5 text-center transition-all ${
+                    editingZone === "branding" ? "ring-2 ring-primary ring-inset" : ""
+                  }`}
+                  style={{
+                    borderColor: config.input_border_color + "20",
+                    backgroundColor: config.chat_bg_color,
+                  }}
+                >
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <Pencil className="h-2.5 w-2.5 text-foreground/30" />
+                  </div>
+                  <span className="text-[9px] text-gray-300">Powered by AI</span>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Chat Bubble (real position) ── */}
+        <motion.button
+          onClick={() => {
+            if (!previewOpen) setPreviewOpen(true);
+            else setEditingZone("bubble-btn");
+          }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className={`absolute bottom-5 z-10 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all ${
+            config.position === "bottom-right" ? "right-6" : "left-6"
+          } ${editingZone === "bubble-btn" ? "ring-2 ring-primary ring-offset-2" : ""}`}
+          style={{
+            backgroundColor: config.accent_color,
+            boxShadow: `0 8px 24px -4px ${config.accent_color}60`,
+          }}
+        >
+          {previewOpen ? (
+            <X className="h-5 w-5 text-white" />
+          ) : (
+            <MessageSquare className="h-5 w-5 text-white" />
+          )}
+        </motion.button>
       </div>
     </motion.div>
   );
