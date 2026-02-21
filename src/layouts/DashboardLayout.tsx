@@ -13,8 +13,10 @@ const DashboardLayout = () => {
     <>
       <CommandPalette />
       <div className="light-theme min-h-screen flex w-full gradient-mesh relative">
-        {/* Top gradient accent line */}
-        <div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-emerald-500 to-cyan-500 z-50 opacity-70" />
+        {/* Top gradient accent line – hidden on widget builder (it has its own toolbar) */}
+        {!isFullBleed && (
+          <div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-emerald-500 to-cyan-500 z-50 opacity-70" />
+        )}
         
         {/* Desktop sidebar */}
         <DashboardSidebar />

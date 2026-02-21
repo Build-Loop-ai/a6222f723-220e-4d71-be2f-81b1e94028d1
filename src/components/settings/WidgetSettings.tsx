@@ -645,15 +645,13 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
       animate={{ opacity: 1 }}
       className="flex-1 min-h-0 h-full overflow-hidden bg-background text-foreground relative"
     >
-      {/* ━━━━ Glassy Top Bar ━━━━ */}
+      {/* ━━━━ Glassy Top Bar – connected to sidebar ━━━━ */}
       <div className="absolute top-0 left-0 right-0 z-30">
-        {/* Ambient green glow – mirrors sidebar treatment */}
-        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary/[0.06] to-transparent pointer-events-none" />
+        {/* Top accent line – spans full width including above sidebar */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-emerald-500/40 to-cyan-500/30 z-10" />
         
         {/* Main bar */}
-        <div className="relative h-14 glass-toolbar flex items-center px-4 gap-0">
-          {/* Top accent line */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-emerald-500/40 to-primary/20" />
+        <div className="relative h-14 glass-toolbar flex items-center px-4 gap-0 border-l-0">
 
           {/* ── Left zone: label + design controls ── */}
           <div className="flex items-center gap-2 shrink-0 w-[45%]">
@@ -963,8 +961,10 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
       {/* ━━━━ Full Canvas ━━━━ */}
       <div className="absolute inset-0 pt-14">
-        {/* Website iframe or fallback skeleton */}
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Website iframe or fallback skeleton – with rounded inset look */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-tl-2xl">
+          {/* Inner shadow overlay for depth */}
+          <div className="absolute inset-0 z-[1] pointer-events-none rounded-tl-2xl shadow-[inset_0_2px_12px_0_rgba(0,0,0,0.08)]" />
           {websiteUrl ? (
             <>
               {iframeFailed && !iframeLoaded && (
