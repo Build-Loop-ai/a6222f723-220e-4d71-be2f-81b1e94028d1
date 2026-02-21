@@ -97,6 +97,33 @@ const RADIUS_OPTIONS = [
   { value: "full", label: "Pill", css: "9999px", icon: "◯" },
 ];
 
+/* ── Color history (localStorage) ── */
+const COLOR_HISTORY_KEY = "widget-color-history";
+const MAX_HISTORY = 12;
+
+function getColorHistory(): string[] {
+  try {
+    const raw = localStorage.getItem(COLOR_HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function pushColorHistory(color: string) {
+  const normalized = color.toLowerCase();
+  if (!/^#[0-9a-f]{6}$/i.test(normalized)) return;
+  const history = getColorHistory().filter((c) => c !== normalized);
+  history.unshift(normalized);
+  localStorage.setItem(COLOR_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+}
+
+const PALETTE_GROUPS: { label: string; colors: string[] }[] = [
+  { label: "Green", colors: ["#34D77B", "#16a34a", "#059669", "#0d9488", "#10b981", "#22c55e"] },
+  { label: "Blue", colors: ["#2563eb", "#3b82f6", "#0891b2", "#06b6d4", "#6366f1", "#818cf8"] },
+  { label: "Warm", colors: ["#dc2626", "#ef4444", "#ea580c", "#f97316", "#d97706", "#eab308"] },
+  { label: "Purple", colors: ["#7c3aed", "#8b5cf6", "#a855f7", "#db2777", "#ec4899", "#f472b6"] },
+  { label: "Neutral", colors: ["#000000", "#1f2937", "#4b5563", "#9ca3af", "#e5e7eb", "#ffffff"] },
+];
+
 /* ── Inline color swatch + picker ── */
 function ColorSwatch({
   value,
@@ -108,65 +135,149 @@ function ColorSwatch({
   label: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [hexInput, setHexInput] = useState(value);
+  const [recentColors, setRecentColors] = useState<string[]>(getColorHistory);
+  const colorInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync hex input when value changes externally
+  useEffect(() => { setHexInput(value); }, [value]);
+
+  const applyColor = (c: string) => {
+    onChange(c);
+    setHexInput(c);
+    pushColorHistory(c);
+    setRecentColors(getColorHistory());
+  };
+
+  const commitHex = () => {
+    const cleaned = hexInput.startsWith("#") ? hexInput : `#${hexInput}`;
+    if (/^#[0-9a-fA-F]{6}$/.test(cleaned)) {
+      applyColor(cleaned);
+    } else {
+      setHexInput(value); // revert
+    }
+  };
 
   return (
-    <div className="space-y-1">
-      <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">
-        {label}
-      </span>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setOpen(!open)}
-          className="relative h-7 w-7 rounded-lg border border-gray-200 transition-all hover:scale-110 hover:shadow-md active:scale-95 shrink-0"
-          style={{ backgroundColor: value }}
-        >
-          {open && (
-            <motion.div
-              layoutId="color-ring"
-              className="absolute -inset-[3px] rounded-[10px] border-2 border-primary"
+    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) commitHex(); }}>
+      <div className="space-y-1">
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60 font-medium">
+          {label}
+        </span>
+        <div className="flex items-center gap-2">
+          <PopoverTrigger asChild>
+            <button
+              className="relative h-7 w-7 rounded-lg border border-border/50 transition-all hover:scale-110 hover:shadow-md active:scale-95 shrink-0 group"
+              style={{ backgroundColor: value }}
+            >
+              <span className="absolute inset-0 rounded-lg ring-1 ring-inset ring-black/10" />
+              {value === "#ffffff" && <span className="absolute inset-0 rounded-lg border border-border" />}
+            </button>
+          </PopoverTrigger>
+          <div className="flex items-center gap-1 flex-1 h-7 border-b border-border/40 focus-within:border-primary/50 transition-colors">
+            <span className="text-[11px] text-muted-foreground/50 font-mono">#</span>
+            <input
+              type="text"
+              value={hexInput.replace(/^#/, "")}
+              onChange={(e) => {
+                const v = e.target.value.replace(/[^0-9a-fA-F]/g, "").slice(0, 6);
+                setHexInput(`#${v}`);
+                if (v.length === 6) applyColor(`#${v}`);
+              }}
+              onBlur={commitHex}
+              onKeyDown={(e) => e.key === "Enter" && commitHex()}
+              className="flex-1 bg-transparent border-0 text-[11px] font-mono text-foreground/80 outline-none px-0 uppercase"
+              maxLength={6}
             />
-          )}
-        </button>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="flex-1 h-7 bg-transparent border-0 border-b border-gray-200 text-[11px] font-mono text-gray-700 outline-none focus:border-primary/50 transition-colors px-0"
-        />
+          </div>
+        </div>
       </div>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="pt-1.5 flex items-center gap-2">
-              <input
-                type="color"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="h-7 w-7 cursor-pointer rounded-lg border-0 bg-transparent p-0"
-              />
-              <div className="flex flex-wrap gap-1">
-                {PRESET_COLORS.slice(0, 8).map((c) => (
+
+      <PopoverContent
+        side="bottom"
+        align="start"
+        sideOffset={8}
+        className="w-[260px] p-0 rounded-xl border-border/50 shadow-xl bg-popover/95 backdrop-blur-xl"
+      >
+        <div className="p-3 space-y-3">
+          {/* Native picker + current value */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => colorInputRef.current?.click()}
+              className="h-10 w-10 rounded-xl border border-border/50 shrink-0 relative overflow-hidden cursor-pointer group"
+              style={{ backgroundColor: value }}
+            >
+              <span className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/10" />
+              <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/20 transition-opacity">
+                <Palette className="h-4 w-4 text-white" />
+              </span>
+            </button>
+            <input
+              ref={colorInputRef}
+              type="color"
+              value={value}
+              onChange={(e) => applyColor(e.target.value)}
+              className="sr-only"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] font-medium text-foreground/70 mb-1">Custom color</div>
+              <div className="text-[10px] text-muted-foreground/50 font-mono uppercase">{value}</div>
+            </div>
+          </div>
+
+          {/* Recent colors */}
+          {recentColors.length > 0 && (
+            <div>
+              <div className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium mb-1.5">Recent</div>
+              <div className="flex flex-wrap gap-1.5">
+                {recentColors.map((c, i) => (
                   <button
-                    key={c}
-                    onClick={() => { onChange(c); setOpen(false); }}
-                    className={`h-4 w-4 rounded-full transition-all hover:scale-125 ${
-                      value === c ? "ring-1 ring-primary ring-offset-1 ring-offset-white" : ""
+                    key={`${c}-${i}`}
+                    onClick={() => { applyColor(c); setOpen(false); }}
+                    className={`h-6 w-6 rounded-lg transition-all hover:scale-110 active:scale-95 relative ${
+                      value.toLowerCase() === c ? "ring-2 ring-primary ring-offset-1 ring-offset-popover" : "ring-1 ring-black/10"
                     }`}
                     style={{ backgroundColor: c }}
-                  />
+                    title={c}
+                  >
+                    {c === "#ffffff" && <span className="absolute inset-0 rounded-lg border border-border" />}
+                  </button>
                 ))}
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          )}
+
+          {/* Palette groups */}
+          <div className="border-t border-border/30 pt-2">
+            <div className="text-[9px] uppercase tracking-widest text-muted-foreground/40 font-medium mb-1.5">Palette</div>
+            <div className="space-y-1.5">
+              {PALETTE_GROUPS.map((group) => (
+                <div key={group.label} className="flex items-center gap-1">
+                  <span className="text-[9px] text-muted-foreground/30 w-10 shrink-0 font-medium">{group.label}</span>
+                  <div className="flex gap-1">
+                    {group.colors.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => { applyColor(c); setOpen(false); }}
+                        className={`h-5 w-5 rounded-md transition-all hover:scale-125 active:scale-95 relative ${
+                          value.toLowerCase() === c.toLowerCase()
+                            ? "ring-2 ring-primary ring-offset-1 ring-offset-popover"
+                            : "ring-1 ring-black/10"
+                        }`}
+                        style={{ backgroundColor: c }}
+                        title={c}
+                      >
+                        {c === "#ffffff" && <span className="absolute inset-0 rounded-md border border-border" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
