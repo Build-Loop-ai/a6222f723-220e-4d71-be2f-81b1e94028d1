@@ -16,7 +16,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Loader2, Building, Clock, Briefcase, Globe, Pencil } from "lucide-react";
+import { Loader2, Building, Clock, Briefcase, Globe, Pencil, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { BusinessHoursEditor } from "./BusinessHoursEditor";
 import { ServicesEditor } from "./ServicesEditor";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,6 +91,7 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
   const [loading, setLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
+  const [crawling, setCrawling] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -107,6 +109,34 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
 
   const [businessHours, setBusinessHours] = useState<BusinessHours>({});
   const [services, setServices] = useState<Service[]>([]);
+
+  const handleCrawlWebsite = useCallback(async () => {
+    if (!formData.website) return;
+    setCrawling(true);
+    try {
+      await supabase
+        .from("organizations")
+        .update({ website: formData.website })
+        .eq("id", organizationId);
+
+      const { data, error } = await supabase.functions.invoke("crawl-site", {
+        body: { organizationId, websiteUrl: formData.website },
+      });
+      if (error) throw error;
+      toast({
+        title: "Website crawled",
+        description: `Successfully indexed ${data?.pagesProcessed || 0} pages. Your AI is now learning from your website.`,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Crawl failed",
+        description: err.message || "Could not crawl website",
+        variant: "destructive",
+      });
+    } finally {
+      setCrawling(false);
+    }
+  }, [formData.website, organizationId, toast]);
 
   const settingsData = useMemo(() => ({
     formData,
@@ -406,14 +436,31 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
                 <div className="flex items-center">
                   <Label>Website URL</Label>
                 </div>
-                <Input
-                  type="url"
-                  value={formData.website}
-                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  placeholder="https://www.example.com"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    type="url"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    placeholder="https://www.example.com"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!formData.website || crawling}
+                    onClick={handleCrawlWebsite}
+                    className="gap-2 shrink-0"
+                  >
+                    {crawling ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4" />
+                    )}
+                    {crawling ? "Crawling..." : "Crawl Website"}
+                  </Button>
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  Used for crawling your site to build the AI knowledge base.
+                  Enter your website URL and click "Crawl Website" to teach the AI about your business.
                 </p>
               </div>
 
