@@ -628,12 +628,12 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex-1 min-h-0 h-full overflow-hidden bg-white text-gray-900 relative"
+      className="flex-1 min-h-0 h-full overflow-hidden bg-background text-foreground relative"
     >
       {/* ━━━━ Glassy Top Bar ━━━━ */}
       <div className="absolute top-0 left-0 right-0 z-30">
         {/* Ambient green glow – mirrors sidebar treatment */}
-        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary/[0.04] to-transparent pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary/[0.06] to-transparent pointer-events-none" />
         
         {/* Main bar */}
         <div className="relative h-14 glass-toolbar flex items-center px-5 gap-4">
