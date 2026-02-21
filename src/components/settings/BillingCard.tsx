@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 import { CreditCard, Check, ExternalLink, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
@@ -160,19 +161,19 @@ export const BillingCard = ({ subscription, organizationId }: BillingCardProps) 
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Plan</CardTitle>
-          <CardDescription>Manage your subscription and billing.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <div className="glass-card overflow-hidden">
+        <div className="p-6 pb-4 border-b border-border/50">
+          <h2 className="text-lg font-serif font-semibold text-foreground">Current Plan</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage your subscription and billing.</p>
+        </div>
+        <div className="p-6 space-y-6">
           {/* Current Plan Display */}
-          <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20">
+          <div className="flex items-center justify-between p-5 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/15">
             <div>
-              <div className="text-lg font-serif font-medium text-primary">
+              <div className="text-lg font-serif font-semibold text-primary">
                 {planLabels[subscription?.plan || 'starter'] || 'Starter Plan'}
               </div>
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground mt-0.5">
                 {currentPlan ? formatPrice(currentPlan.price_monthly_cents) : '€97'}/month
                 {subscription?.current_period_end && (
                   <>
@@ -184,51 +185,52 @@ export const BillingCard = ({ subscription, organizationId }: BillingCardProps) 
             </div>
             <Badge
               variant="secondary"
-              className={
+              className={cn(
+                "rounded-lg px-3 py-1 text-xs font-semibold capitalize",
                 subscription?.status === 'active'
-                  ? 'bg-green-100 text-green-700'
+                  ? 'bg-primary/10 text-primary border border-primary/20'
                   : subscription?.status === 'trialing'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-amber-100 text-amber-700'
-              }
+                  ? 'bg-info/10 text-info border border-info/20'
+                  : 'bg-warning/10 text-warning border border-warning/20'
+              )}
             >
               {subscription?.status || 'trialing'}
             </Badge>
           </div>
 
           {/* Minutes Usage */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium">Minutes Usage</div>
+                <div className="font-medium text-sm">Minutes Usage</div>
                 <div className="text-sm text-muted-foreground">
                   {minutesUsed} of {minutesIncluded} minutes used
                 </div>
               </div>
-              <span className="text-sm font-medium">{usagePercentage}%</span>
+              <span className="text-sm font-bold tabular-nums">{usagePercentage}%</span>
             </div>
-            <Progress value={usagePercentage} className={usagePercentage > 90 ? 'bg-red-100' : ''} />
+            <Progress value={usagePercentage} className={cn("h-2.5 rounded-full", usagePercentage > 90 ? 'bg-destructive/10' : '')} />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-4">
-            <Button onClick={() => setShowUpgradeDialog(true)}>
-              <CreditCard className="w-4 h-4 mr-2" />
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Button onClick={() => setShowUpgradeDialog(true)} className="rounded-xl shadow-md gap-2">
+              <CreditCard className="w-4 h-4" />
               Change Plan
             </Button>
             {subscription?.stripe_customer_id && (
-              <Button variant="outline" onClick={handleManageBilling} disabled={loading}>
+              <Button variant="outline" onClick={handleManageBilling} disabled={loading} className="rounded-xl gap-2">
                 {loading ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <ExternalLink className="w-4 h-4 mr-2" />
+                  <ExternalLink className="w-4 h-4" />
                 )}
                 Manage Billing
               </Button>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Upgrade Dialog */}
       <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>

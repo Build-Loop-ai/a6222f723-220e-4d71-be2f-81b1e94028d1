@@ -10,14 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Building,
-  
   Users,
   CreditCard,
   Plus,
+  Settings as SettingsIcon,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BusinessSettings } from "@/components/settings/BusinessSettings";
-
 import { InviteMemberDialog } from "@/components/settings/InviteMemberDialog";
 import { TeamMembersList } from "@/components/settings/TeamMembersList";
 import { BillingCard } from "@/components/settings/BillingCard";
@@ -139,63 +138,79 @@ const DashboardSettings = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8 max-w-4xl mx-auto">
         <div>
-          <Skeleton className="h-8 w-32 mb-2" />
-          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-9 w-40 mb-2" />
+          <Skeleton className="h-4 w-72" />
         </div>
-        <Skeleton className="h-10 w-full max-w-md" />
-        <Card>
-          <CardContent className="p-6">
-            <Skeleton className="h-64 w-full" />
-          </CardContent>
-        </Card>
+        <Skeleton className="h-12 w-full max-w-lg rounded-2xl" />
+        <div className="glass-card p-8">
+          <Skeleton className="h-72 w-full rounded-xl" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-serif text-foreground">Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your business settings and AI configuration.
-        </p>
+    <div className="space-y-8 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0">
+          <SettingsIcon className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-foreground tracking-tight">Settings</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your business profile, team, and subscription.
+          </p>
+        </div>
       </div>
 
-      <Tabs defaultValue="business" className="space-y-6">
-        <TabsList className="bg-muted/50 flex-wrap h-auto gap-1 p-1">
-          <TabsTrigger value="business" className="gap-2">
+      <Tabs defaultValue="business" className="space-y-8">
+        <TabsList className="glass-card !rounded-2xl p-1.5 h-auto gap-1 w-full sm:w-auto inline-flex flex-wrap">
+          <TabsTrigger
+            value="business"
+            className="gap-2 rounded-xl px-5 py-2.5 text-[13px] font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
+          >
             <Building className="w-4 h-4" />
             My Business
           </TabsTrigger>
-          <TabsTrigger value="team" className="gap-2">
+          <TabsTrigger
+            value="team"
+            className="gap-2 rounded-xl px-5 py-2.5 text-[13px] font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
+          >
             <Users className="w-4 h-4" />
             Team
           </TabsTrigger>
-          <TabsTrigger value="billing" className="gap-2">
+          <TabsTrigger
+            value="billing"
+            className="gap-2 rounded-xl px-5 py-2.5 text-[13px] font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all duration-200"
+          >
             <CreditCard className="w-4 h-4" />
             Billing
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="business" className="space-y-6">
+        <TabsContent value="business" className="space-y-6 mt-0">
           {organizationId && <BusinessSettings organizationId={organizationId} />}
         </TabsContent>
 
-        <TabsContent value="team" className="space-y-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+        <TabsContent value="team" className="space-y-6 mt-0">
+          <div className="glass-card overflow-hidden">
+            <div className="p-6 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/50">
               <div>
-                <CardTitle>Team Members</CardTitle>
-                <CardDescription>Invite and manage team members.</CardDescription>
+                <h2 className="text-lg font-serif font-semibold text-foreground">Team Members</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">Invite and manage your team.</p>
               </div>
-              <Button className="gap-2" onClick={() => setShowInviteDialog(true)}>
+              <Button
+                className="gap-2 rounded-xl shadow-md"
+                onClick={() => setShowInviteDialog(true)}
+              >
                 <Plus className="w-4 h-4" />
                 Invite Member
               </Button>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="p-6">
               {organizationId && user && (
                 <TeamMembersList
                   members={teamMembers}
@@ -206,11 +221,11 @@ const DashboardSettings = () => {
                   onInvitationCancelled={() => fetchTeamData(organizationId)}
                 />
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </TabsContent>
 
-        <TabsContent value="billing" className="space-y-6">
+        <TabsContent value="billing" className="space-y-6 mt-0">
           {organizationId && (
             <BillingCard subscription={subscription} organizationId={organizationId} />
           )}

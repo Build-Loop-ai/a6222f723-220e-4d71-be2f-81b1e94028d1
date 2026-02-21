@@ -337,11 +337,13 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
     <div className="space-y-6">
       {/* Source info banner */}
       {extractedData?.extracted_at && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-primary/5 border border-primary/10 text-sm text-muted-foreground">
-          <Globe className="w-4 h-4 text-primary shrink-0" />
+        <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-primary/5 border-2 border-primary/15 text-sm text-muted-foreground">
+          <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Globe className="w-4 h-4 text-primary" />
+          </div>
           <span>
             Some fields were auto-detected from{" "}
-            <span className="font-medium text-foreground">
+            <span className="font-semibold text-foreground">
               {extractedData.source_url
                 ? new URL(extractedData.source_url).hostname
                 : "your website"}
@@ -357,12 +359,14 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
 
       <Accordion type="multiple" defaultValue={["info", "hours", "services"]} className="space-y-4">
         {/* Basic Information */}
-        <AccordionItem value="info" className="border rounded-lg px-4">
-          <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-3">
-              <Building className="w-5 h-5 text-primary" />
+        <AccordionItem value="info" className="glass-card px-6 border-none">
+          <AccordionTrigger className="hover:no-underline py-5">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0">
+                <Building className="w-5 h-5 text-primary" />
+              </div>
               <div className="text-left">
-                <div className="font-medium">Basic Information</div>
+                <div className="font-serif font-semibold text-[15px]">Basic Information</div>
                 <div className="text-sm text-muted-foreground font-normal">
                   Name, address, and contact details
                 </div>
@@ -590,12 +594,14 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
         </AccordionItem>
 
         {/* Business Hours */}
-        <AccordionItem value="hours" className="border rounded-lg px-4">
-          <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-3">
-              <Clock className="w-5 h-5 text-primary" />
+        <AccordionItem value="hours" className="glass-card px-6 border-none">
+          <AccordionTrigger className="hover:no-underline py-5">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5 text-primary" />
+              </div>
               <div className="text-left">
-                <div className="font-medium flex items-center">
+                <div className="font-serif font-semibold text-[15px] flex items-center">
                   Business Hours
                   <FieldSourceBadge detected={hoursDetected} fieldName="hours" />
                 </div>
@@ -615,12 +621,14 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
         </AccordionItem>
 
         {/* Services */}
-        <AccordionItem value="services" className="border rounded-lg px-4">
-          <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-3">
-              <Briefcase className="w-5 h-5 text-primary" />
+        <AccordionItem value="services" className="glass-card px-6 border-none">
+          <AccordionTrigger className="hover:no-underline py-5">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0">
+                <Briefcase className="w-5 h-5 text-primary" />
+              </div>
               <div className="text-left">
-                <div className="font-medium flex items-center">
+                <div className="font-serif font-semibold text-[15px] flex items-center">
                   Services
                   <FieldSourceBadge detected={servicesDetected} fieldName="services" />
                 </div>
