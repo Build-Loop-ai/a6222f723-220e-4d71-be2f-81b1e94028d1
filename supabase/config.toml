@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.get-widget-voice-config]
 verify_jwt = false
+
+[functions.vapi-proxy]
+verify_jwt = false

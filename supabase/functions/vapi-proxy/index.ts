@@ -40,23 +40,17 @@ Deno.serve(async (req) => {
     }
 
     const targetUrl = `https://api.vapi.ai${vapiPath}${url.search}`;
-    console.log(`[vapi-proxy] Proxying ${req.method} -> ${targetUrl}`);
 
     // Forward the request body if present
     let body: string | undefined;
     if (req.method !== "GET" && req.method !== "HEAD") {
       body = await req.text();
     }
-    console.log(`[vapi-proxy] Body: ${body?.substring(0, 200)}`);
 
-    // Try VAPI_API_KEY (private key) first, fall back to VAPI_PUBLIC_KEY
-    const vapiKey = Deno.env.get("VITE_VAPI_PUBLIC_KEY") || Deno.env.get("VAPI_PUBLIC_KEY") || "";
-    // Log key info for debugging (first/last 4 chars only)
-    const vapiKeyDebug = vapiKey ? `${vapiKey.substring(0, 4)}...${vapiKey.substring(vapiKey.length - 4)}` : "EMPTY";
-    console.log(`[vapi-proxy] Using key: ${vapiKeyDebug} (length: ${vapiKey.length})`);
+    const vapiKey = Deno.env.get("VAPI_PUBLIC_KEY") || "";
     if (!vapiKey) {
       return new Response(
-        JSON.stringify({ error: "VAPI key not configured" }),
+        JSON.stringify({ error: "VAPI_PUBLIC_KEY not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
