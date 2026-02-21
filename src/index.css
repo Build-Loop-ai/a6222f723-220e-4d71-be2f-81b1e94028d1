@@ -475,7 +475,7 @@
   /* ━━ Glass Sidebar – solid panel with gradient edge ━━ */
   .glass-sidebar {
     background: linear-gradient(180deg, #fff 0%, #f8faf9 50%, #f5f7f6 100%);
-    border-right: 1px solid hsl(225 15% 88%);
+    border-right: none;
     position: relative;
   }
   .glass-sidebar::before {
