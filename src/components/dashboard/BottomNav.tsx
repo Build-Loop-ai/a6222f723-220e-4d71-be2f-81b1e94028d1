@@ -1,11 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, MessageSquare, BarChart3, BookOpen, Settings } from "lucide-react";
+import { LayoutDashboard, MessageSquareText, MessageSquare, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Home", href: "/dashboard" },
+  { icon: MessageSquareText, label: "Widget", href: "/dashboard/widget" },
   { icon: MessageSquare, label: "Chats", href: "/dashboard/conversations" },
-  { icon: BookOpen, label: "Knowledge", href: "/dashboard/knowledge-base" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];
 
