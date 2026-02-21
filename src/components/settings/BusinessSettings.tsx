@@ -16,7 +16,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Loader2, Building, Clock, Briefcase } from "lucide-react";
+import { Loader2, Building, Clock, Briefcase, Globe, Pencil } from "lucide-react";
 import { BusinessHoursEditor } from "./BusinessHoursEditor";
 import { ServicesEditor } from "./ServicesEditor";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Json } from "@/integrations/supabase/types";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { SaveStatusIndicator } from "@/components/ui/save-status";
+import { Badge } from "@/components/ui/badge";
 
 interface BusinessSettingsProps {
   organizationId: string;
@@ -45,12 +46,51 @@ interface BusinessHours {
   [day: string]: DayHours;
 }
 
+interface ExtractedData {
+  business_name?: string | null;
+  description?: string | null;
+  phone?: string | null;
+  address?: {
+    street?: string | null;
+    city?: string | null;
+    postal_code?: string | null;
+  } | null;
+  business_hours?: BusinessHours | null;
+  services?: Service[] | null;
+  extracted_at?: string | null;
+  source_url?: string | null;
+}
+
+/** Small badge showing whether a field was auto-detected or needs manual input */
+function FieldSourceBadge({
+  detected,
+  fieldName,
+}: {
+  detected: boolean;
+  fieldName: string;
+}) {
+  if (detected) {
+    return (
+      <Badge variant="outline" className="ml-2 text-[10px] font-normal gap-1 border-primary/30 text-primary bg-primary/5">
+        <Globe className="w-3 h-3" />
+        Auto-detected
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="outline" className="ml-2 text-[10px] font-normal gap-1 border-muted-foreground/20 text-muted-foreground">
+      <Pencil className="w-3 h-3" />
+      Manual
+    </Badge>
+  );
+}
+
 export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
 
-  // Organization data (no AI-related fields)
   const [formData, setFormData] = useState({
     name: "",
     business_type: "",
@@ -64,20 +104,16 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
     },
   });
 
-  // Settings data
   const [businessHours, setBusinessHours] = useState<BusinessHours>({});
   const [services, setServices] = useState<Service[]>([]);
 
-  // Memoized data for auto-save
   const settingsData = useMemo(() => ({
     formData,
     businessHours,
     services,
   }), [formData, businessHours, services]);
 
-  // Save function for database
   const saveToDatabase = useCallback(async (data: typeof settingsData) => {
-    // Update organization
     const { error: orgError } = await supabase
       .from("organizations")
       .update({
@@ -92,7 +128,6 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
 
     if (orgError) throw orgError;
 
-    // Update settings
     const { error: settingsError } = await supabase
       .from("organization_settings")
       .update({
@@ -104,14 +139,12 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
     if (settingsError) throw settingsError;
   }, [organizationId]);
 
-  // Sync function for Vapi
   const syncToVapi = useCallback(async () => {
     await supabase.functions.invoke("create-vapi-assistant", {
       body: { organizationId },
     });
   }, [organizationId]);
 
-  // Auto-save hook
   const { status, syncStatus } = useAutoSave({
     data: settingsData,
     onSave: saveToDatabase,
@@ -121,10 +154,32 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
     enabled: dataLoaded && !!organizationId,
   });
 
+  // Helper to check if a field value was provided by extraction
+  const wasDetected = useCallback(
+    (fieldPath: string): boolean => {
+      if (!extractedData) return false;
+      const parts = fieldPath.split(".");
+      let val: unknown = extractedData;
+      for (const p of parts) {
+        if (val == null || typeof val !== "object") return false;
+        val = (val as Record<string, unknown>)[p];
+      }
+      return val != null && val !== "" && val !== false;
+    },
+    [extractedData]
+  );
+
+  const hoursDetected = useMemo(() => {
+    return !!(extractedData?.business_hours && Object.keys(extractedData.business_hours).length > 0);
+  }, [extractedData]);
+
+  const servicesDetected = useMemo(() => {
+    return !!(extractedData?.services && extractedData.services.length > 0);
+  }, [extractedData]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch organization and settings in parallel
         const [orgRes, settingsRes] = await Promise.all([
           supabase
             .from("organizations")
@@ -133,7 +188,7 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
             .single(),
           supabase
             .from("organization_settings")
-            .select("business_hours, services")
+            .select("business_hours, services, extracted_business_data")
             .eq("organization_id", organizationId)
             .maybeSingle(),
         ]);
@@ -158,9 +213,11 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
         if (settingsRes.data) {
           setBusinessHours((settingsRes.data.business_hours as unknown as BusinessHours) || {});
           setServices((settingsRes.data.services as unknown as Service[]) || []);
+          if (settingsRes.data.extracted_business_data) {
+            setExtractedData(settingsRes.data.extracted_business_data as unknown as ExtractedData);
+          }
         }
 
-        // Enable auto-save after initial load
         setTimeout(() => setDataLoaded(true), 100);
       } catch (error) {
         console.error("Error fetching business data:", error);
@@ -193,7 +250,22 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Save Status Indicator */}
+      {/* Source info banner */}
+      {extractedData?.extracted_at && (
+        <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-primary/5 border border-primary/10 text-sm text-muted-foreground">
+          <Globe className="w-4 h-4 text-primary shrink-0" />
+          <span>
+            Some fields were auto-detected from{" "}
+            <span className="font-medium text-foreground">
+              {extractedData.source_url
+                ? new URL(extractedData.source_url).hostname
+                : "your website"}
+            </span>
+            . You can edit any field to override.
+          </span>
+        </div>
+      )}
+
       <div className="flex justify-end">
         <SaveStatusIndicator status={status} syncStatus={syncStatus} />
       </div>
@@ -216,7 +288,9 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
             <div className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Business Name</Label>
+                  <div className="flex items-center">
+                    <Label>Business Name</Label>
+                  </div>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -243,11 +317,18 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>Business Description</Label>
+                <div className="flex items-center">
+                  <Label>Business Description</Label>
+                  <FieldSourceBadge detected={wasDetected("description")} fieldName="description" />
+                </div>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe what your business does, your specialties, etc."
+                  placeholder={
+                    !formData.description && !wasDetected("description")
+                      ? "We couldn't find a description on your website. Add one to help your AI answer accurately."
+                      : "Describe what your business does, your specialties, etc."
+                  }
                   rows={3}
                 />
                 <p className="text-xs text-muted-foreground">
@@ -257,7 +338,10 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Street Address</Label>
+                  <div className="flex items-center">
+                    <Label>Street Address</Label>
+                    <FieldSourceBadge detected={wasDetected("address.street")} fieldName="street" />
+                  </div>
                   <Input
                     value={formData.address.street}
                     onChange={(e) =>
@@ -266,11 +350,18 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
                         address: { ...formData.address, street: e.target.value },
                       })
                     }
-                    placeholder="123 Main Street"
+                    placeholder={
+                      !formData.address.street && !wasDetected("address.street")
+                        ? "Not found — fill in manually"
+                        : "123 Main Street"
+                    }
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Postal Code</Label>
+                  <div className="flex items-center">
+                    <Label>Postal Code</Label>
+                    <FieldSourceBadge detected={wasDetected("address.postal_code")} fieldName="postal_code" />
+                  </div>
                   <Input
                     value={formData.address.postal_code}
                     onChange={(e) =>
@@ -279,11 +370,18 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
                         address: { ...formData.address, postal_code: e.target.value },
                       })
                     }
-                    placeholder="1234 AB"
+                    placeholder={
+                      !formData.address.postal_code && !wasDetected("address.postal_code")
+                        ? "Not found — fill in manually"
+                        : "1234 AB"
+                    }
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>City</Label>
+                  <div className="flex items-center">
+                    <Label>City</Label>
+                    <FieldSourceBadge detected={wasDetected("address.city")} fieldName="city" />
+                  </div>
                   <Input
                     value={formData.address.city}
                     onChange={(e) =>
@@ -292,18 +390,29 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
                         address: { ...formData.address, city: e.target.value },
                       })
                     }
-                    placeholder="Amsterdam"
+                    placeholder={
+                      !formData.address.city && !wasDetected("address.city")
+                        ? "Not found — fill in manually"
+                        : "Amsterdam"
+                    }
                   />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Contact Phone</Label>
+                  <div className="flex items-center">
+                    <Label>Contact Phone</Label>
+                    <FieldSourceBadge detected={wasDetected("phone")} fieldName="phone" />
+                  </div>
                   <Input
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+31 20 123 4567"
+                    placeholder={
+                      !formData.phone && !wasDetected("phone")
+                        ? "Not found — fill in manually"
+                        : "+31 20 123 4567"
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -336,9 +445,16 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-primary" />
               <div className="text-left">
-                <div className="font-medium">Business Hours</div>
+                <div className="font-medium flex items-center">
+                  Business Hours
+                  <FieldSourceBadge detected={hoursDetected} fieldName="hours" />
+                </div>
                 <div className="text-sm text-muted-foreground font-normal">
-                  When your business is open
+                  {hoursDetected
+                    ? "Auto-detected from your website — review and adjust if needed"
+                    : Object.keys(businessHours).length === 0
+                    ? "Not found on your website — add your hours so your AI can inform customers"
+                    : "When your business is open"}
                 </div>
               </div>
             </div>
@@ -354,9 +470,16 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
             <div className="flex items-center gap-3">
               <Briefcase className="w-5 h-5 text-primary" />
               <div className="text-left">
-                <div className="font-medium">Services</div>
+                <div className="font-medium flex items-center">
+                  Services
+                  <FieldSourceBadge detected={servicesDetected} fieldName="services" />
+                </div>
                 <div className="text-sm text-muted-foreground font-normal">
-                  Services you offer and their durations
+                  {servicesDetected
+                    ? "Auto-detected from your website — review and adjust if needed"
+                    : services.length === 0
+                    ? "Not found on your website — add services so your AI can help customers"
+                    : "Services you offer and their durations"}
                 </div>
               </div>
             </div>
