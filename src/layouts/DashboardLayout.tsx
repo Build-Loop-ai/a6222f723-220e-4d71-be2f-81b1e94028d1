@@ -1,9 +1,14 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import BottomNav from "@/components/dashboard/BottomNav";
 import CommandPalette from "@/components/CommandPalette";
 
+const FULL_BLEED_ROUTES = ["/dashboard/widget"];
+
 const DashboardLayout = () => {
+  const location = useLocation();
+  const isFullBleed = FULL_BLEED_ROUTES.some((r) => location.pathname.startsWith(r));
+
   return (
     <>
       <CommandPalette />
@@ -16,7 +21,11 @@ const DashboardLayout = () => {
         
         {/* Main content */}
         <div className="flex-1 flex flex-col min-h-screen">
-          <main className="flex-1 p-5 md:p-10 pb-24 md:pb-10 max-w-6xl mx-auto w-full">
+          <main className={
+            isFullBleed
+              ? "flex-1 flex flex-col min-h-0"
+              : "flex-1 p-5 md:p-10 pb-24 md:pb-10 max-w-6xl mx-auto w-full"
+          }>
             <Outlet />
           </main>
         </div>

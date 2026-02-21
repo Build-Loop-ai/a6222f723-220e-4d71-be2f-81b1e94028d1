@@ -280,7 +280,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-[600px]">
+      <div className="flex items-center justify-center flex-1 h-full">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -297,7 +297,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex items-center justify-center h-[600px]"
+        className="flex items-center justify-center flex-1 h-full"
       >
         <div className="text-center max-w-md">
           <motion.div
@@ -479,7 +479,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex gap-0 min-h-[740px] -mx-6 -mt-2 rounded-2xl overflow-hidden bg-white text-gray-900 shadow-lg"
+      className="flex gap-0 flex-1 min-h-0 h-full overflow-hidden bg-white text-gray-900"
     >
       {/* ━━━━ Left Panel — Glass sidebar ━━━━ */}
       <div className="w-[300px] shrink-0 flex flex-col border-r border-gray-200 bg-gray-50/80">

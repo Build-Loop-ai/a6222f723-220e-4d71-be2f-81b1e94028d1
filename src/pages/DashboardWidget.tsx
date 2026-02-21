@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 import { WidgetSettings } from "@/components/settings/WidgetSettings";
-import { GoogleCalendarIntegration } from "@/components/settings/GoogleCalendarIntegration";
-import { Separator } from "@/components/ui/separator";
 
 const DashboardWidget = () => {
   const { user } = useAuth();
@@ -34,12 +32,8 @@ const DashboardWidget = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <Skeleton className="h-8 w-48 mb-2" />
-          <Skeleton className="h-4 w-80" />
-        </div>
-        <Skeleton className="h-[500px] w-full" />
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -52,28 +46,7 @@ const DashboardWidget = () => {
     );
   }
 
-  return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-serif text-foreground">Widget Builder</h1>
-        <p className="text-muted-foreground">
-          Configure your chat widget appearance, behavior, and connected integrations.
-        </p>
-      </div>
-
-      <WidgetSettings organizationId={organizationId} />
-
-      <Separator />
-
-      <div>
-        <h2 className="text-xl font-semibold text-foreground mb-1">Connected Integrations</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Services that power your widget's capabilities.
-        </p>
-        <GoogleCalendarIntegration organizationId={organizationId} />
-      </div>
-    </div>
-  );
+  return <WidgetSettings organizationId={organizationId} />;
 };
 
 export default DashboardWidget;
