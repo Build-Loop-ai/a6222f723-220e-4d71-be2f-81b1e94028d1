@@ -199,6 +199,9 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [activePanel, setActivePanel] = useState<"style" | "embed" | "domains">("style");
   const [websiteUrl, setWebsiteUrl] = useState<string | null>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeFailed, setIframeFailed] = useState(false);
+  const [screenshotLoaded, setScreenshotLoaded] = useState(false);
+  const iframeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -226,6 +229,19 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     };
     fetchConfig();
   }, [organizationId]);
+
+  // Iframe load timeout — if it doesn't load within 5s, fall back to screenshot
+  useEffect(() => {
+    if (!websiteUrl || iframeLoaded) return;
+    iframeTimeoutRef.current = setTimeout(() => {
+      if (!iframeLoaded) {
+        setIframeFailed(true);
+      }
+    }, 5000);
+    return () => {
+      if (iframeTimeoutRef.current) clearTimeout(iframeTimeoutRef.current);
+    };
+  }, [websiteUrl, iframeLoaded]);
 
   const saveConfig = async (updates: Partial<WidgetConfig>) => {
     if (!config) return;
@@ -822,41 +838,73 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
         <div className="absolute inset-0 pointer-events-none">
           {websiteUrl ? (
             <>
-              {!iframeLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white">
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin text-gray-300" />
-                    <span className="text-[10px] text-gray-400">Loading website…</span>
-                  </div>
+              {/* Screenshot fallback (shown when iframe fails) */}
+              {iframeFailed && !iframeLoaded && (
+                <div className="absolute inset-0">
+                  {!screenshotLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-muted/30">
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground/40" />
+                        <span className="text-[10px] text-muted-foreground/60">Capturing screenshot…</span>
+                      </div>
+                    </div>
+                  )}
+                  <img
+                    src={`https://image.thum.io/get/width/1440/crop/900/noanimate/${websiteUrl}`}
+                    alt="Website preview"
+                    className={`w-full h-full object-cover object-top transition-opacity duration-500 ${screenshotLoaded ? "opacity-100" : "opacity-0"}`}
+                    onLoad={() => setScreenshotLoaded(true)}
+                    onError={() => setScreenshotLoaded(false)}
+                  />
+                  {screenshotLoaded && (
+                    <div className="absolute inset-0 bg-white/10 backdrop-blur-[0.5px]" />
+                  )}
                 </div>
               )}
-              <iframe
-                src={websiteUrl}
-                className={`w-full h-full border-0 transition-opacity duration-500 ${iframeLoaded ? "opacity-100" : "opacity-0"}`}
-                sandbox="allow-scripts allow-same-origin"
-                loading="lazy"
-                onLoad={() => setIframeLoaded(true)}
-                title="Website preview"
-              />
-              {/* Subtle overlay so the widget stands out */}
-              {iframeLoaded && (
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-[0.5px]" />
+
+              {/* Primary: iframe attempt (hidden if failed) */}
+              {!iframeFailed && (
+                <>
+                  {!iframeLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background">
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground/40" />
+                        <span className="text-[10px] text-muted-foreground/60">Loading website…</span>
+                      </div>
+                    </div>
+                  )}
+                  <iframe
+                    src={websiteUrl}
+                    className={`w-full h-full border-0 transition-opacity duration-500 ${iframeLoaded ? "opacity-100" : "opacity-0"}`}
+                    sandbox="allow-scripts allow-same-origin"
+                    loading="lazy"
+                    onLoad={() => {
+                      setIframeLoaded(true);
+                      if (iframeTimeoutRef.current) clearTimeout(iframeTimeoutRef.current);
+                    }}
+                    onError={() => setIframeFailed(true)}
+                    title="Website preview"
+                  />
+                  {iframeLoaded && (
+                    <div className="absolute inset-0 bg-white/10 backdrop-blur-[0.5px]" />
+                  )}
+                </>
               )}
             </>
           ) : (
             <div className="max-w-2xl mx-auto space-y-4 p-10 pt-16 opacity-[0.06]">
-              <div className="h-8 w-2/3 rounded-lg bg-gray-900" />
-              <div className="h-3 w-full rounded bg-gray-900" />
-              <div className="h-3 w-5/6 rounded bg-gray-900" />
-              <div className="h-3 w-4/5 rounded bg-gray-900" />
-              <div className="h-40 w-full rounded-xl bg-gray-900 mt-6" />
-              <div className="h-3 w-full rounded bg-gray-900 mt-6" />
-              <div className="h-3 w-3/4 rounded bg-gray-900" />
-              <div className="h-3 w-2/3 rounded bg-gray-900" />
-              <div className="h-32 w-full rounded-xl bg-gray-900 mt-6" />
-              <div className="h-3 w-4/5 rounded bg-gray-900 mt-6" />
-              <div className="h-3 w-full rounded bg-gray-900" />
-              <div className="h-3 w-3/5 rounded bg-gray-900" />
+              <div className="h-8 w-2/3 rounded-lg bg-foreground" />
+              <div className="h-3 w-full rounded bg-foreground" />
+              <div className="h-3 w-5/6 rounded bg-foreground" />
+              <div className="h-3 w-4/5 rounded bg-foreground" />
+              <div className="h-40 w-full rounded-xl bg-foreground mt-6" />
+              <div className="h-3 w-full rounded bg-foreground mt-6" />
+              <div className="h-3 w-3/4 rounded bg-foreground" />
+              <div className="h-3 w-2/3 rounded bg-foreground" />
+              <div className="h-32 w-full rounded-xl bg-foreground mt-6" />
+              <div className="h-3 w-4/5 rounded bg-foreground mt-6" />
+              <div className="h-3 w-full rounded bg-foreground" />
+              <div className="h-3 w-3/5 rounded bg-foreground" />
             </div>
           )}
         </div>
@@ -866,7 +914,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 text-gray-700 rounded-full px-3 py-1.5 shadow-sm"
+            className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-background/90 backdrop-blur-sm border border-border text-foreground rounded-full px-3 py-1.5 shadow-sm"
           >
             <Pencil className="h-2.5 w-2.5 text-primary" />
             <span className="text-[10px] font-medium">Editing {ZONE_LABELS[editingZone]?.title}</span>
