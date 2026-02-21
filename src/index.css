@@ -456,16 +456,11 @@
 
   /* ━━ Glass Toolbar – light frosted glass, visionOS-style ━━ */
   .glass-toolbar {
-    background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.78) 0%,
-      rgba(250, 253, 251, 0.75) 50%,
-      rgba(255, 255, 255, 0.78) 100%
-    );
-    backdrop-filter: blur(80px) saturate(200%);
-    -webkit-backdrop-filter: blur(80px) saturate(200%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+    background: linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.70) 100%);
+    backdrop-filter: blur(80px) saturate(220%);
+    -webkit-backdrop-filter: blur(80px) saturate(220%);
+    border-bottom: 1px solid rgba(255,255,255,0.50);
     box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.35) inset,
       0 4px 24px -6px rgb(0 0 0 / 0.06),
       0 1px 3px 0 rgb(0 0 0 / 0.04);
   }
