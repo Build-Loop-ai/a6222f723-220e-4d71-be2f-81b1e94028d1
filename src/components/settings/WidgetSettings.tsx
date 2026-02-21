@@ -194,19 +194,34 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [newDomain, setNewDomain] = useState("");
-  // previewDevice removed — widget renders at real size
   const [previewOpen, setPreviewOpen] = useState(true);
   const [editingZone, setEditingZone] = useState<EditingZone>(null);
   const [activePanel, setActivePanel] = useState<"style" | "embed" | "domains">("style");
+  const [websiteUrl, setWebsiteUrl] = useState<string | null>(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
   useEffect(() => {
     const fetchConfig = async () => {
-      const { data } = await supabase
-        .from("widget_configs")
-        .select("*")
-        .eq("organization_id", organizationId)
-        .maybeSingle();
-      setConfig(data);
+      const [{ data: widgetData }, { data: orgData }] = await Promise.all([
+        supabase
+          .from("widget_configs")
+          .select("*")
+          .eq("organization_id", organizationId)
+          .maybeSingle(),
+        supabase
+          .from("organizations")
+          .select("website")
+          .eq("id", organizationId)
+          .maybeSingle(),
+      ]);
+      setConfig(widgetData);
+      if (orgData?.website) {
+        let url = orgData.website.trim();
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+          url = `https://${url}`;
+        }
+        setWebsiteUrl(url);
+      }
       setLoading(false);
     };
     fetchConfig();
@@ -803,22 +818,47 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
       {/* ━━━━ Right: Live Canvas ━━━━ */}
       <div className="flex-1 flex flex-col min-w-0 relative overflow-hidden bg-white">
-        {/* Subtle page skeleton background */}
+        {/* Website iframe or fallback skeleton */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="max-w-2xl mx-auto space-y-4 p-10 pt-16 opacity-[0.06]">
-            <div className="h-8 w-2/3 rounded-lg bg-gray-900" />
-            <div className="h-3 w-full rounded bg-gray-900" />
-            <div className="h-3 w-5/6 rounded bg-gray-900" />
-            <div className="h-3 w-4/5 rounded bg-gray-900" />
-            <div className="h-40 w-full rounded-xl bg-gray-900 mt-6" />
-            <div className="h-3 w-full rounded bg-gray-900 mt-6" />
-            <div className="h-3 w-3/4 rounded bg-gray-900" />
-            <div className="h-3 w-2/3 rounded bg-gray-900" />
-            <div className="h-32 w-full rounded-xl bg-gray-900 mt-6" />
-            <div className="h-3 w-4/5 rounded bg-gray-900 mt-6" />
-            <div className="h-3 w-full rounded bg-gray-900" />
-            <div className="h-3 w-3/5 rounded bg-gray-900" />
-          </div>
+          {websiteUrl ? (
+            <>
+              {!iframeLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white">
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-gray-300" />
+                    <span className="text-[10px] text-gray-400">Loading website…</span>
+                  </div>
+                </div>
+              )}
+              <iframe
+                src={websiteUrl}
+                className={`w-full h-full border-0 transition-opacity duration-500 ${iframeLoaded ? "opacity-100" : "opacity-0"}`}
+                sandbox="allow-scripts allow-same-origin"
+                loading="lazy"
+                onLoad={() => setIframeLoaded(true)}
+                title="Website preview"
+              />
+              {/* Subtle overlay so the widget stands out */}
+              {iframeLoaded && (
+                <div className="absolute inset-0 bg-white/10 backdrop-blur-[0.5px]" />
+              )}
+            </>
+          ) : (
+            <div className="max-w-2xl mx-auto space-y-4 p-10 pt-16 opacity-[0.06]">
+              <div className="h-8 w-2/3 rounded-lg bg-gray-900" />
+              <div className="h-3 w-full rounded bg-gray-900" />
+              <div className="h-3 w-5/6 rounded bg-gray-900" />
+              <div className="h-3 w-4/5 rounded bg-gray-900" />
+              <div className="h-40 w-full rounded-xl bg-gray-900 mt-6" />
+              <div className="h-3 w-full rounded bg-gray-900 mt-6" />
+              <div className="h-3 w-3/4 rounded bg-gray-900" />
+              <div className="h-3 w-2/3 rounded bg-gray-900" />
+              <div className="h-32 w-full rounded-xl bg-gray-900 mt-6" />
+              <div className="h-3 w-4/5 rounded bg-gray-900 mt-6" />
+              <div className="h-3 w-full rounded bg-gray-900" />
+              <div className="h-3 w-3/5 rounded bg-gray-900" />
+            </div>
+          )}
         </div>
 
         {/* Editing zone indicator */}
