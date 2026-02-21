@@ -1244,6 +1244,11 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 z-10">
                       <Pencil className="h-3 w-3 text-foreground/40" />
                     </div>
+                    {config.voice_call_enabled && (
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-400">
+                        <Phone className="h-3.5 w-3.5" />
+                      </div>
+                    )}
                     {config.voice_enabled && (
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-gray-400">
                         <Mic className="h-3.5 w-3.5" />
