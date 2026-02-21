@@ -1,40 +1,75 @@
 
 
-## Fix VAPI Voice Call Failing Immediately
+## Fix VAPI Voice Call -- "[object Object]" Error and Immediate Close
 
-### Root Causes Identified
+### Root Causes
 
-There are three bugs causing the call to close immediately:
+**Problem 1: `vapi.start()` is called outside user gesture context**
 
-1. **Stale closure in `endCall`**: The `useEffect` runs once (empty dependency array) and captures the initial `endCall` function where `status = "connecting"`. When the Vapi SDK fires events later, they use a stale reference. If `endCall` gets called twice (e.g., from both an "error" event and the `.catch()`), the second call passes the `status === "ended"` guard because the stale closure still sees `status = "connecting"`.
+The current flow is:
+1. User clicks phone button -> `getUserMedia()` runs (good -- user gesture)
+2. `setInCall(true)` triggers React re-render
+3. `VoiceCallOverlay` mounts -> `useEffect` fires -> `vapi.start()` is called
 
-2. **No cleanup of Vapi event listeners**: Every time the overlay mounts, new event listeners are added via `vapi.on(...)`, but they are never removed on unmount. If the user opens the call overlay a second time, the old listeners from the previous instance fire alongside new ones, causing double `endCall` invocations.
+By the time `useEffect` runs, the browser no longer considers it a user gesture. The Vapi SDK internally needs microphone access via Daily.co, and this second mic request is blocked because the gesture context was lost across the React render boundary. The pre-acquired `micStream` from step 1 is never passed to Vapi -- it's wasted.
 
-3. **Singleton Vapi instance gets into a dirty state**: `resetVapiClient()` sets the variable to `null`, but doesn't call cleanup methods on the old instance. The old instance may still have active internal state that interferes when a new instance is created.
+**Problem 2: "[object Object]" error display**
+
+The error handler does:
+```typescript
+const msg = err instanceof Error ? err.message : String(err);
+```
+
+The Vapi SDK's `error` event passes a plain object (not an `Error` instance), so `String({some: "data"})` produces `"[object Object]"`. This gets displayed as the error message.
 
 ### Fix Plan
 
-**File: `src/lib/vapi-client.ts`**
-- Before resetting the singleton to null, call `vapi.stop()` and remove all event listeners on the old instance
-- Add a `createFreshVapiClient` function that always returns a clean new instance for each call session
+**File: `src/components/embed/ChatPanel.tsx`**
+- Remove the pre-emptive `getUserMedia()` call from the phone button click handler (it's unnecessary -- Vapi handles mic access internally)
+- Instead, create the Vapi instance and call `vapi.start()` directly inside the click handler (preserving user gesture context)
+- Pass the already-started Vapi instance to `VoiceCallOverlay` as a prop instead of passing keys/IDs
 
 **File: `src/components/embed/VoiceCallOverlay.tsx`**
-- Replace `useCallback` for `endCall` with a ref-based pattern so the effect always calls the latest version (avoids stale closure)
-- Add proper cleanup in the `useEffect` return: remove all event listeners from the Vapi instance
-- Add a guard (`endingRef`) to prevent double-invocation of end logic
-- Add visible error feedback: instead of silently closing, show the actual error message briefly (e.g., "Connection failed") before closing, so users can see what went wrong
-- Add `console.log` breadcrumbs for each lifecycle event to aid debugging
+- Accept a `vapiInstance` prop (already started) instead of `vapiPublicKey` / `vapiAssistantId`
+- Remove the `useEffect` that creates the client and calls `vapi.start()` -- the call is already in progress
+- Keep the `useEffect` only for attaching event listeners (`call-start`, `call-end`, `speech-start`, `speech-end`, `error`) and cleaning them up on unmount
+- Fix error serialization: use `JSON.stringify(err)` for non-Error objects so the actual error details are shown instead of "[object Object]"
 
-**File: `src/components/embed/ChatPanel.tsx`**
-- Stop the mic stream tracks in the `onEnd` callback (already done, just verify)
-- Pass the existing `micStream` to the overlay so Vapi can potentially reuse it (prevents double mic request)
+**File: `src/lib/vapi-client.ts`**
+- No changes needed -- `createFreshVapiClient` already works correctly
+
+### Technical Details
+
+The restructured flow will be:
+
+```text
+User clicks phone button
+  -> createFreshVapiClient(publicKey)     [still in gesture context]
+  -> vapi.start(assistantId)              [still in gesture context - mic allowed]
+  -> setVapiInstance(vapi)
+  -> setInCall(true)
+  -> VoiceCallOverlay mounts with running instance
+  -> useEffect attaches event listeners to track call status
+```
+
+This keeps `vapi.start()` in the synchronous call chain of the click event, which satisfies the browser's user gesture requirement.
+
+### Error Display Fix
+
+```typescript
+// Before (broken):
+const msg = err instanceof Error ? err.message : String(err);
+// Shows: "[object Object]"
+
+// After (fixed):
+const msg = err instanceof Error
+  ? err.message
+  : (typeof err === 'object' ? JSON.stringify(err) : String(err));
+// Shows: actual error details like '{"error":"meeting has ended"}'
+```
 
 ### Expected Outcome
-- The call overlay will no longer close immediately due to stale closures or duplicate event firings
-- If the call genuinely fails (e.g., network issue or VAPI API error), the user will see a brief error message before the overlay closes
-- Console logs will show exactly where the failure occurs for future debugging
-
-### Testing
-- After implementation, publish the app and test the voice call on the live URL
-- The preview environment may still have limitations with certain network requests, so the published URL is the reliable way to verify
+- Voice calls will connect successfully because `vapi.start()` runs within user gesture context
+- Errors will display meaningful messages instead of "[object Object]"
+- The mic stream is managed entirely by Vapi (no redundant `getUserMedia` call)
 
