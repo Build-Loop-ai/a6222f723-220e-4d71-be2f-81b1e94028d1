@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Send, Mic, ArrowRight, Globe, MessageCircle, Phone, Loader2 } from "lucide-react";
+import { Send, Mic, ArrowRight, Globe, MessageCircle, Phone, Loader2, X } from "lucide-react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
 
@@ -39,6 +39,7 @@ const HeroSection = () => {
   ]);
   const [chatInput, setChatInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [widgetDismissed, setWidgetDismissed] = useState(false);
 
   // Rotate words
   useEffect(() => {
@@ -733,14 +734,48 @@ const HeroSection = () => {
 
       {/* === FIXED WIDGET — sticks to bottom-right after animation === */}
       <AnimatePresence>
-        {isFixed && (
+        {isFixed && !widgetDismissed && (
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.85 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.85, transition: { duration: 0.3 } }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="fixed bottom-6 right-6 z-50 hidden lg:block"
           >
+            <button
+              onClick={() => setWidgetDismissed(true)}
+              className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-colors"
+              style={{
+                background: "rgba(0,0,0,0.7)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                backdropFilter: "blur(10px)",
+              }}
+              aria-label="Close chat widget"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
             {widgetContent}
+          </motion.div>
+        )}
+        {isFixed && widgetDismissed && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed bottom-6 right-6 z-50 hidden lg:block"
+          >
+            <button
+              onClick={() => setWidgetDismissed(false)}
+              className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl"
+              style={{
+                background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))",
+                boxShadow: "0 4px 24px rgba(52,215,123,0.3)",
+              }}
+              aria-label="Open chat widget"
+            >
+              <MessageCircle className="w-6 h-6 text-white" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
