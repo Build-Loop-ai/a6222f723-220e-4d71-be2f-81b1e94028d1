@@ -15,7 +15,6 @@ import {
   Users,
   CreditCard,
   MessageSquareText,
-  BookOpen,
   Plus,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,7 +25,7 @@ import { InviteMemberDialog } from "@/components/settings/InviteMemberDialog";
 import { TeamMembersList } from "@/components/settings/TeamMembersList";
 import { BillingCard } from "@/components/settings/BillingCard";
 import { WidgetSettings } from "@/components/settings/WidgetSettings";
-import { KnowledgeBaseSettings } from "@/components/settings/KnowledgeBaseSettings";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -178,10 +177,6 @@ const DashboardSettings = () => {
             <MessageSquareText className="w-4 h-4" />
             Widget
           </TabsTrigger>
-          <TabsTrigger value="knowledge" className="gap-2">
-            <BookOpen className="w-4 h-4" />
-            Knowledge Base
-          </TabsTrigger>
           <TabsTrigger value="ai" className="gap-2">
             <Bot className="w-4 h-4" />
             AI Assistant
@@ -206,10 +201,6 @@ const DashboardSettings = () => {
 
         <TabsContent value="widget" className="space-y-6">
           {organizationId && <WidgetSettings organizationId={organizationId} />}
-        </TabsContent>
-
-        <TabsContent value="knowledge" className="space-y-6">
-          {organizationId && <KnowledgeBaseSettings organizationId={organizationId} />}
         </TabsContent>
 
         <TabsContent value="ai" className="space-y-6">
