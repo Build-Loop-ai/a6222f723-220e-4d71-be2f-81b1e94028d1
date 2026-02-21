@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, Mic, MicOff, X, Phone } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { VoiceCallOverlay } from "./VoiceCallOverlay";
+import { createFreshVapiClient } from "@/lib/vapi-client";
+import type Vapi from "@vapi-ai/web";
 
 interface Message {
   id: string;
@@ -32,7 +34,7 @@ interface ChatPanelProps {
 
 export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = false, vapiPublicKey, vapiAssistantId }: ChatPanelProps) {
   const [inCall, setInCall] = useState(false);
-  const [micStream, setMicStream] = useState<MediaStream | null>(null);
+  const [vapiInstance, setVapiInstance] = useState<Vapi | null>(null);
   const canVoiceCall = !!(vapiPublicKey && vapiAssistantId);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -243,16 +245,12 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
       </div>
 
       {/* Voice Call Overlay */}
-      {inCall && canVoiceCall && (
+      {inCall && canVoiceCall && vapiInstance && (
         <VoiceCallOverlay
-          vapiPublicKey={vapiPublicKey!}
-          vapiAssistantId={vapiAssistantId!}
+          vapiInstance={vapiInstance}
           accentColor={config.accentColor}
           onEnd={() => {
-            if (micStream) {
-              micStream.getTracks().forEach(t => t.stop());
-              setMicStream(null);
-            }
+            setVapiInstance(null);
             setInCall(false);
           }}
         />
@@ -289,15 +287,17 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
         {canVoiceCall && (
           <button
             type="button"
-            onClick={async () => {
+            onClick={() => {
               try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                  audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 },
+                console.log("[ChatPanel] Starting voice call in user gesture context");
+                const vapi = createFreshVapiClient(vapiPublicKey!);
+                vapi.start(vapiAssistantId!).catch((err: unknown) => {
+                  console.error("[ChatPanel] vapi.start() rejected:", err);
                 });
-                setMicStream(stream);
+                setVapiInstance(vapi);
                 setInCall(true);
               } catch (err) {
-                console.error("Microphone access denied:", err);
+                console.error("[ChatPanel] Failed to create Vapi client:", err);
               }
             }}
             disabled={inCall}

@@ -1,19 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { Phone, PhoneOff } from "lucide-react";
-import { createFreshVapiClient, stopVapiCall, resetVapiClient } from "@/lib/vapi-client";
+import { stopVapiCall, resetVapiClient } from "@/lib/vapi-client";
+import type Vapi from "@vapi-ai/web";
 
 type CallStatus = "connecting" | "listening" | "speaking" | "ended";
 
 interface VoiceCallOverlayProps {
-  vapiPublicKey: string;
-  vapiAssistantId: string;
+  vapiInstance: Vapi;
   accentColor: string;
   onEnd: () => void;
 }
 
 export function VoiceCallOverlay({
-  vapiPublicKey,
-  vapiAssistantId,
+  vapiInstance,
   accentColor,
   onEnd,
 }: VoiceCallOverlayProps) {
@@ -21,10 +20,10 @@ export function VoiceCallOverlay({
   const [seconds, setSeconds] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const endingRef = useRef(false); // guard against double-end
+  const endingRef = useRef(false);
   const onEndRef = useRef(onEnd);
   onEndRef.current = onEnd;
-  const maxDuration = 300; // 5 minutes
+  const maxDuration = 300;
 
   const doEnd = (reason?: string) => {
     if (endingRef.current) {
@@ -44,13 +43,12 @@ export function VoiceCallOverlay({
     setTimeout(() => onEndRef.current(), reason ? 1500 : 600);
   };
 
-  // Keep a ref so the effect's listeners can always call the latest doEnd
   const doEndRef = useRef(doEnd);
   doEndRef.current = doEnd;
 
   useEffect(() => {
-    console.log("[VoiceCall] Mounting – creating fresh Vapi client");
-    const vapi = createFreshVapiClient(vapiPublicKey);
+    console.log("[VoiceCall] Mounting – attaching event listeners to running Vapi instance");
+    const vapi = vapiInstance;
 
     const onCallStart = () => {
       console.log("[VoiceCall] Event: call-start");
@@ -83,7 +81,9 @@ export function VoiceCallOverlay({
 
     const onError = (err: unknown) => {
       console.error("[VoiceCall] Event: error", err);
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = err instanceof Error
+        ? err.message
+        : (typeof err === 'object' && err !== null ? JSON.stringify(err) : String(err));
       doEndRef.current(msg || "Connection failed");
     };
 
@@ -92,13 +92,6 @@ export function VoiceCallOverlay({
     vapi.on("speech-start", onSpeechStart);
     vapi.on("speech-end", onSpeechEnd);
     vapi.on("error", onError);
-
-    console.log("[VoiceCall] Starting call with assistant:", vapiAssistantId);
-    vapi.start(vapiAssistantId).catch((err: unknown) => {
-      console.error("[VoiceCall] vapi.start() rejected:", err);
-      const msg = err instanceof Error ? err.message : String(err);
-      doEndRef.current(msg || "Failed to start call");
-    });
 
     return () => {
       console.log("[VoiceCall] Unmounting – cleaning up listeners");
