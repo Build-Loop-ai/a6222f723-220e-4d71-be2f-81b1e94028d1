@@ -10,6 +10,8 @@ interface ChatMessageProps {
 export function ChatMessage({ role, content, suggestedUrl, accentColor }: ChatMessageProps) {
   const isUser = role === "user";
 
+  // Don't render empty assistant messages (placeholder while streaming)
+  if (!isUser && !content?.trim()) return null;
   // Simple markdown-like link detection for display
   const renderContent = (text: string) => {
     // Convert URLs in text to clickable links

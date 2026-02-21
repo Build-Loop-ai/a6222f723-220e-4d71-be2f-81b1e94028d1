@@ -130,14 +130,25 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose }: ChatPanelPro
           }
         }
 
-        // Extract suggested URL
-        const urlMatch = fullText.match(/https?:\/\/[^\s)>]+/);
-        if (urlMatch) {
+        // If streaming returned no content, set a fallback
+        if (!fullText.trim()) {
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === assistantId ? { ...m, suggestedUrl: urlMatch[0] } : m
+              m.id === assistantId
+                ? { ...m, content: "I'm sorry, I couldn't generate a response. Please try again." }
+                : m
             )
           );
+        } else {
+          // Extract suggested URL
+          const urlMatch = fullText.match(/https?:\/\/[^\s)>]+/);
+          if (urlMatch) {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantId ? { ...m, suggestedUrl: urlMatch[0] } : m
+              )
+            );
+          }
         }
       } catch (err: any) {
         setMessages((prev) =>
@@ -235,7 +246,7 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose }: ChatPanelPro
             accentColor={config.accentColor}
           />
         ))}
-        {isLoading && messages[messages.length - 1]?.content === "" && (
+        {isLoading && (
           <div className="mb-3 flex justify-start">
             <div className="flex gap-1 rounded-2xl rounded-bl-md bg-gray-100 px-4 py-3">
               <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400" style={{ animationDelay: "0ms" }} />
