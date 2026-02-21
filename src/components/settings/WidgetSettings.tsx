@@ -1052,17 +1052,19 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
         {/* ── Try Mode: Real interactive ChatWidget ── */}
         {tryMode && (
-          <ChatWidget
-            apiKey={config.api_key}
-            supabaseUrl={import.meta.env.VITE_SUPABASE_URL}
-            accentColor={config.accent_color}
-            position={config.position as "bottom-right" | "bottom-left"}
-            welcomeMessage={config.welcome_message}
-            placeholderText={config.placeholder_text}
-            widgetTitle={config.widget_title}
-            avatarUrl={config.avatar_url}
-            voiceEnabled={config.voice_enabled}
-          />
+          <div className="absolute inset-0" style={{ transform: "translateZ(0)" }}>
+            <ChatWidget
+              apiKey={config.api_key}
+              supabaseUrl={import.meta.env.VITE_SUPABASE_URL}
+              accentColor={config.accent_color}
+              position={config.position as "bottom-right" | "bottom-left"}
+              welcomeMessage={config.welcome_message}
+              placeholderText={config.placeholder_text}
+              widgetTitle={config.widget_title}
+              avatarUrl={config.avatar_url}
+              voiceEnabled={config.voice_enabled}
+            />
+          </div>
         )}
 
         {/* ── Edit Mode: Static clickable widget ── */}
