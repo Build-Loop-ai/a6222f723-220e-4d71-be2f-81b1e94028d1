@@ -281,6 +281,7 @@ Deno.serve(async (req) => {
 
 {
   "business_name": "string or null",
+  "business_type": "one of: dental_clinic, medical_practice, salon, restaurant, saas, agency, ecommerce, consulting, law_firm, accounting, real_estate, insurance, fitness, spa, automotive, education, nonprofit, healthcare, construction, retail, hospitality, technology, marketing, financial_services, photography, cleaning, plumbing, electrician, landscaping, pet_services, logistics, travel, food_delivery, coaching, other",
   "description": "string or null - a concise description of the business",
   "phone": "string or null - phone number in international format if possible",
   "address": {
@@ -336,7 +337,7 @@ Only include data you actually find on the website. Use null for anything not fo
             // Auto-populate empty fields in organizations table
             const { data: currentOrg } = await supabaseAdmin
               .from("organizations")
-              .select("description, phone, address")
+              .select("name, description, phone, address, business_type")
               .eq("id", organizationId)
               .single();
 
@@ -345,11 +346,20 @@ Only include data you actually find on the website. Use null for anything not fo
               const extracted = extractedBusinessData as Record<string, unknown>;
 
               // Only fill in empty fields
+              if (!currentOrg.name && extracted.business_name) {
+                updates.name = extracted.business_name;
+              } else if (currentOrg.name === 'My Organization' && extracted.business_name) {
+                // Replace default placeholder name
+                updates.name = extracted.business_name;
+              }
               if (!currentOrg.description && extracted.description) {
                 updates.description = extracted.description;
               }
               if (!currentOrg.phone && extracted.phone) {
                 updates.phone = extracted.phone;
+              }
+              if ((!currentOrg.business_type || currentOrg.business_type === 'other') && extracted.business_type) {
+                updates.business_type = extracted.business_type;
               }
               const currentAddr = (currentOrg.address as Record<string, string>) || {};
               const extractedAddr = (extracted.address as Record<string, string>) || {};
