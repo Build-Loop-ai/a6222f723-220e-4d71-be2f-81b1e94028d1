@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ChatBubble } from "./ChatBubble";
 import { ChatPanel } from "./ChatPanel";
 
@@ -26,10 +26,32 @@ export function ChatWidget({
   voiceEnabled = false,
 }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const openWidget = useCallback(() => {
+    setShowPanel(true);
+    setIsOpen(true);
+    setIsClosing(false);
+  }, []);
+
+  const closeWidget = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowPanel(false);
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 250);
+  }, []);
+
+  const toggleWidget = useCallback(() => {
+    if (isOpen) closeWidget();
+    else openWidget();
+  }, [isOpen, openWidget, closeWidget]);
 
   return (
     <>
-      {isOpen && (
+      {showPanel && (
         <ChatPanel
           config={{
             accentColor,
@@ -42,12 +64,13 @@ export function ChatWidget({
           }}
           apiKey={apiKey}
           supabaseUrl={supabaseUrl}
-          onClose={() => setIsOpen(false)}
+          onClose={closeWidget}
+          isClosing={isClosing}
         />
       )}
       <ChatBubble
         isOpen={isOpen}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleWidget}
         accentColor={accentColor}
         position={position}
       />
