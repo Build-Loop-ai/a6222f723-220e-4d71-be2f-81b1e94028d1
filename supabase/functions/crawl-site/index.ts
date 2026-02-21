@@ -455,7 +455,10 @@ Only include data you actually find on the website. Use null for anything not fo
         success: true,
         urls_discovered: urls.length,
         pages_scraped: scrapedPages.length,
+        urls: urls.slice(0, 50),
+        scraped_titles: scrapedPages.map(p => ({ url: p.url, title: p.title })),
         business_data_extracted: extractedBusinessData !== null,
+        extracted_data: extractedBusinessData || null,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
