@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Phone, PhoneOff } from "lucide-react";
-import { startVapiCall, stopVapiCall, resetVapiClient } from "@/lib/vapi-client";
+import { getVapiClient, stopVapiCall, resetVapiClient } from "@/lib/vapi-client";
 
 type CallStatus = "connecting" | "listening" | "speaking" | "ended";
 
@@ -20,6 +20,7 @@ export function VoiceCallOverlay({
   const [status, setStatus] = useState<CallStatus>("connecting");
   const [seconds, setSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startedRef = useRef(false);
   const maxDuration = 300; // 5 minutes
 
   const endCall = useCallback(() => {
@@ -33,37 +34,47 @@ export function VoiceCallOverlay({
     setTimeout(onEnd, 600);
   }, [status, vapiPublicKey, onEnd]);
 
+  // Start the VAPI call on mount – getUserMedia was already granted in the click handler
   useEffect(() => {
-    let mounted = true;
+    if (startedRef.current) return;
+    startedRef.current = true;
 
-    startVapiCall(vapiPublicKey, vapiAssistantId, {
-      onCallStart: () => {
-        if (!mounted) return;
-        setStatus("listening");
-        timerRef.current = setInterval(() => {
-          setSeconds((s) => {
-            if (s + 1 >= maxDuration) {
-              endCall();
-              return s;
-            }
-            return s + 1;
-          });
-        }, 1000);
-      },
-      onCallEnd: () => {
-        if (!mounted) return;
-        endCall();
-      },
-      onSpeechStart: () => {
-        if (mounted) setStatus("speaking");
-      },
-      onSpeechEnd: () => {
-        if (mounted) setStatus("listening");
-      },
-      onError: () => {
-        if (mounted) endCall();
-      },
-    }).catch(() => {
+    let mounted = true;
+    const vapi = getVapiClient(vapiPublicKey);
+
+    vapi.on("call-start", () => {
+      if (!mounted) return;
+      setStatus("listening");
+      timerRef.current = setInterval(() => {
+        setSeconds((s) => {
+          if (s + 1 >= maxDuration) {
+            endCall();
+            return s;
+          }
+          return s + 1;
+        });
+      }, 1000);
+    });
+
+    vapi.on("call-end", () => {
+      if (mounted) endCall();
+    });
+
+    vapi.on("speech-start", () => {
+      if (mounted) setStatus("speaking");
+    });
+
+    vapi.on("speech-end", () => {
+      if (mounted) setStatus("listening");
+    });
+
+    vapi.on("error", (err: unknown) => {
+      console.error("Vapi error:", err);
+      if (mounted) endCall();
+    });
+
+    vapi.start(vapiAssistantId).catch((err: unknown) => {
+      console.error("Vapi start failed:", err);
       if (mounted) endCall();
     });
 

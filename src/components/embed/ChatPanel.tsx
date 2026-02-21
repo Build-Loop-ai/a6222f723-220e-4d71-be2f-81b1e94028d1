@@ -32,6 +32,7 @@ interface ChatPanelProps {
 
 export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = false, vapiPublicKey, vapiAssistantId }: ChatPanelProps) {
   const [inCall, setInCall] = useState(false);
+  const [micStream, setMicStream] = useState<MediaStream | null>(null);
   const canVoiceCall = !!(vapiPublicKey && vapiAssistantId);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -247,7 +248,13 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
           vapiPublicKey={vapiPublicKey!}
           vapiAssistantId={vapiAssistantId!}
           accentColor={config.accentColor}
-          onEnd={() => setInCall(false)}
+          onEnd={() => {
+            if (micStream) {
+              micStream.getTracks().forEach(t => t.stop());
+              setMicStream(null);
+            }
+            setInCall(false);
+          }}
         />
       )}
 
@@ -282,7 +289,17 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
         {canVoiceCall && (
           <button
             type="button"
-            onClick={() => setInCall(true)}
+            onClick={async () => {
+              try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                  audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 },
+                });
+                setMicStream(stream);
+                setInCall(true);
+              } catch (err) {
+                console.error("Microphone access denied:", err);
+              }
+            }}
             disabled={inCall}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-40"
             title="Start voice call"
