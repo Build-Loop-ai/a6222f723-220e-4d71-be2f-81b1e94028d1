@@ -52,8 +52,14 @@ serve(async (req) => {
     // Check if assistant already exists
     const existingAssistantId = settings?.vapi_assistant_id;
 
-    // Build the system prompt based on business info
-    const systemPrompt = buildSystemPrompt(org, settings);
+    // Fetch site_pages for website knowledge base
+    const { data: sitePages } = await supabase
+      .from("site_pages")
+      .select("title, summary, content_markdown, url")
+      .eq("organization_id", organizationId);
+
+    // Build the system prompt based on business info + website knowledge
+    const systemPrompt = buildSystemPrompt(org, settings, sitePages || []);
 
     // Use voice_id directly - it's now stored as the actual ElevenLabs voice ID
     // Default to first recommended voice (Sarah) if not set
@@ -370,7 +376,7 @@ function buildAssistantPayload(org: any, settings: any, systemPrompt: string, el
   };
 }
 
-function buildSystemPrompt(org: any, settings: any): string {
+function buildSystemPrompt(org: any, settings: any, sitePages: any[]): string {
   const businessHours = formatBusinessHours(settings?.business_hours);
   const services =
     settings?.services?.map((s: any) => s.name).join(", ") || "general appointments";
@@ -514,7 +520,48 @@ ${personality === "professional" ? "Maintain a professional, business-like tone"
 Today is ${currentDateFormatted} (${currentDate}).
 When users mention relative dates like "tomorrow", "next week", "this Friday", etc., calculate the correct date using this as reference.
 ALWAYS use the current year (${today.getFullYear()}) unless the user explicitly specifies a different year.
-For example: if today is ${currentDateFormatted}, "tomorrow" means ${new Date(today.getTime() + 86400000).toISOString().split('T')[0]}.`;
+For example: if today is ${currentDateFormatted}, "tomorrow" means ${new Date(today.getTime() + 86400000).toISOString().split('T')[0]}.
+
+${buildWebsiteKnowledgeSection(sitePages)}`;
+}
+
+function buildWebsiteKnowledgeSection(sitePages: any[]): string {
+  if (!sitePages || sitePages.length === 0) return "";
+
+  // Priority keywords for sorting pages
+  const priorityKeywords = ["about", "services", "pricing", "price", "faq", "contact", "home", "team", "offer"];
+  
+  const sorted = [...sitePages].sort((a, b) => {
+    const titleA = (a.title || "").toLowerCase();
+    const titleB = (b.title || "").toLowerCase();
+    const scoreA = priorityKeywords.reduce((s, kw) => s + (titleA.includes(kw) ? 1 : 0), 0);
+    const scoreB = priorityKeywords.reduce((s, kw) => s + (titleB.includes(kw) ? 1 : 0), 0);
+    return scoreB - scoreA;
+  });
+
+  let section = "## Website Knowledge Base\nUse this information to answer questions about the business. When a caller asks about services, pricing, the team, etc., use the content below to give accurate, detailed answers.\n\n";
+  let tokenBudget = 4000; // ~4000 tokens worth of chars
+
+  for (let i = 0; i < sorted.length && tokenBudget > 0; i++) {
+    const page = sorted[i];
+    const title = page.title || page.url;
+    const summary = page.summary || "";
+    
+    if (i < 5 && page.content_markdown) {
+      // Top 5 pages: include content snippet
+      const content = page.content_markdown.substring(0, 800);
+      const entry = `### ${title}\n${summary}\n${content}\n\n`;
+      section += entry;
+      tokenBudget -= entry.length;
+    } else if (summary) {
+      // Remaining pages: summary only
+      const entry = `- **${title}**: ${summary}\n`;
+      section += entry;
+      tokenBudget -= entry.length;
+    }
+  }
+
+  return section;
 }
 
 function formatBusinessHours(hours: any): string {
