@@ -652,8 +652,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             </div>
           </div>
 
-          {/* Center: Tab pills */}
-          <div className="flex-1 flex justify-center">
+          {/* Center: Tab pills – absolutely centered so left/right content changes don't shift them */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
             <div className="flex gap-0.5 p-[3px] rounded-xl bg-foreground/[0.04] border border-foreground/[0.06]">
               {([
                 { key: "style", icon: <Palette className="h-3 w-3" />, label: "Design" },
@@ -682,8 +682,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             </div>
           </div>
 
-          {/* Right: Design inline controls + preview + position — fixed min-width to prevent tab shift */}
-          <div className="flex items-center gap-1.5 shrink-0 min-w-[320px] justify-end">
+          {/* Right: Design inline controls + preview + position */}
+          <div className="flex items-center gap-1.5 shrink-0 ml-auto">
             {activePanel === "style" && (
               <>
                 {/* Inline color swatches */}
