@@ -2,61 +2,61 @@ import Vapi from "@vapi-ai/web";
 
 let vapiInstance: Vapi | null = null;
 
-export function getVapiClient(publicKey: string): Vapi {
-  if (!vapiInstance) {
-    vapiInstance = new Vapi(publicKey);
+/**
+ * Create a completely fresh Vapi client, destroying any previous one.
+ * Use this at the start of every new call session.
+ */
+export function createFreshVapiClient(publicKey: string): Vapi {
+  // Tear down any existing instance first
+  if (vapiInstance) {
+    try {
+      vapiInstance.stop();
+    } catch {
+      // ignore – may not be in a call
+    }
+    try {
+      vapiInstance.removeAllListeners();
+    } catch {
+      // ignore – older SDK versions may not support this
+    }
+    vapiInstance = null;
   }
+
+  console.log("[vapi-client] Creating fresh Vapi instance");
+  vapiInstance = new Vapi(publicKey);
   return vapiInstance;
 }
 
+/**
+ * Get the current singleton (only useful for stopping an active call).
+ */
+export function getVapiClient(): Vapi | null {
+  return vapiInstance;
+}
+
+/**
+ * Fully tear down the current Vapi instance.
+ */
 export function resetVapiClient(): void {
-  vapiInstance = null;
+  if (vapiInstance) {
+    console.log("[vapi-client] Resetting Vapi instance");
+    try {
+      vapiInstance.stop();
+    } catch {
+      // ignore
+    }
+    try {
+      vapiInstance.removeAllListeners();
+    } catch {
+      // ignore
+    }
+    vapiInstance = null;
+  }
 }
 
-export interface VapiCallEvents {
-  onCallStart?: () => void;
-  onCallEnd?: () => void;
-  onSpeechStart?: () => void;
-  onSpeechEnd?: () => void;
-  onError?: (error: any) => void;
-  onMessage?: (message: any) => void;
-}
-
-export async function startVapiCall(
-  publicKey: string,
-  assistantId: string,
-  events: VapiCallEvents
-): Promise<void> {
-  const vapi = getVapiClient(publicKey);
-
-  if (events.onCallStart) {
-    vapi.on("call-start", events.onCallStart);
+export function stopVapiCall(): void {
+  if (vapiInstance) {
+    console.log("[vapi-client] Stopping active call");
+    vapiInstance.stop();
   }
-
-  if (events.onCallEnd) {
-    vapi.on("call-end", events.onCallEnd);
-  }
-
-  if (events.onSpeechStart) {
-    vapi.on("speech-start", events.onSpeechStart);
-  }
-
-  if (events.onSpeechEnd) {
-    vapi.on("speech-end", events.onSpeechEnd);
-  }
-
-  if (events.onError) {
-    vapi.on("error", events.onError);
-  }
-
-  if (events.onMessage) {
-    vapi.on("message", events.onMessage);
-  }
-
-  await vapi.start(assistantId);
-}
-
-export function stopVapiCall(publicKey: string): void {
-  const vapi = getVapiClient(publicKey);
-  vapi.stop();
 }

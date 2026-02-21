@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Phone, PhoneOff } from "lucide-react";
-import { getVapiClient, stopVapiCall, resetVapiClient } from "@/lib/vapi-client";
+import { createFreshVapiClient, stopVapiCall, resetVapiClient } from "@/lib/vapi-client";
 
 type CallStatus = "connecting" | "listening" | "speaking" | "ended";
 
@@ -19,68 +19,95 @@ export function VoiceCallOverlay({
 }: VoiceCallOverlayProps) {
   const [status, setStatus] = useState<CallStatus>("connecting");
   const [seconds, setSeconds] = useState(0);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const startedRef = useRef(false);
+  const endingRef = useRef(false); // guard against double-end
+  const onEndRef = useRef(onEnd);
+  onEndRef.current = onEnd;
   const maxDuration = 300; // 5 minutes
 
-  const endCall = useCallback(() => {
-    if (status === "ended") return;
+  const doEnd = (reason?: string) => {
+    if (endingRef.current) {
+      console.log("[VoiceCall] doEnd skipped – already ending");
+      return;
+    }
+    endingRef.current = true;
+    console.log("[VoiceCall] Ending call, reason:", reason || "user hangup");
+
     setStatus("ended");
-    try {
-      stopVapiCall(vapiPublicKey);
-    } catch {}
+    if (reason) setErrorMsg(reason);
+
+    try { stopVapiCall(); } catch {}
     resetVapiClient();
     if (timerRef.current) clearInterval(timerRef.current);
-    setTimeout(onEnd, 600);
-  }, [status, vapiPublicKey, onEnd]);
 
-  // Start the VAPI call on mount – getUserMedia was already granted in the click handler
+    setTimeout(() => onEndRef.current(), reason ? 1500 : 600);
+  };
+
+  // Keep a ref so the effect's listeners can always call the latest doEnd
+  const doEndRef = useRef(doEnd);
+  doEndRef.current = doEnd;
+
   useEffect(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
+    console.log("[VoiceCall] Mounting – creating fresh Vapi client");
+    const vapi = createFreshVapiClient(vapiPublicKey);
 
-    let mounted = true;
-    const vapi = getVapiClient(vapiPublicKey);
-
-    vapi.on("call-start", () => {
-      if (!mounted) return;
+    const onCallStart = () => {
+      console.log("[VoiceCall] Event: call-start");
       setStatus("listening");
       timerRef.current = setInterval(() => {
         setSeconds((s) => {
-          if (s + 1 >= maxDuration) {
-            endCall();
+          if (s + 1 >= 300) {
+            doEndRef.current("Max duration reached");
             return s;
           }
           return s + 1;
         });
       }, 1000);
-    });
+    };
 
-    vapi.on("call-end", () => {
-      if (mounted) endCall();
-    });
+    const onCallEnd = () => {
+      console.log("[VoiceCall] Event: call-end");
+      doEndRef.current();
+    };
 
-    vapi.on("speech-start", () => {
-      if (mounted) setStatus("speaking");
-    });
+    const onSpeechStart = () => {
+      console.log("[VoiceCall] Event: speech-start");
+      setStatus("speaking");
+    };
 
-    vapi.on("speech-end", () => {
-      if (mounted) setStatus("listening");
-    });
+    const onSpeechEnd = () => {
+      console.log("[VoiceCall] Event: speech-end");
+      setStatus("listening");
+    };
 
-    vapi.on("error", (err: unknown) => {
-      console.error("Vapi error:", err);
-      if (mounted) endCall();
-    });
+    const onError = (err: unknown) => {
+      console.error("[VoiceCall] Event: error", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      doEndRef.current(msg || "Connection failed");
+    };
 
+    vapi.on("call-start", onCallStart);
+    vapi.on("call-end", onCallEnd);
+    vapi.on("speech-start", onSpeechStart);
+    vapi.on("speech-end", onSpeechEnd);
+    vapi.on("error", onError);
+
+    console.log("[VoiceCall] Starting call with assistant:", vapiAssistantId);
     vapi.start(vapiAssistantId).catch((err: unknown) => {
-      console.error("Vapi start failed:", err);
-      if (mounted) endCall();
+      console.error("[VoiceCall] vapi.start() rejected:", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      doEndRef.current(msg || "Failed to start call");
     });
 
     return () => {
-      mounted = false;
+      console.log("[VoiceCall] Unmounting – cleaning up listeners");
       if (timerRef.current) clearInterval(timerRef.current);
+      vapi.off("call-start", onCallStart);
+      vapi.off("call-end", onCallEnd);
+      vapi.off("speech-start", onSpeechStart);
+      vapi.off("speech-end", onSpeechEnd);
+      vapi.off("error", onError);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -98,6 +125,8 @@ export function VoiceCallOverlay({
       ? "Speaking…"
       : status === "listening"
       ? "Listening…"
+      : errorMsg
+      ? errorMsg
       : "Call ended";
 
   const isActive = status !== "ended" && status !== "connecting";
@@ -127,16 +156,22 @@ export function VoiceCallOverlay({
         <div
           className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full text-white shadow-lg"
           style={{
-            backgroundColor: accentColor,
+            backgroundColor: status === "ended" && errorMsg ? "#ef4444" : accentColor,
             boxShadow: `0 8px 32px -4px ${accentColor}50`,
           }}
         >
-          <Phone className="h-7 w-7" />
+          {status === "ended" && errorMsg ? (
+            <PhoneOff className="h-7 w-7" />
+          ) : (
+            <Phone className="h-7 w-7" />
+          )}
         </div>
       </div>
 
       {/* Status */}
-      <p className="text-sm font-medium text-gray-700 mb-1">{statusLabel}</p>
+      <p className={`text-sm font-medium mb-1 ${status === "ended" && errorMsg ? "text-red-600" : "text-gray-700"}`}>
+        {statusLabel}
+      </p>
       {(isActive || status === "ended") && (
         <p className="text-xs text-gray-400 font-mono mb-8">{formatTime(seconds)}</p>
       )}
@@ -145,7 +180,7 @@ export function VoiceCallOverlay({
       {/* End Call button */}
       {status !== "ended" && (
         <button
-          onClick={endCall}
+          onClick={() => doEnd()}
           className="flex items-center gap-2 rounded-full bg-red-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-red-600 hover:shadow-xl active:scale-95"
         >
           <PhoneOff className="h-4 w-4" />
