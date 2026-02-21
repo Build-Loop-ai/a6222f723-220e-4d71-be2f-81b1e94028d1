@@ -647,11 +647,17 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     >
       {/* ━━━━ Glassy Top Bar – connected to sidebar ━━━━ */}
       <div className="absolute top-0 left-0 right-0 z-30">
-        {/* Top accent line – spans full width including above sidebar */}
+        {/* Top accent line */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-emerald-500/40 to-cyan-500/30 z-10" />
         
-        {/* Main bar */}
+        {/* Main bar – matches sidebar glass */}
         <div className="relative h-14 glass-toolbar flex items-center px-4 gap-0 border-l-0">
+          {/* Smooth concave corner – fills the junction between toolbar bottom and content area */}
+          <div className="hidden md:block absolute left-0 bottom-0 translate-y-full w-[20px] h-[20px] z-20 pointer-events-none">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="block">
+              <path d="M0 0 L0 20 Q0 0 20 0 Z" fill="rgba(255,255,255,0.76)" />
+            </svg>
+          </div>
 
           {/* ── Left zone: label + design controls ── */}
           <div className="flex items-center gap-2 shrink-0 w-[45%]">
