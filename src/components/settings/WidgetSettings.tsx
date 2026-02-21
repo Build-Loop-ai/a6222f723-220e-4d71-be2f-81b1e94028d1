@@ -682,8 +682,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             </div>
           </div>
 
-          {/* Right: Design inline controls + preview + position */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          {/* Right: Design inline controls + preview + position — fixed min-width to prevent tab shift */}
+          <div className="flex items-center gap-1.5 shrink-0 min-w-[320px] justify-end">
             {activePanel === "style" && (
               <>
                 {/* Inline color swatches */}
