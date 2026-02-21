@@ -18,18 +18,17 @@ export function ChatBubble({ isOpen, onClick, accentColor, position, unreadCount
       style={{ backgroundColor: accentColor }}
       aria-label={isOpen ? "Close chat" : "Open chat"}
     >
-      {isOpen ? (
+      <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isOpen ? "rotate-0 scale-100 opacity-100" : "rotate-90 scale-0 opacity-0"}`}>
         <X className="h-6 w-6 text-white" />
-      ) : (
-        <>
-          <MessageCircle className="h-6 w-6 text-white" />
-          {unreadCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-              {unreadCount}
-            </span>
-          )}
-        </>
-      )}
+      </div>
+      <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isOpen ? "-rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"}`}>
+        <MessageCircle className="h-6 w-6 text-white" />
+        {!isOpen && unreadCount > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+            {unreadCount}
+          </span>
+        )}
+      </div>
     </button>
   );
 }

@@ -24,9 +24,10 @@ interface ChatPanelProps {
   apiKey: string;
   supabaseUrl: string;
   onClose: () => void;
+  isClosing?: boolean;
 }
 
-export function ChatPanel({ config, apiKey, supabaseUrl, onClose }: ChatPanelProps) {
+export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = false }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -204,7 +205,11 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose }: ChatPanelPro
 
   return (
     <div
-      className={`fixed ${positionClasses} z-[9999] flex h-[520px] w-[380px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}
+      className={`fixed ${positionClasses} z-[9999] flex h-[520px] w-[380px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-250 ease-out ${
+        isClosing
+          ? "translate-y-4 scale-95 opacity-0"
+          : "animate-[widget-open_0.25s_ease-out_forwards]"
+      }`}
       style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}
     >
       {/* Header */}
