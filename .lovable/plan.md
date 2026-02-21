@@ -1,71 +1,86 @@
 
-
-# Glassy Top Bar for Widget Builder
+# Add Voice Agent (VAPI) Call to the Chat Widget
 
 ## Overview
 
-Replace the right-side builder panel with a floating glassy top toolbar. This maximizes the canvas area and creates a more modern, Figma/Canva-style editing experience. The canvas fills the entire viewport while a translucent toolbar hovers at the top with all controls accessible via tab sections and expandable dropdowns/popovers.
+Currently the widget has a microphone button that does **speech-to-text** (browser's SpeechRecognition API) -- it transcribes your voice into text and sends it as a chat message. What's missing is a **live voice call** with the VAPI voice agent, similar to a phone call experience.
 
-## Layout Change
+This plan adds a dedicated "Call" button to the widget that starts an interactive voice conversation powered by VAPI, right inside the chat panel.
 
-**Current**: Navigation sidebar (left) | Canvas (center) | Builder panel 300px (right)
+## What the User Will See
 
-**New**: Navigation sidebar (left) | Full canvas with glassy top bar overlay
+1. **New phone icon** in the chat panel input area (next to the existing mic button) -- a `Phone` icon that starts a live voice call
+2. **In-call overlay** inside the chat panel showing:
+   - A pulsing animation indicating the call is active
+   - "Speaking..." / "Listening..." status indicators
+   - A red "End Call" button
+   - Call duration timer
+3. When the call ends, the panel returns to the normal chat view
 
-## Design Details
+## How It Works
 
-### Glassy Top Bar
-- Fixed to the top of the canvas area, full width
-- Glassmorphism: `backdrop-blur-xl bg-white/70 border-b border-white/30 shadow-lg`
-- Height: ~56px for the main bar
-- Contains:
-  - Left: Widget Builder label + Wand2 icon + auto-save indicator
-  - Center: Tab pills (Design / Embed / Domains) -- same as current but horizontal
-  - Right: Preview button + position toggle (left/right)
+- The widget needs two new props: `vapiPublicKey` and `vapiAssistantId`
+- These come from the organization's settings (`organization_settings.vapi_assistant_id` and the `VAPI_PUBLIC_KEY` secret)
+- When the user clicks the phone button, it uses the existing `vapi-client.ts` helper to start a browser-based VAPI call
+- The VAPI Web SDK handles all audio capture/playback in the browser
 
-### Design Tab -- Inline Controls
-When "Design" is active, the top bar shows a compact horizontal control strip:
-- Brand color swatches (the preset circles) inline
-- Color picker input
-- Font selector as a small dropdown/popover
-- Corner style as a small dropdown/popover
-- Feature toggles (Voice, Branding) as icon buttons
-- A "More" or zone-specific editing via a dropdown panel that slides down from the bar when a zone is clicked on the canvas
+## Technical Details
 
-### Zone Editing
-When a user clicks a zone on the canvas preview, a slim dropdown panel slides down from the top bar (still glassy) showing the zone-specific fields (text inputs, color pickers). Clicking away or pressing the back button closes it.
+### 1. Database: Add VAPI fields to widget_configs table
 
-### Embed/Domains Tabs
-These open a centered popover/dropdown panel below the top bar (not a full sidebar) with the embed code snippet or domain management UI.
+Add a new `voice_call_enabled` boolean column to `widget_configs` to let orgs control whether the voice call button appears (separate from the existing `voice_enabled` which controls speech-to-text).
 
-## Technical Plan
+### 2. New Edge Function: `get-widget-voice-config`
 
-### File: `src/components/settings/WidgetSettings.tsx`
+A lightweight public endpoint that the embedded widget calls to get the VAPI public key and assistant ID for a given widget API key. This avoids exposing secrets in the widget loader.
 
-1. **Remove** the right panel `<div className="w-[300px]">` and all its contents (lines 821-1139)
-2. **Add** a new `<div>` as the first child inside the canvas container, positioned as an overlay at the top:
-   - Glassmorphism styling with `backdrop-blur-xl`, semi-transparent background
-   - Contains the tab navigation, inline design controls, and action buttons
-3. **Add** a collapsible dropdown panel below the top bar for:
-   - Zone-specific editors (triggered by clicking canvas zones)
-   - Embed code display
-   - Domains management
-4. **Reorganize** the Design controls into a horizontal layout:
-   - Color swatches displayed inline as a row
-   - Font, corners, and toggles as small popover triggers
-5. **Adjust** canvas padding to account for the top bar height (~56px top padding or margin)
+- Input: `x-widget-key` header
+- Output: `{ vapiPublicKey, vapiAssistantId }` (or empty if not configured)
+- Looks up `widget_configs` -> `organization_settings` to find the assistant ID, and reads the `VAPI_PUBLIC_KEY` secret
 
-### File: `src/layouts/DashboardLayout.tsx`
-- No changes needed -- the full-bleed route already works correctly
+### 3. New Component: `VoiceCallOverlay.tsx`
 
-### New UI Pattern
-- Use Radix `Popover` components for font/corner/feature dropdowns
-- Use `AnimatePresence` + `motion.div` for the slide-down panel animation
-- Keep the existing state management (`activePanel`, `editingZone`, config updates) -- only the rendering layout changes
+A full-panel overlay rendered inside ChatPanel when a voice call is active:
 
-## What Stays the Same
-- All the config state, auto-save logic, and data fetching
-- The canvas with website iframe/screenshot background
-- The chat panel preview and bubble positioning
-- Zone click detection on the canvas
-- Embed code snippet and domain management functionality
+- Uses `startVapiCall` / `stopVapiCall` from `vapi-client.ts`
+- Shows animated concentric rings (pulsing) during the call
+- Displays status: "Connecting...", "Listening...", "Speaking..."
+- Shows a call duration timer
+- Big red "End Call" button
+- Auto-ends after 30 seconds (matching existing duration cap)
+
+### 4. Update `ChatPanel.tsx`
+
+- Accept new optional props: `vapiPublicKey` and `vapiAssistantId`
+- Add `inCall` state
+- Render `VoiceCallOverlay` when `inCall === true`
+- Add a `Phone` icon button next to the send button (only visible when `vapiPublicKey` and `vapiAssistantId` are provided)
+
+### 5. Update `ChatWidget.tsx`
+
+- Add `vapiPublicKey` and `vapiAssistantId` optional props
+- Pass them through to `ChatPanel`
+
+### 6. Update `WidgetSettings.tsx`
+
+- Fetch `vapi_assistant_id` from `organization_settings` for the current org
+- Add a "Voice Call" toggle in the widget design settings
+- Pass `vapiPublicKey` and `vapiAssistantId` to the try-mode `ChatWidget`
+
+### 7. Update `widget-loader` edge function
+
+- Include `voice_call_enabled` in the config it serves
+- When `voice_call_enabled` is true, also fetch and include the VAPI public key and assistant ID in the widget initialization data
+
+### File Changes Summary
+
+| File | Change |
+|------|--------|
+| `supabase/migrations/` | Add `voice_call_enabled` column to `widget_configs` |
+| `supabase/functions/get-widget-voice-config/index.ts` | New edge function |
+| `src/components/embed/VoiceCallOverlay.tsx` | New component - in-call UI |
+| `src/components/embed/ChatPanel.tsx` | Add phone button + voice call overlay |
+| `src/components/embed/ChatWidget.tsx` | Pass through VAPI props |
+| `src/components/settings/WidgetSettings.tsx` | Voice call toggle + pass VAPI config to try mode |
+| `supabase/functions/widget-loader/index.ts` | Include voice call config |
+| `supabase/functions/widget-chat/index.ts` | No changes needed |
