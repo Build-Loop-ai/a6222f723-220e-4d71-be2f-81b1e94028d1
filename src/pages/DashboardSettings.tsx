@@ -11,20 +11,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Building,
   Bot,
-  Link,
   Users,
   CreditCard,
-  MessageSquareText,
   Plus,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BusinessSettings } from "@/components/settings/BusinessSettings";
 import { AIAssistantSettings } from "@/components/settings/AIAssistantSettings";
-import { GoogleCalendarIntegration } from "@/components/settings/GoogleCalendarIntegration";
 import { InviteMemberDialog } from "@/components/settings/InviteMemberDialog";
 import { TeamMembersList } from "@/components/settings/TeamMembersList";
 import { BillingCard } from "@/components/settings/BillingCard";
-import { WidgetSettings } from "@/components/settings/WidgetSettings";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -173,17 +169,9 @@ const DashboardSettings = () => {
             <Building className="w-4 h-4" />
             My Business
           </TabsTrigger>
-          <TabsTrigger value="widget" className="gap-2">
-            <MessageSquareText className="w-4 h-4" />
-            Widget
-          </TabsTrigger>
           <TabsTrigger value="ai" className="gap-2">
             <Bot className="w-4 h-4" />
             AI Assistant
-          </TabsTrigger>
-          <TabsTrigger value="integrations" className="gap-2">
-            <Link className="w-4 h-4" />
-            Integrations
           </TabsTrigger>
           <TabsTrigger value="team" className="gap-2">
             <Users className="w-4 h-4" />
@@ -199,18 +187,8 @@ const DashboardSettings = () => {
           {organizationId && <BusinessSettings organizationId={organizationId} />}
         </TabsContent>
 
-        <TabsContent value="widget" className="space-y-6">
-          {organizationId && <WidgetSettings organizationId={organizationId} />}
-        </TabsContent>
-
         <TabsContent value="ai" className="space-y-6">
           <AIAssistantSettings organizationId={organizationId || undefined} />
-        </TabsContent>
-
-        <TabsContent value="integrations" className="space-y-6">
-          {organizationId && (
-            <GoogleCalendarIntegration organizationId={organizationId} />
-          )}
         </TabsContent>
 
         <TabsContent value="team" className="space-y-6">

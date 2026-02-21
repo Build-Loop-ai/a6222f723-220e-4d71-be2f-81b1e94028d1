@@ -7,6 +7,7 @@ import {
   LogOut,
   BookOpen,
   Sparkles,
+  MessageSquareText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +16,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: MessageSquareText, label: "Widget", href: "/dashboard/widget" },
   { icon: MessageSquare, label: "Conversations", href: "/dashboard/conversations" },
   { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
   { icon: BookOpen, label: "Knowledge Base", href: "/dashboard/knowledge-base" },
