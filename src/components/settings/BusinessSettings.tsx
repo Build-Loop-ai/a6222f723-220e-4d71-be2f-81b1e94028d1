@@ -375,9 +375,9 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
           </AccordionTrigger>
           <AccordionContent className="pt-4 pb-6">
             <div className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4 items-end">
                 <div className="space-y-2">
-                  <div className="flex items-center">
+                  <div className="flex items-center min-h-[28px]">
                     <Label>Business Name</Label>
                   </div>
                   <Input
@@ -386,7 +386,7 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center">
+                  <div className="flex items-center min-h-[28px]">
                     <Label>Business Type</Label>
                     <FieldSourceBadge detected={wasDetected("business_type")} fieldName="business_type" />
                   </div>
