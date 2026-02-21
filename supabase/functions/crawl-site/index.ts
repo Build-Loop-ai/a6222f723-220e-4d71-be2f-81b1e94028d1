@@ -119,7 +119,6 @@ Deno.serve(async (req) => {
         is_crawled: false,
       }));
 
-      // Insert in batches of 100
       for (let i = 0; i < siteMapRows.length; i += 100) {
         const batch = siteMapRows.slice(i, i + 100);
         await supabaseAdmin.from("site_maps").upsert(batch, {
@@ -128,7 +127,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Step 2: Scrape top pages (limit 30 to stay within reasonable limits)
+    // Step 2: Scrape top pages (limit 30)
     const pagesToScrape = urls.slice(0, 30);
     console.log(`Step 2: Scraping ${pagesToScrape.length} pages`);
 
@@ -141,7 +140,7 @@ Deno.serve(async (req) => {
       last_crawled_at: string;
     }> = [];
 
-    // Scrape in batches of 5 to avoid rate limits
+    // Scrape in batches of 5
     for (let i = 0; i < pagesToScrape.length; i += 5) {
       const batch = pagesToScrape.slice(i, i + 5);
       const scrapePromises = batch.map(async (pageUrl: string) => {
@@ -169,8 +168,8 @@ Deno.serve(async (req) => {
               organization_id: organizationId,
               url: pageUrl,
               title: title.substring(0, 500),
-              content_markdown: markdown.substring(0, 50000), // Cap at 50k chars
-              summary: null, // Will be generated later
+              content_markdown: markdown.substring(0, 50000),
+              summary: null,
               last_crawled_at: new Date().toISOString(),
             };
           }
@@ -199,7 +198,6 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Mark scraped URLs in site_maps
       const scrapedUrls = scrapedPages.map((p) => p.url);
       await supabaseAdmin
         .from("site_maps")
@@ -208,11 +206,14 @@ Deno.serve(async (req) => {
         .in("url", scrapedUrls);
     }
 
-    // Step 3: Generate summaries using Lovable AI
+    // Step 3: Generate summaries + extract business data using AI
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (LOVABLE_API_KEY && scrapedPages.length > 0) {
-      console.log("Step 3: Generating page summaries");
+    let extractedBusinessData: Record<string, unknown> | null = null;
 
+    if (LOVABLE_API_KEY && scrapedPages.length > 0) {
+      console.log("Step 3: Generating summaries");
+
+      // Summaries
       for (const page of scrapedPages.slice(0, 20)) {
         try {
           const content = page.content_markdown.substring(0, 3000);
@@ -253,6 +254,159 @@ Deno.serve(async (req) => {
           console.warn(`Failed to summarize ${page.url}:`, err);
         }
       }
+
+      // Step 4: Extract structured business data from all scraped content
+      console.log("Step 4: Extracting business data from website content");
+      try {
+        // Combine content from top pages for extraction
+        const combinedContent = scrapedPages
+          .slice(0, 10)
+          .map((p) => `--- PAGE: ${p.title} (${p.url}) ---\n${p.content_markdown.substring(0, 4000)}`)
+          .join("\n\n");
+
+        const extractRes = await fetch(
+          "https://ai.gateway.lovable.dev/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash",
+              messages: [
+                {
+                  role: "system",
+                  content: `You are a data extraction assistant. Extract structured business information from the website content provided. Return ONLY valid JSON with these fields (use null for any field you cannot find):
+
+{
+  "business_name": "string or null",
+  "description": "string or null - a concise description of the business",
+  "phone": "string or null - phone number in international format if possible",
+  "address": {
+    "street": "string or null",
+    "city": "string or null",
+    "postal_code": "string or null"
+  },
+  "business_hours": {
+    "monday": { "isOpen": true/false, "open": "HH:MM", "close": "HH:MM" },
+    "tuesday": { "isOpen": true/false, "open": "HH:MM", "close": "HH:MM" },
+    "wednesday": { "isOpen": true/false, "open": "HH:MM", "close": "HH:MM" },
+    "thursday": { "isOpen": true/false, "open": "HH:MM", "close": "HH:MM" },
+    "friday": { "isOpen": true/false, "open": "HH:MM", "close": "HH:MM" },
+    "saturday": { "isOpen": true/false, "open": "HH:MM", "close": "HH:MM" },
+    "sunday": { "isOpen": true/false, "open": "HH:MM", "close": "HH:MM" }
+  },
+  "services": [
+    { "name": "string", "duration": number_or_null_in_minutes, "description": "string or null" }
+  ]
+}
+
+Only include data you actually find on the website. Use null for anything not found. Do not guess or make up data.`,
+                },
+                { role: "user", content: combinedContent },
+              ],
+            }),
+          }
+        );
+
+        if (extractRes.ok) {
+          const extractData = await extractRes.json();
+          let rawContent = extractData.choices?.[0]?.message?.content || "";
+          
+          // Strip markdown code fences if present
+          rawContent = rawContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+          
+          try {
+            extractedBusinessData = JSON.parse(rawContent);
+            console.log("Successfully extracted business data:", JSON.stringify(extractedBusinessData).substring(0, 200));
+
+            // Store extracted data in organization_settings
+            await supabaseAdmin
+              .from("organization_settings")
+              .update({
+                extracted_business_data: {
+                  ...extractedBusinessData,
+                  extracted_at: new Date().toISOString(),
+                  source_url: formattedUrl,
+                },
+              })
+              .eq("organization_id", organizationId);
+
+            // Auto-populate empty fields in organizations table
+            const { data: currentOrg } = await supabaseAdmin
+              .from("organizations")
+              .select("description, phone, address")
+              .eq("id", organizationId)
+              .single();
+
+            if (currentOrg && extractedBusinessData) {
+              const updates: Record<string, unknown> = {};
+              const extracted = extractedBusinessData as Record<string, unknown>;
+
+              // Only fill in empty fields
+              if (!currentOrg.description && extracted.description) {
+                updates.description = extracted.description;
+              }
+              if (!currentOrg.phone && extracted.phone) {
+                updates.phone = extracted.phone;
+              }
+              const currentAddr = (currentOrg.address as Record<string, string>) || {};
+              const extractedAddr = (extracted.address as Record<string, string>) || {};
+              if ((!currentAddr.street && extractedAddr?.street) || 
+                  (!currentAddr.city && extractedAddr?.city) || 
+                  (!currentAddr.postal_code && extractedAddr?.postal_code)) {
+                updates.address = {
+                  street: currentAddr.street || extractedAddr?.street || "",
+                  city: currentAddr.city || extractedAddr?.city || "",
+                  postal_code: currentAddr.postal_code || extractedAddr?.postal_code || "",
+                };
+              }
+
+              if (Object.keys(updates).length > 0) {
+                console.log("Auto-populating organization fields:", Object.keys(updates));
+                await supabaseAdmin
+                  .from("organizations")
+                  .update(updates)
+                  .eq("id", organizationId);
+              }
+            }
+
+            // Auto-populate empty settings fields
+            const { data: currentSettings } = await supabaseAdmin
+              .from("organization_settings")
+              .select("business_hours, services")
+              .eq("organization_id", organizationId)
+              .single();
+
+            if (currentSettings && extractedBusinessData) {
+              const settingsUpdates: Record<string, unknown> = {};
+              const extracted = extractedBusinessData as Record<string, unknown>;
+              const currentHours = currentSettings.business_hours as Record<string, unknown> | null;
+              const currentServices = currentSettings.services as unknown[] | null;
+
+              if ((!currentHours || Object.keys(currentHours).length === 0) && extracted.business_hours) {
+                settingsUpdates.business_hours = extracted.business_hours;
+              }
+              if ((!currentServices || currentServices.length === 0) && extracted.services) {
+                settingsUpdates.services = extracted.services;
+              }
+
+              if (Object.keys(settingsUpdates).length > 0) {
+                console.log("Auto-populating settings fields:", Object.keys(settingsUpdates));
+                await supabaseAdmin
+                  .from("organization_settings")
+                  .update(settingsUpdates)
+                  .eq("organization_id", organizationId);
+              }
+            }
+          } catch (parseErr) {
+            console.warn("Failed to parse extracted business data:", parseErr);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to extract business data:", err);
+      }
     }
 
     return new Response(
@@ -260,6 +414,7 @@ Deno.serve(async (req) => {
         success: true,
         urls_discovered: urls.length,
         pages_scraped: scrapedPages.length,
+        business_data_extracted: extractedBusinessData !== null,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

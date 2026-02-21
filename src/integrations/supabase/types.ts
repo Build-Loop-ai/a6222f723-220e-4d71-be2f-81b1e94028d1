@@ -416,6 +416,7 @@ export type Database = {
           business_hours: Json | null
           created_at: string
           custom_greeting: string | null
+          extracted_business_data: Json | null
           google_calendar_connected: boolean | null
           google_calendar_email: string | null
           google_calendar_id: string | null
@@ -437,6 +438,7 @@ export type Database = {
           business_hours?: Json | null
           created_at?: string
           custom_greeting?: string | null
+          extracted_business_data?: Json | null
           google_calendar_connected?: boolean | null
           google_calendar_email?: string | null
           google_calendar_id?: string | null
@@ -458,6 +460,7 @@ export type Database = {
           business_hours?: Json | null
           created_at?: string
           custom_greeting?: string | null
+          extracted_business_data?: Json | null
           google_calendar_connected?: boolean | null
           google_calendar_email?: string | null
           google_calendar_id?: string | null
