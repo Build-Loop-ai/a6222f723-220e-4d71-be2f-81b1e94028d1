@@ -409,6 +409,37 @@ Only include data you actually find on the website. Use null for anything not fo
       }
     }
 
+    // Step 5: Auto-sync Vapi assistant with new website knowledge
+    try {
+      const { data: orgSettings } = await supabaseAdmin
+        .from("organization_settings")
+        .select("vapi_assistant_id")
+        .eq("organization_id", organizationId)
+        .single();
+
+      if (orgSettings?.vapi_assistant_id) {
+        console.log("Step 5: Syncing Vapi assistant with new website content");
+        const vapiSyncRes = await fetch(
+          `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-vapi-assistant`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ organizationId }),
+          }
+        );
+        if (vapiSyncRes.ok) {
+          console.log("Vapi assistant synced successfully after crawl");
+        } else {
+          console.warn("Failed to sync Vapi assistant:", await vapiSyncRes.text());
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to sync Vapi assistant after crawl:", err);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

@@ -6,6 +6,83 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-widget-key, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const STOP_WORDS = new Set([
+  "the", "is", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
+  "of", "with", "by", "from", "it", "its", "this", "that", "are", "was",
+  "were", "be", "been", "being", "have", "has", "had", "do", "does", "did",
+  "will", "would", "could", "should", "may", "might", "can", "what", "how",
+  "when", "where", "who", "which", "why", "not", "no", "yes", "all", "any",
+  "each", "every", "some", "such", "than", "too", "very", "just", "about",
+  "into", "over", "after", "before", "between", "under", "again", "then",
+  "here", "there", "if", "so", "up", "out", "more", "also", "your", "my",
+  "me", "i", "you", "we", "they", "he", "she", "them", "our", "us",
+]);
+
+function extractSearchTerms(message: string): { unigrams: string[]; bigrams: string[] } {
+  const words = message.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/).filter(Boolean);
+  const unigrams = words.filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+  const bigrams: string[] = [];
+  for (let i = 0; i < words.length - 1; i++) {
+    if (!STOP_WORDS.has(words[i]) || !STOP_WORDS.has(words[i + 1])) {
+      bigrams.push(`${words[i]} ${words[i + 1]}`);
+    }
+  }
+  return { unigrams, bigrams };
+}
+
+function countOccurrences(text: string, term: string): number {
+  let count = 0;
+  let pos = 0;
+  while ((pos = text.indexOf(term, pos)) !== -1) {
+    count++;
+    pos += term.length;
+  }
+  return count;
+}
+
+function scorePage(page: any, unigrams: string[], bigrams: string[]): number {
+  const title = (page.title || "").toLowerCase();
+  const summary = (page.summary || "").toLowerCase();
+  const body = (page.content_markdown || "").toLowerCase();
+  let score = 0;
+
+  for (const term of unigrams) {
+    score += countOccurrences(title, term) * 3;
+    score += countOccurrences(summary, term) * 2;
+    score += countOccurrences(body, term);
+  }
+  for (const bg of bigrams) {
+    score += countOccurrences(title, bg) * 5;
+    score += countOccurrences(summary, bg) * 3;
+    score += countOccurrences(body, bg) * 2;
+  }
+  return score;
+}
+
+function formatBusinessHours(hours: any): string {
+  if (!hours || Object.keys(hours).length === 0) return "";
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  return days
+    .map((day) => {
+      const h = hours[day] || hours[day.toLowerCase()];
+      if (!h || !h.isOpen) return `${day}: Closed`;
+      return `${day}: ${h.open} - ${h.close}`;
+    })
+    .join("\n");
+}
+
+function formatServices(services: any): string {
+  if (!services || !Array.isArray(services) || services.length === 0) return "";
+  return services
+    .map((s: any) => {
+      let line = `- ${s.name}`;
+      if (s.duration) line += ` (${s.duration} min)`;
+      if (s.description) line += `: ${s.description}`;
+      return line;
+    })
+    .join("\n");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -21,15 +98,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Authenticate via widget API key (passed as header or in body)
-    const widgetKey =
-      req.headers.get("x-widget-key") ||
-      (await req.json().catch(() => ({}))).widgetKey;
-
-    // Re-parse body since we already consumed it
-    // Actually we already parsed it above, let's use a different approach
     const apiKeyHeader = req.headers.get("x-widget-key");
-
     if (!apiKeyHeader) {
       return new Response(
         JSON.stringify({ error: "Widget API key required (x-widget-key header)" }),
@@ -57,6 +126,22 @@ Deno.serve(async (req) => {
     }
 
     const orgId = widgetConfig.organization_id;
+
+    // Fetch business context in parallel with conversation setup
+    const [settingsResult, sitePagesResult] = await Promise.all([
+      supabaseAdmin
+        .from("organization_settings")
+        .select("business_hours, services, extracted_business_data")
+        .eq("organization_id", orgId)
+        .single(),
+      supabaseAdmin
+        .from("site_pages")
+        .select("url, title, summary, content_markdown")
+        .eq("organization_id", orgId),
+    ]);
+
+    const orgSettings = settingsResult.data;
+    const sitePages = sitePagesResult.data;
 
     // Get or create conversation
     let activeConversationId = conversationId;
@@ -98,36 +183,21 @@ Deno.serve(async (req) => {
       .order("created_at", { ascending: true })
       .limit(20);
 
-    // Search site_pages for relevant content
-    const { data: sitePages } = await supabaseAdmin
-      .from("site_pages")
-      .select("url, title, summary, content_markdown")
-      .eq("organization_id", orgId);
+    // Improved search: weighted scoring with bigrams
+    const { unigrams, bigrams } = extractSearchTerms(message);
 
-    // Simple keyword search to find relevant pages
-    const searchTerms = message
-      .toLowerCase()
-      .split(/\s+/)
-      .filter((t: string) => t.length > 3);
-
-    let relevantPages =
-      sitePages
-        ?.map((page: any) => {
-          const text =
-            `${page.title} ${page.summary} ${page.content_markdown}`.toLowerCase();
-          const score = searchTerms.reduce(
-            (s: number, term: string) => s + (text.includes(term) ? 1 : 0),
-            0
-          );
-          return { ...page, score };
-        })
+    let relevantPages: any[] = [];
+    if (sitePages && sitePages.length > 0) {
+      relevantPages = sitePages
+        .map((page: any) => ({ ...page, score: scorePage(page, unigrams, bigrams) }))
         .filter((p: any) => p.score > 0)
         .sort((a: any, b: any) => b.score - a.score)
-        .slice(0, 5) || [];
+        .slice(0, 8);
 
-    // If no keyword matches, include top pages by summary
-    if (relevantPages.length === 0 && sitePages) {
-      relevantPages = sitePages.slice(0, 3).map((p: any) => ({ ...p, score: 0 }));
+      // Fallback: include top pages if no keyword matches
+      if (relevantPages.length === 0) {
+        relevantPages = sitePages.slice(0, 5).map((p: any) => ({ ...p, score: 0 }));
+      }
     }
 
     // Build context for AI
@@ -135,20 +205,43 @@ Deno.serve(async (req) => {
     const pageContext = relevantPages
       .map(
         (p: any) =>
-          `Page: ${p.title}\nURL: ${p.url}\nSummary: ${p.summary || "No summary"}\nContent preview: ${(p.content_markdown || "").substring(0, 1000)}`
+          `Page: ${p.title}\nURL: ${p.url}\nSummary: ${p.summary || "No summary"}\nContent:\n${(p.content_markdown || "").substring(0, 3000)}`
       )
       .join("\n\n---\n\n");
 
+    // Build structured business context
+    let businessContext = "";
+    if (orgSettings) {
+      const hours = formatBusinessHours(orgSettings.business_hours);
+      if (hours) businessContext += `\nBUSINESS HOURS:\n${hours}\n`;
+
+      const services = formatServices(orgSettings.services as any);
+      if (services) businessContext += `\nSERVICES OFFERED:\n${services}\n`;
+
+      const extracted = orgSettings.extracted_business_data as any;
+      if (extracted) {
+        if (extracted.phone) businessContext += `\nPhone: ${extracted.phone}`;
+        if (extracted.address) {
+          const addr = extracted.address;
+          const parts = [addr.street, addr.city, addr.postal_code].filter(Boolean);
+          if (parts.length) businessContext += `\nAddress: ${parts.join(", ")}`;
+        }
+      }
+    }
+
     const systemPrompt = `You are a helpful AI assistant for ${org?.name || "this business"}. ${org?.description || ""}
 
-Your job is to help website visitors find what they need. You have access to the website's page content below.
+Your job is to help website visitors by answering their questions accurately and in detail using the information below.
 
 IMPORTANT RULES:
-- Answer based on the website content provided. If you don't have the info, say so politely.
-- When relevant, suggest a specific page URL the visitor should visit. Include it naturally in your response.
-- Keep responses concise and friendly (2-4 sentences max unless more detail is needed).
-- If the visitor's question relates to a specific page, include the URL.
+- Answer based on the business information and website content provided. Give specific, detailed answers — don't just point to a URL.
+- When relevant, mention the specific page URL the visitor can visit for more details.
+- Keep responses concise and friendly (2-4 sentences unless more detail is genuinely needed).
+- For greetings, thanks, and small talk, respond naturally and warmly.
+- If asked about hours, services, pricing, or contact info, use the structured data below for an immediate, accurate answer.
+- If you truly don't have the information, say so politely and suggest contacting the business directly.
 ${org?.special_instructions ? `- Business-specific instructions: ${org.special_instructions}` : ""}
+${businessContext ? `\nBUSINESS DETAILS:${businessContext}` : ""}
 
 AVAILABLE WEBSITE PAGES:
 ${pageContext || "No pages crawled yet. Help the visitor as best you can."}`;
@@ -166,7 +259,7 @@ ${pageContext || "No pages crawled yet. Help the visitor as best you can."}`;
       ...(history || []).map((m: any) => ({ role: m.role, content: m.content })),
     ];
 
-    // Stream response from Lovable AI
+    // Stream response from AI
     const aiRes = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
@@ -204,13 +297,11 @@ ${pageContext || "No pages crawled yet. Help the visitor as best you can."}`;
       );
     }
 
-    // Create a TransformStream to capture the full response for DB storage
+    // Stream and capture response
     let fullResponse = "";
     const { readable, writable } = new TransformStream({
       transform(chunk, controller) {
-        // Decode to capture full response
         const text = new TextDecoder().decode(chunk);
-        // Extract content from SSE chunks
         for (const line of text.split("\n")) {
           if (!line.startsWith("data: ") || line.includes("[DONE]")) continue;
           try {
@@ -224,9 +315,7 @@ ${pageContext || "No pages crawled yet. Help the visitor as best you can."}`;
         controller.enqueue(chunk);
       },
       async flush() {
-        // Store assistant message after stream completes
         if (fullResponse) {
-          // Extract suggested URL from response
           const urlMatch = fullResponse.match(/https?:\/\/[^\s)>]+/);
           try {
             await supabaseAdmin.from("chat_messages").insert({
@@ -242,7 +331,6 @@ ${pageContext || "No pages crawled yet. Help the visitor as best you can."}`;
       },
     });
 
-    // Pipe AI response through our transform
     aiRes.body?.pipeTo(writable);
 
     return new Response(readable, {
