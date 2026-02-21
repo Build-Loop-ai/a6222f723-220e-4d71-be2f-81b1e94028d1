@@ -518,18 +518,18 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             </div>
             <div>
               <h4 className="text-xs font-semibold text-foreground">{zone.title}</h4>
-              <p className="text-[10px] text-foreground/40">{zone.desc}</p>
+              <p className="text-[10px] text-foreground/50">{zone.desc}</p>
             </div>
           </div>
           <button
             onClick={() => { setEditingZone(null); setDropdownOpen(false); }}
-            className="h-7 w-7 rounded-lg flex items-center justify-center text-foreground/30 hover:text-foreground hover:bg-white/[0.06] transition-colors"
+            className="h-7 w-7 rounded-lg flex items-center justify-center text-foreground/30 hover:text-foreground hover:bg-foreground/[0.05] transition-colors"
           >
             <X className="h-3.5 w-3.5" />
           </button>
         </div>
 
-        <div className="h-px bg-white/[0.06]" />
+        <div className="h-px bg-foreground/[0.06]" />
 
         {/* Zone-specific controls in a horizontal flow */}
         <div className="flex flex-wrap gap-4">
@@ -547,12 +547,12 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             <>
               <div className="w-40"><FieldInput label="Bot Name" value={config.bot_name} onChange={(v) => u("bot_name", v)} /></div>
               <div className="w-64 space-y-1.5">
-                <span className="text-[10px] uppercase tracking-wider text-foreground/40 font-medium">Welcome Message</span>
+                <span className="text-[10px] uppercase tracking-wider text-foreground/50 font-medium">Welcome Message</span>
                 <Textarea
                   value={config.welcome_message}
                   onChange={(e) => u("welcome_message", e.target.value)}
                   rows={2}
-                  className="text-xs bg-white/[0.06] border-white/[0.08] text-foreground rounded-lg focus:border-primary/40 resize-none placeholder:text-foreground/20"
+                  className="text-xs bg-white/60 border-white/40 text-foreground rounded-lg focus:border-primary/50 resize-none"
                 />
               </div>
             </>
@@ -593,7 +593,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             <>
               <ColorSwatch label="Button Color" value={config.accent_color} onChange={(v) => u("accent_color", v)} />
               <div className="space-y-1.5">
-                <span className="text-[10px] uppercase tracking-wider text-foreground/40 font-medium">Position</span>
+                <span className="text-[10px] uppercase tracking-wider text-foreground/50 font-medium">Position</span>
                 <div className="flex gap-1.5">
                   {(["bottom-right", "bottom-left"] as const).map((pos) => (
                     <button
@@ -602,7 +602,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                       className={`relative rounded-xl p-2.5 text-[10px] font-medium transition-all w-20 ${
                         config.position === pos
                           ? "bg-primary/10 text-primary border border-primary/30"
-                          : "bg-white/[0.04] text-foreground/50 border border-white/[0.08] hover:border-white/[0.15]"
+                          : "bg-white/50 text-foreground/50 border border-white/40 hover:border-foreground/15"
                       }`}
                     >
                       <div className="relative h-6 w-full rounded-md border border-current/10 bg-current/5 mb-1">
@@ -654,7 +654,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
 
           {/* Center: Tab pills */}
           <div className="flex-1 flex justify-center">
-            <div className="flex gap-0.5 p-[3px] rounded-xl bg-white/[0.04] border border-white/[0.06]">
+            <div className="flex gap-0.5 p-[3px] rounded-xl bg-foreground/[0.04] border border-foreground/[0.06]">
               {([
                 { key: "style", icon: <Palette className="h-3 w-3" />, label: "Design" },
                 { key: "embed", icon: <Code className="h-3 w-3" />, label: "Embed" },
@@ -671,8 +671,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                   }}
                   className={`flex items-center gap-1.5 px-4 py-1.5 rounded-[10px] text-[11px] font-medium transition-all duration-200 ${
                     activePanel === tab.key
-                      ? "bg-white/[0.10] text-foreground shadow-sm shadow-black/20 border border-white/[0.10]"
-                      : "text-foreground/40 hover:text-foreground/65 hover:bg-white/[0.04]"
+                      ? "bg-white/90 text-foreground shadow-sm shadow-black/[0.06] border border-white/60"
+                      : "text-foreground/45 hover:text-foreground/70 hover:bg-white/30"
                   }`}
                 >
                   {tab.icon}
@@ -687,7 +687,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             {activePanel === "style" && (
               <>
                 {/* Inline color swatches */}
-                <div className="hidden md:flex items-center gap-1 px-1.5 py-1 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                <div className="hidden md:flex items-center gap-1 px-1.5 py-1 rounded-xl bg-foreground/[0.03] border border-foreground/[0.05]">
                   {PRESET_COLORS.slice(0, 6).map((c) => (
                     <motion.button
                       key={c}
@@ -696,8 +696,8 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                       onClick={() => u("accent_color", c)}
                       className={`h-[18px] w-[18px] rounded-full transition-all ${
                         config.accent_color === c
-                          ? "ring-2 ring-primary ring-offset-1 ring-offset-background shadow-md"
-                          : "hover:shadow-sm ring-1 ring-white/[0.10]"
+                          ? "ring-2 ring-primary ring-offset-1 ring-offset-white/80 shadow-md"
+                          : "hover:shadow-sm ring-1 ring-black/[0.06]"
                       }`}
                       style={{ backgroundColor: c }}
                     />
@@ -710,18 +710,18 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                   />
                 </div>
 
-                <div className="hidden md:block h-5 w-px bg-white/[0.08]" />
+                <div className="hidden md:block h-5 w-px bg-foreground/[0.08]" />
 
                 {/* Font popover */}
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="flex items-center gap-1 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] px-2.5 py-1.5 text-[10px] font-medium text-foreground/50 hover:text-foreground/70 transition-all">
+                    <button className="flex items-center gap-1 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.07] border border-foreground/[0.06] px-2.5 py-1.5 text-[10px] font-medium text-foreground/55 hover:text-foreground/75 transition-all">
                       <Type className="h-3 w-3" />
                       <span className="hidden lg:inline" style={{ fontFamily: config.font_family }}>{FONT_OPTIONS.find(f => f.value === config.font_family)?.label || "Font"}</span>
                       <ChevronDown className="h-2.5 w-2.5 opacity-50" />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-48 p-1.5 bg-popover border-border shadow-xl z-50 rounded-xl" align="end" sideOffset={8}>
+                  <PopoverContent className="w-48 p-1.5 glass-light-strong border-white/60 shadow-xl z-50 rounded-xl" align="end" sideOffset={8}>
                     <div className="space-y-0.5">
                       {FONT_OPTIONS.map((f) => (
                         <button
@@ -730,7 +730,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                           className={`w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs transition-all ${
                             config.font_family === f.value
                               ? "bg-primary/10 text-primary font-semibold"
-                              : "text-popover-foreground/60 hover:bg-white/[0.05]"
+                              : "text-foreground/60 hover:bg-foreground/[0.04]"
                           }`}
                         >
                           <span className="text-sm font-bold w-6" style={{ fontFamily: f.value }}>{f.preview}</span>
@@ -744,13 +744,13 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                 {/* Corners popover */}
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="flex items-center gap-1 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] px-2.5 py-1.5 text-[10px] font-medium text-foreground/50 hover:text-foreground/70 transition-all">
+                    <button className="flex items-center gap-1 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.07] border border-foreground/[0.06] px-2.5 py-1.5 text-[10px] font-medium text-foreground/55 hover:text-foreground/75 transition-all">
                       <LayoutGrid className="h-3 w-3" />
                       <span className="hidden lg:inline">{RADIUS_OPTIONS.find(r => r.value === config.border_radius)?.label || "Corners"}</span>
                       <ChevronDown className="h-2.5 w-2.5 opacity-50" />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-44 p-1.5 bg-popover border-border shadow-xl z-50 rounded-xl" align="end" sideOffset={8}>
+                  <PopoverContent className="w-44 p-1.5 glass-light-strong border-white/60 shadow-xl z-50 rounded-xl" align="end" sideOffset={8}>
                     <div className="space-y-0.5">
                       {RADIUS_OPTIONS.map((r) => (
                         <button
@@ -759,7 +759,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                           className={`w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs transition-all ${
                             config.border_radius === r.value
                               ? "bg-primary/10 text-primary font-semibold"
-                              : "text-popover-foreground/60 hover:bg-white/[0.05]"
+                              : "text-foreground/60 hover:bg-foreground/[0.04]"
                           }`}
                         >
                           <div className="h-4 w-4 border-2 border-current" style={{ borderRadius: r.css === "9999px" ? "50%" : r.css }} />
@@ -770,7 +770,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                   </PopoverContent>
                 </Popover>
 
-                <div className="hidden md:block h-5 w-px bg-white/[0.08]" />
+                <div className="hidden md:block h-5 w-px bg-foreground/[0.08]" />
 
                 {/* Feature toggle icons */}
                 <button
@@ -778,7 +778,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                   className={`h-7 w-7 rounded-xl flex items-center justify-center transition-all duration-200 ${
                     config.voice_enabled
                       ? "bg-primary/12 text-primary shadow-sm shadow-primary/10"
-                      : "bg-white/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-white/[0.07]"
+                      : "bg-foreground/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-foreground/[0.07]"
                   }`}
                   title="Voice input"
                 >
@@ -789,7 +789,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                   className={`h-7 w-7 rounded-xl flex items-center justify-center transition-all duration-200 ${
                     config.show_branding
                       ? "bg-primary/12 text-primary shadow-sm shadow-primary/10"
-                      : "bg-white/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-white/[0.07]"
+                      : "bg-foreground/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-foreground/[0.07]"
                   }`}
                   title="Show branding"
                 >
@@ -798,15 +798,15 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
               </>
             )}
 
-            <div className="h-5 w-px bg-white/[0.08]" />
+            <div className="h-5 w-px bg-foreground/[0.08]" />
 
             {/* Position toggle */}
             <button
               onClick={() => uNow("position", config.position === "bottom-right" ? "bottom-left" : "bottom-right")}
-              className="flex items-center gap-1 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] px-2 py-1.5 text-[10px] font-medium text-foreground/50 transition-all"
+              className="flex items-center gap-1 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.07] border border-foreground/[0.06] px-2 py-1.5 text-[10px] font-medium text-foreground/55 transition-all"
               title={`Position: ${config.position}`}
             >
-              <div className="relative h-4 w-6 rounded-md border border-white/[0.12] bg-white/[0.04]">
+              <div className="relative h-4 w-6 rounded-md border border-foreground/15 bg-foreground/[0.03]">
                 <div className={`absolute bottom-0.5 h-1.5 w-1.5 rounded-full bg-primary ${config.position === "bottom-right" ? "right-0.5" : "left-0.5"}`} />
               </div>
             </button>
@@ -847,11 +847,11 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <h4 className="text-xs font-semibold text-foreground">Install on Your Website</h4>
-                          <p className="text-[10px] text-foreground/40">Add this snippet before the closing {'</body>'} tag.</p>
+                          <p className="text-[10px] text-foreground/50">Add this snippet before the closing {'</body>'} tag.</p>
                         </div>
                         <button
                           onClick={() => { setDropdownOpen(false); setActivePanel("style"); }}
-                          className="h-7 w-7 rounded-lg flex items-center justify-center text-foreground/30 hover:text-foreground hover:bg-white/[0.06] transition-colors"
+                          className="h-7 w-7 rounded-lg flex items-center justify-center text-foreground/30 hover:text-foreground hover:bg-foreground/[0.05] transition-colors"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -871,11 +871,11 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="text-xs font-semibold text-foreground">Allowed Domains</h4>
-                          <p className="text-[10px] text-foreground/40">Restrict where your widget can appear. Leave empty for no restrictions.</p>
+                          <p className="text-[10px] text-foreground/50">Restrict where your widget can appear. Leave empty for no restrictions.</p>
                         </div>
                         <button
                           onClick={() => { setDropdownOpen(false); setActivePanel("style"); }}
-                          className="h-7 w-7 rounded-lg flex items-center justify-center text-foreground/30 hover:text-foreground hover:bg-white/[0.06] transition-colors"
+                          className="h-7 w-7 rounded-lg flex items-center justify-center text-foreground/30 hover:text-foreground hover:bg-foreground/[0.05] transition-colors"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -886,9 +886,9 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                           value={newDomain}
                           onChange={(e) => setNewDomain(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && addDomain()}
-                          className="h-8 text-xs bg-white/[0.06] border-white/[0.08] text-foreground rounded-lg focus:border-primary/40 placeholder:text-foreground/20"
+                          className="h-8 text-xs bg-white/60 border-white/30 text-foreground rounded-lg"
                         />
-                        <Button variant="outline" size="sm" onClick={addDomain} className="h-8 w-8 p-0 shrink-0 rounded-lg border-white/[0.08]">
+                        <Button variant="outline" size="sm" onClick={addDomain} className="h-8 w-8 p-0 shrink-0 rounded-lg">
                           <Plus className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -904,9 +904,9 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                           ))}
                         </div>
                       ) : (
-                        <div className="rounded-xl border border-dashed border-white/[0.08] py-4 text-center">
+                        <div className="rounded-xl border border-dashed border-foreground/10 py-4 text-center">
                           <Shield className="h-4 w-4 text-foreground/20 mx-auto mb-1.5" />
-                          <p className="text-[10px] text-foreground/30">No domain restrictions</p>
+                          <p className="text-[10px] text-foreground/35">No domain restrictions</p>
                         </div>
                       )}
                     </motion.div>
@@ -1247,7 +1247,7 @@ function FieldInput({
 }) {
   return (
     <div className="space-y-1.5">
-      <span className="text-[10px] uppercase tracking-wider text-foreground/40 font-medium">
+      <span className="text-[10px] uppercase tracking-wider text-foreground/50 font-medium">
         {label}
       </span>
       <input
@@ -1255,7 +1255,7 @@ function FieldInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-8 bg-white/[0.06] border border-white/[0.08] rounded-lg text-xs text-foreground px-2.5 outline-none focus:border-primary/40 focus:bg-white/[0.08] transition-all placeholder:text-foreground/20"
+        className="w-full h-8 bg-white/60 border border-white/30 rounded-lg text-xs text-foreground px-2.5 outline-none focus:border-primary/50 focus:bg-white/80 transition-all placeholder:text-foreground/30"
       />
     </div>
   );
