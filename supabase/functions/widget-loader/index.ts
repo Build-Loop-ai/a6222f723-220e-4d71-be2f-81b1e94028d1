@@ -40,6 +40,19 @@ Deno.serve(async (req) => {
     });
   }
 
+  // If voice call is enabled, fetch VAPI config
+  let vapiPublicKey = null;
+  let vapiAssistantId = null;
+  if (config.voice_call_enabled) {
+    const { data: settings } = await supabaseAdmin
+      .from("organization_settings")
+      .select("vapi_assistant_id")
+      .eq("organization_id", config.organization_id)
+      .single();
+    vapiPublicKey = Deno.env.get("VAPI_PUBLIC_KEY") || null;
+    vapiAssistantId = settings?.vapi_assistant_id || null;
+  }
+
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 
   // Generate a self-contained widget script
@@ -55,9 +68,12 @@ Deno.serve(async (req) => {
     widgetTitle: config.widget_title,
     avatarUrl: config.avatar_url,
     voiceEnabled: config.voice_enabled,
+    voiceCallEnabled: config.voice_call_enabled,
     position: config.position,
     apiKey: config.api_key,
     supabaseUrl: supabaseUrl,
+    vapiPublicKey: vapiPublicKey,
+    vapiAssistantId: vapiAssistantId,
   })};
 
   // Inject styles
@@ -164,6 +180,9 @@ Deno.serve(async (req) => {
       html += '</div>';
       // Input
       html += '<form class="cw-input-bar" onsubmit="__cwSend(event)">';
+      if (CONFIG.vapiPublicKey && CONFIG.vapiAssistantId && CONFIG.voiceCallEnabled) {
+        html += '<button type="button" class="cw-send" style="background:transparent;color:#9ca3af;" onclick="__cwStartCall()" title="Voice call"><svg viewBox="0 0 24 24" style="stroke:#9ca3af;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></button>';
+      }
       html += '<input class="cw-input" id="__cw-input" placeholder="' + escapeHtml(CONFIG.placeholderText) + '" ' + (isLoading ? 'disabled' : '') + ' />';
       html += '<button type="submit" class="cw-send" style="background:' + CONFIG.accentColor + ';" ' + (isLoading ? 'disabled' : '') + '><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>';
       html += '</form>';
@@ -243,6 +262,71 @@ Deno.serve(async (req) => {
     isLoading = false;
     render();
   };
+
+  window.__cwStartCall = function() {
+    if (!CONFIG.vapiPublicKey || !CONFIG.vapiAssistantId) return;
+    // Load VAPI Web SDK dynamically
+    if (window.__vapiSDK) { __cwInitCall(); return; }
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.5.2/dist/vapi.umd.min.js';
+    script.onload = function() {
+      window.__vapiSDK = true;
+      __cwInitCall();
+    };
+    document.head.appendChild(script);
+  };
+
+  function __cwInitCall() {
+    var vapi = new window.Vapi(CONFIG.vapiPublicKey);
+    window.__cwVapi = vapi;
+    var callSeconds = 0;
+    var callTimer = null;
+
+    // Show overlay
+    function renderCallOverlay(status) {
+      var overlay = document.getElementById('__cw-call-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = '__cw-call-overlay';
+        overlay.style.cssText = 'position:absolute;inset:0;z-index:99;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+        var panel = root.querySelector('.cw-panel');
+        if (panel) { panel.style.position = 'relative'; panel.appendChild(overlay); }
+      }
+      var label = status === 'connecting' ? 'Connecting…' : status === 'speaking' ? 'Speaking…' : status === 'listening' ? 'Listening…' : 'Call ended';
+      var m = Math.floor(callSeconds / 60);
+      var s = callSeconds % 60;
+      var time = m + ':' + (s < 10 ? '0' : '') + s;
+      overlay.innerHTML = '<div style="width:64px;height:64px;border-radius:50%;background:' + CONFIG.accentColor + ';display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 8px 32px -4px ' + CONFIG.accentColor + '50;"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div><p style="font-size:14px;font-weight:500;color:#374151;margin-bottom:4px;">' + label + '</p><p style="font-size:12px;color:#9ca3af;font-family:monospace;margin-bottom:32px;">' + time + '</p>' + (status !== 'ended' ? '<button onclick="__cwEndCall()" style="display:flex;align-items:center;gap:8px;background:#ef4444;color:white;border:none;border-radius:9999px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(239,68,68,0.3);">End Call</button>' : '');
+    }
+
+    vapi.on('call-start', function() {
+      renderCallOverlay('listening');
+      callTimer = setInterval(function() {
+        callSeconds++;
+        if (callSeconds >= 300) { __cwEndCall(); return; }
+        renderCallOverlay('listening');
+      }, 1000);
+    });
+    vapi.on('call-end', function() { __cwCleanupCall(); });
+    vapi.on('speech-start', function() { renderCallOverlay('speaking'); });
+    vapi.on('speech-end', function() { renderCallOverlay('listening'); });
+    vapi.on('error', function() { __cwCleanupCall(); });
+
+    window.__cwEndCall = function() {
+      try { vapi.stop(); } catch(e) {}
+      __cwCleanupCall();
+    };
+
+    function __cwCleanupCall() {
+      if (callTimer) clearInterval(callTimer);
+      var overlay = document.getElementById('__cw-call-overlay');
+      if (overlay) { overlay.remove(); }
+      window.__cwVapi = null;
+    }
+
+    renderCallOverlay('connecting');
+    vapi.start(CONFIG.vapiAssistantId);
+  }
 
   render();
 })();

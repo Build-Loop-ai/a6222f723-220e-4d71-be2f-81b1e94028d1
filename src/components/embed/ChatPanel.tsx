@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Mic, MicOff, X } from "lucide-react";
+import { Send, Mic, MicOff, X, Phone } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
+import { VoiceCallOverlay } from "./VoiceCallOverlay";
 
 interface Message {
   id: string;
@@ -25,9 +26,13 @@ interface ChatPanelProps {
   supabaseUrl: string;
   onClose: () => void;
   isClosing?: boolean;
+  vapiPublicKey?: string;
+  vapiAssistantId?: string;
 }
 
-export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = false }: ChatPanelProps) {
+export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = false, vapiPublicKey, vapiAssistantId }: ChatPanelProps) {
+  const [inCall, setInCall] = useState(false);
+  const canVoiceCall = !!(vapiPublicKey && vapiAssistantId);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -236,6 +241,16 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
         </button>
       </div>
 
+      {/* Voice Call Overlay */}
+      {inCall && canVoiceCall && (
+        <VoiceCallOverlay
+          vapiPublicKey={vapiPublicKey!}
+          vapiAssistantId={vapiAssistantId!}
+          accentColor={config.accentColor}
+          onEnd={() => setInCall(false)}
+        />
+      )}
+
       {/* Messages */}
       <div
         ref={scrollRef}
@@ -264,6 +279,17 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
 
       {/* Input */}
       <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-gray-100 px-3 py-2.5">
+        {canVoiceCall && (
+          <button
+            type="button"
+            onClick={() => setInCall(true)}
+            disabled={inCall}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-40"
+            title="Start voice call"
+          >
+            <Phone className="h-4 w-4" />
+          </button>
+        )}
         {config.voiceEnabled && (
           <button
             type="button"

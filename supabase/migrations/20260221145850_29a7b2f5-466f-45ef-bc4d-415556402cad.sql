@@ -1,0 +1,1 @@
+ALTER TABLE public.widget_configs ADD COLUMN voice_call_enabled boolean NOT NULL DEFAULT false;
