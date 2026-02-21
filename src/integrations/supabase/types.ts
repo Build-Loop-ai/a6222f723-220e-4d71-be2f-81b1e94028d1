@@ -1124,6 +1124,36 @@ export type Database = {
         | "salon"
         | "restaurant"
         | "other"
+        | "saas"
+        | "agency"
+        | "ecommerce"
+        | "consulting"
+        | "law_firm"
+        | "accounting"
+        | "real_estate"
+        | "insurance"
+        | "fitness"
+        | "spa"
+        | "automotive"
+        | "education"
+        | "nonprofit"
+        | "healthcare"
+        | "construction"
+        | "retail"
+        | "hospitality"
+        | "technology"
+        | "marketing"
+        | "financial_services"
+        | "photography"
+        | "cleaning"
+        | "plumbing"
+        | "electrician"
+        | "landscaping"
+        | "pet_services"
+        | "logistics"
+        | "travel"
+        | "food_delivery"
+        | "coaching"
       call_direction: "inbound" | "outbound"
       call_outcome:
         | "appointment_booked"
@@ -1269,6 +1299,36 @@ export const Constants = {
         "salon",
         "restaurant",
         "other",
+        "saas",
+        "agency",
+        "ecommerce",
+        "consulting",
+        "law_firm",
+        "accounting",
+        "real_estate",
+        "insurance",
+        "fitness",
+        "spa",
+        "automotive",
+        "education",
+        "nonprofit",
+        "healthcare",
+        "construction",
+        "retail",
+        "hospitality",
+        "technology",
+        "marketing",
+        "financial_services",
+        "photography",
+        "cleaning",
+        "plumbing",
+        "electrician",
+        "landscaping",
+        "pet_services",
+        "logistics",
+        "travel",
+        "food_delivery",
+        "coaching",
       ],
       call_direction: ["inbound", "outbound"],
       call_outcome: [
