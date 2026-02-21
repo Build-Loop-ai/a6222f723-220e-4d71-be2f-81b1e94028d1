@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,7 @@ import { Loader2, Building, Clock, Briefcase, Globe, Pencil, RefreshCw } from "l
 import { Button } from "@/components/ui/button";
 import { BusinessHoursEditor } from "./BusinessHoursEditor";
 import { ServicesEditor } from "./ServicesEditor";
+import { CrawlProgressModal } from "./CrawlProgressModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Json } from "@/integrations/supabase/types";
@@ -92,6 +93,8 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
   const [crawling, setCrawling] = useState(false);
+  const [crawlModalOpen, setCrawlModalOpen] = useState(false);
+  const crawlPromiseRef = useRef<Promise<any> | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -113,30 +116,79 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
   const handleCrawlWebsite = useCallback(async () => {
     if (!formData.website) return;
     setCrawling(true);
-    try {
-      await supabase
-        .from("organizations")
-        .update({ website: formData.website })
-        .eq("id", organizationId);
 
-      const { data, error } = await supabase.functions.invoke("crawl-site", {
+    // Save website URL first
+    await supabase
+      .from("organizations")
+      .update({ website: formData.website })
+      .eq("id", organizationId);
+
+    // Create promise that the modal will track
+    const promise = supabase.functions
+      .invoke("crawl-site", {
         body: { organizationId, websiteUrl: formData.website },
+      })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        return data;
       });
-      if (error) throw error;
-      toast({
-        title: "Website crawled",
-        description: `Successfully indexed ${data?.pages_scraped || 0} pages. Your AI is now learning from your website.`,
-      });
-    } catch (err: any) {
-      toast({
-        title: "Crawl failed",
-        description: err.message || "Could not crawl website",
-        variant: "destructive",
-      });
-    } finally {
-      setCrawling(false);
+
+    crawlPromiseRef.current = promise;
+    setCrawlModalOpen(true);
+  }, [formData.website, organizationId]);
+
+  const handleCrawlComplete = useCallback(async () => {
+    setCrawling(false);
+    // Reload data from DB to pick up auto-populated fields
+    try {
+      const [orgRes, settingsRes] = await Promise.all([
+        supabase
+          .from("organizations")
+          .select("*")
+          .eq("id", organizationId)
+          .single(),
+        supabase
+          .from("organization_settings")
+          .select("business_hours, services, extracted_business_data")
+          .eq("organization_id", organizationId)
+          .maybeSingle(),
+      ]);
+
+      if (orgRes.data) {
+        const org = orgRes.data;
+        const addr = (org.address as any) || {};
+        setFormData({
+          name: org.name || "",
+          business_type: org.business_type || "",
+          phone: org.phone || "",
+          website: org.website || "",
+          timezone: org.timezone || "Europe/Amsterdam",
+          description: org.description || "",
+          address: {
+            street: addr.street || "",
+            city: addr.city || "",
+            postal_code: addr.postal_code || "",
+          },
+        });
+      }
+
+      if (settingsRes.data) {
+        setBusinessHours(
+          (settingsRes.data.business_hours as unknown as BusinessHours) || {}
+        );
+        setServices(
+          (settingsRes.data.services as unknown as Service[]) || []
+        );
+        if (settingsRes.data.extracted_business_data) {
+          setExtractedData(
+            settingsRes.data.extracted_business_data as unknown as ExtractedData
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Failed to reload after crawl:", err);
     }
-  }, [formData.website, organizationId, toast]);
+  }, [organizationId]);
 
   const settingsData = useMemo(() => ({
     formData,
@@ -330,19 +382,52 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Business Type</Label>
+                  <div className="flex items-center">
+                    <Label>Business Type</Label>
+                    <FieldSourceBadge detected={wasDetected("business_type")} fieldName="business_type" />
+                  </div>
                   <Select
                     value={formData.business_type}
                     onValueChange={(value) => setFormData({ ...formData, business_type: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select type..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-64">
+                      <SelectItem value="saas">SaaS</SelectItem>
+                      <SelectItem value="agency">Agency</SelectItem>
+                      <SelectItem value="ecommerce">E-commerce</SelectItem>
+                      <SelectItem value="consulting">Consulting</SelectItem>
+                      <SelectItem value="technology">Technology</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="financial_services">Financial Services</SelectItem>
+                      <SelectItem value="accounting">Accounting</SelectItem>
+                      <SelectItem value="law_firm">Law Firm</SelectItem>
+                      <SelectItem value="real_estate">Real Estate</SelectItem>
+                      <SelectItem value="insurance">Insurance</SelectItem>
+                      <SelectItem value="coaching">Coaching</SelectItem>
+                      <SelectItem value="education">Education</SelectItem>
+                      <SelectItem value="healthcare">Healthcare</SelectItem>
                       <SelectItem value="dental_clinic">Dental Clinic</SelectItem>
                       <SelectItem value="medical_practice">Medical Practice</SelectItem>
-                      <SelectItem value="salon">Salon</SelectItem>
+                      <SelectItem value="salon">Salon & Beauty</SelectItem>
+                      <SelectItem value="spa">Spa & Wellness</SelectItem>
+                      <SelectItem value="fitness">Fitness & Gym</SelectItem>
                       <SelectItem value="restaurant">Restaurant</SelectItem>
+                      <SelectItem value="hospitality">Hospitality</SelectItem>
+                      <SelectItem value="food_delivery">Food Delivery</SelectItem>
+                      <SelectItem value="retail">Retail</SelectItem>
+                      <SelectItem value="automotive">Automotive</SelectItem>
+                      <SelectItem value="construction">Construction</SelectItem>
+                      <SelectItem value="plumbing">Plumbing</SelectItem>
+                      <SelectItem value="electrician">Electrician</SelectItem>
+                      <SelectItem value="cleaning">Cleaning Services</SelectItem>
+                      <SelectItem value="landscaping">Landscaping</SelectItem>
+                      <SelectItem value="photography">Photography</SelectItem>
+                      <SelectItem value="pet_services">Pet Services</SelectItem>
+                      <SelectItem value="travel">Travel & Tourism</SelectItem>
+                      <SelectItem value="logistics">Logistics</SelectItem>
+                      <SelectItem value="nonprofit">Non-profit</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
@@ -554,6 +639,14 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      <CrawlProgressModal
+        open={crawlModalOpen}
+        onClose={() => setCrawlModalOpen(false)}
+        websiteUrl={formData.website}
+        crawlPromise={crawlPromiseRef.current}
+        onComplete={handleCrawlComplete}
+      />
     </div>
   );
 }
