@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardConversations from "./pages/DashboardConversations";
 import DashboardConversationDetail from "./pages/DashboardConversationDetail";
 import DashboardCallDetail from "./pages/DashboardCallDetail";
+import DashboardCalls from "./pages/DashboardCalls";
 import DashboardAnalytics from "./pages/DashboardAnalytics";
 import DashboardKnowledgeBase from "./pages/DashboardKnowledgeBase";
 import DashboardWidget from "./pages/DashboardWidget";
