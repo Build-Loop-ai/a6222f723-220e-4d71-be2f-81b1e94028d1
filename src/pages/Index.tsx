@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet";
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import SocialProofBar from "@/components/landing/SocialProofBar";
@@ -12,6 +13,14 @@ import Footer from "@/components/landing/Footer";
 const Index = () => {
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ background: "#050506" }}>
+      <Helmet>
+        <title>Greet – AI Receptionist for Your Business</title>
+        <meta name="description" content="Greet is an AI-powered virtual receptionist that answers calls, books appointments, and chats with your website visitors 24/7." />
+        <meta property="og:title" content="Greet – AI Receptionist for Your Business" />
+        <meta property="og:description" content="AI-powered virtual receptionist that answers calls, books appointments, and chats with visitors 24/7." />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href={window.location.origin} />
+      </Helmet>
       <Navbar />
       <HeroSection />
       <SocialProofBar />
