@@ -145,10 +145,9 @@ const AcceptInvitation = () => {
       }
       
       toast({
-        title: "Welcome to the team!",
-        description: `You've joined ${invitation.organization_name}.`,
+        title: "Check your email!",
+        description: "We've sent you a confirmation link. Please verify your email to sign in.",
       });
-      navigate("/dashboard");
     } catch (err) {
       console.error("Error accepting invitation:", err);
       toast({

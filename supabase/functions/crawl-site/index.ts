@@ -26,12 +26,6 @@ Deno.serve(async (req) => {
     const isServiceRole = token === serviceRoleKey;
 
     const { organizationId, websiteUrl } = await req.json();
-    if (!organizationId || !websiteUrl) {
-      return new Response(
-        JSON.stringify({ error: "organizationId and websiteUrl are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
 
     // If not service role, verify user is org member
     if (!isServiceRole) {

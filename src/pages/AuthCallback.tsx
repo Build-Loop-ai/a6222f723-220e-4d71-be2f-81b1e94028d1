@@ -68,13 +68,13 @@ const AuthCallback = () => {
     // Small delay to allow OAuth tokens to be processed
     setTimeout(checkExistingSession, 100);
 
-    // Fallback timeout - if nothing happens in 5 seconds, go to login
+    // Fallback timeout - if nothing happens in 15 seconds, go to login
     const timeout = setTimeout(() => {
       if (!hasHandled.current) {
         console.log("Auth callback timeout, redirecting to login");
         navigate("/login", { replace: true });
       }
-    }, 5000);
+    }, 15000);
 
     return () => {
       subscription.unsubscribe();

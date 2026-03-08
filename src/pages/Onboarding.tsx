@@ -469,8 +469,8 @@ const Onboarding = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-success mb-4">
                     <CheckCircle2 className="w-5 h-5" />
-                    <span className="font-medium">
-                      {crawledPages.length} pages discovered
+                   <span className="font-medium">
+                      Website validated — your site will be fully crawled once setup completes.
                     </span>
                   </div>
 

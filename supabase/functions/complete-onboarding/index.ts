@@ -34,6 +34,21 @@ serve(async (req) => {
     if (!businessData?.name) throw new Error('Business name is required');
     if (!businessData?.website) throw new Error('Website URL is required');
 
+    // Idempotency: check if user already has an organization
+    const { data: existingProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('organization_id, onboarding_completed')
+      .eq('id', user.id)
+      .single();
+
+    if (existingProfile?.onboarding_completed && existingProfile?.organization_id) {
+      console.log('User already completed onboarding, returning existing org');
+      return new Response(
+        JSON.stringify({ success: true, organizationId: existingProfile.organization_id }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+    }
+
     // 1. Create organization
     const { data: org, error: orgError } = await supabaseAdmin
       .from('organizations')

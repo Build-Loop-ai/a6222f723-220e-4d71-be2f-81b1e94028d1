@@ -263,6 +263,12 @@ export const BillingCard = ({ subscription, organizationId }: BillingCardProps) 
 
           {/* Plans Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+            {plans.length === 0 && (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                <p className="font-medium">Plans coming soon</p>
+                <p className="text-sm mt-1">Pricing plans are being configured. Check back later.</p>
+              </div>
+            )}
             {plans.map((plan) => {
               const isCurrentPlan = subscription?.plan === plan.slug;
               const price = billingPeriod === 'annual' && plan.price_annual_cents
