@@ -650,7 +650,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
         {/* Top accent line removed – now handled by DashboardLayout full-width line */}
         
         {/* Main bar – matches sidebar glass */}
-        <div className="relative h-14 glass-toolbar flex items-center px-4 gap-0 border-l-0">
+        <div className="relative h-14 glass-toolbar flex items-center justify-between px-4 gap-0 border-l-0">
           {/* Smooth concave corner – fills the junction between toolbar bottom and content area */}
           <div className="hidden md:block absolute left-0 bottom-0 translate-y-full w-[20px] h-[20px] z-20 pointer-events-none">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="block">
