@@ -105,6 +105,13 @@ export const BillingCard = ({ subscription, organizationId }: BillingCardProps) 
       const result = await response.json();
 
       if (!response.ok) {
+        if (result.error === 'Payments not configured') {
+          toast({
+            title: 'Payments Coming Soon',
+            description: 'Online payments are not yet configured. Please contact support to upgrade your plan.',
+          });
+          return;
+        }
         throw new Error(result.error || 'Failed to create checkout session');
       }
 

@@ -199,9 +199,8 @@ Deno.serve(async (req) => {
     if (scrapedPages.length > 0) {
       for (let i = 0; i < scrapedPages.length; i += 20) {
         const batch = scrapedPages.slice(i, i + 20);
-        await supabaseAdmin.from("site_pages").upsert(batch, {
-          onConflict: "organization_id,url",
-        });
+        const { error: insertErr } = await supabaseAdmin.from("site_pages").insert(batch);
+        if (insertErr) console.warn(`Failed to insert site_pages batch ${i}:`, insertErr);
       }
 
       const scrapedUrls = scrapedPages.map((p) => p.url);
