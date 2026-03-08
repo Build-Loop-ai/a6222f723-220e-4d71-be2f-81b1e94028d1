@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Phone, ArrowLeft } from "lucide-react";
+import { Helmet } from "react-helmet";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 
 const Privacy = () => {
@@ -7,6 +8,10 @@ const Privacy = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Privacy Policy – Greet</title>
+        <meta name="description" content="Learn how Greet protects your data and privacy. Read our full Privacy Policy." />
+      </Helmet>
       <div className="max-w-3xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="mb-12">
