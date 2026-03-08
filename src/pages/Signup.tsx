@@ -312,6 +312,7 @@ const Signup = () => {
         </motion.div>
       </div>
     </div>
+    </>
   );
 };
 
