@@ -384,12 +384,10 @@ const Onboarding = () => {
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="dental_clinic">Dental Clinic</SelectItem>
-                        <SelectItem value="medical_practice">Medical Practice</SelectItem>
-                        <SelectItem value="salon">Salon</SelectItem>
-                        <SelectItem value="restaurant">Restaurant</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                      <SelectContent className="max-h-60">
+                        {BUSINESS_TYPES.map((bt) => (
+                          <SelectItem key={bt.value} value={bt.value}>{bt.label}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
