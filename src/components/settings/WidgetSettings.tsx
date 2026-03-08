@@ -671,7 +671,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           </div>
 
           {/* ── Center: Tab pills (fixed width, always centered) ── */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center shrink-0">
+          <div className="flex justify-center flex-1">
             <div className="flex gap-0.5 p-[3px] rounded-xl bg-foreground/[0.04] border border-foreground/[0.06]">
               {([
                 { key: "style", icon: <Palette className="h-3 w-3" />, label: "Design" },
