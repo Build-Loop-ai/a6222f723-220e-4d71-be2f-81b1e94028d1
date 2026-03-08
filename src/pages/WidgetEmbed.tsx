@@ -10,7 +10,7 @@ const DEFAULTS = {
   widgetTitle: "Chat with us",
   avatarUrl: null as string | null,
   voiceEnabled: false,
-  position: "bottom-right" as const,
+  position: "bottom-right" as "bottom-right" | "bottom-left",
 };
 
 /**
@@ -30,27 +30,41 @@ export default function WidgetEmbed() {
       return;
     }
 
-    // Fetch real widget config from edge function that validates the key
     const fetchConfig = async () => {
-      try {
-        // Use the get-widget-voice-config edge function which already validates the key
-        const { data: voiceData } = await supabase.functions.invoke("get-widget-voice-config", {
+      // Fetch visual config + voice config in parallel
+      const [configRes, voiceRes] = await Promise.allSettled([
+        supabase.functions.invoke("get-widget-config", {
           headers: { "x-widget-key": apiKey },
+        }),
+        supabase.functions.invoke("get-widget-voice-config", {
+          headers: { "x-widget-key": apiKey },
+        }),
+      ]);
+
+      // Visual config
+      if (configRes.status === "fulfilled" && configRes.value.data && !configRes.value.error) {
+        const d = configRes.value.data;
+        setConfig({
+          accentColor: d.accentColor || DEFAULTS.accentColor,
+          welcomeMessage: d.welcomeMessage || DEFAULTS.welcomeMessage,
+          placeholderText: d.placeholderText || DEFAULTS.placeholderText,
+          widgetTitle: d.widgetTitle || DEFAULTS.widgetTitle,
+          avatarUrl: d.avatarUrl ?? null,
+          voiceEnabled: d.voiceEnabled ?? false,
+          position: d.position === "bottom-left" ? "bottom-left" : "bottom-right",
         });
-        if (voiceData) {
-          setVoiceConfig({
-            vapiPublicKey: voiceData.vapiPublicKey ?? undefined,
-            vapiAssistantId: voiceData.vapiAssistantId ?? undefined,
-          });
-        }
-      } catch {
-        // Voice config is optional, fall through
+      } else {
+        setConfig(DEFAULTS);
       }
 
-      // For the visual config, we'd need a public endpoint or anon access.
-      // widget_configs requires org membership to SELECT, so use defaults for now.
-      // The widget-chat function validates the key at message time.
-      setConfig(DEFAULTS);
+      // Voice config
+      if (voiceRes.status === "fulfilled" && voiceRes.value.data) {
+        const v = voiceRes.value.data;
+        setVoiceConfig({
+          vapiPublicKey: v.vapiPublicKey ?? undefined,
+          vapiAssistantId: v.vapiAssistantId ?? undefined,
+        });
+      }
     };
 
     fetchConfig();
