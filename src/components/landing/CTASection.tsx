@@ -25,9 +25,9 @@ const CTASection = () => {
 
   return (
     <section ref={ref} className="py-24 md:py-44 relative overflow-hidden">
-      {/* GRAND FINALE — Aurora Borealis effect */}
+      {/* Seamless dark-green atmosphere */}
       <div className="absolute inset-0 pointer-events-none" style={{
-        background: "linear-gradient(180deg, #070810 0%, #0A1E12 20%, #0D2818 40%, #0A1E12 60%, #0D1520 80%, #070810 100%)",
+        background: "radial-gradient(ellipse 120% 80% at 50% 50%, rgba(13,40,24,0.7) 0%, rgba(5,5,6,0) 70%)",
       }} />
 
       {/* Multiple aurora layers */}
