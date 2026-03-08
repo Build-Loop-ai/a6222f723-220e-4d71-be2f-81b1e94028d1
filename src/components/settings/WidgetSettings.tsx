@@ -650,7 +650,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
         {/* Top accent line removed – now handled by DashboardLayout full-width line */}
         
         {/* Main bar – matches sidebar glass */}
-        <div className="relative h-14 glass-toolbar flex items-center px-4 gap-0 border-l-0">
+        <div className="relative h-14 glass-toolbar flex items-center justify-between px-4 gap-0 border-l-0">
           {/* Smooth concave corner – fills the junction between toolbar bottom and content area */}
           <div className="hidden md:block absolute left-0 bottom-0 translate-y-full w-[20px] h-[20px] z-20 pointer-events-none">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="block">
@@ -659,7 +659,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           </div>
 
           {/* ── Left zone: label + design controls ── */}
-          <div className="flex items-center gap-2 shrink-0 w-[45%]">
+          <div className="flex items-center gap-2 shrink-0 min-w-0 overflow-hidden">
             <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-primary/15 to-emerald-500/10 flex items-center justify-center shadow-sm shadow-primary/10 shrink-0">
               <Wand2 className="h-3.5 w-3.5 text-primary" />
             </div>
@@ -795,7 +795,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           </div>
 
           {/* ── Center: Tab pills (fixed width, always centered) ── */}
-          <div className="flex justify-center shrink-0">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center shrink-0">
             <div className="flex gap-0.5 p-[3px] rounded-xl bg-foreground/[0.04] border border-foreground/[0.06]">
               {([
                 { key: "style", icon: <Palette className="h-3 w-3" />, label: "Design" },
