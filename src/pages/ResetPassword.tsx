@@ -101,7 +101,12 @@ const ResetPassword = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-background grain-overlay relative overflow-hidden">
+    <>
+      <Helmet>
+        <title>Set New Password — Greet</title>
+        <meta name="description" content="Set a new password for your Greet account." />
+      </Helmet>
+      <div className="min-h-screen flex items-center justify-center p-8 bg-background grain-overlay relative overflow-hidden">
       <div className="absolute top-[-200px] left-1/3 w-[400px] h-[400px] rounded-full bg-primary/[0.06] blur-[120px] animate-float pointer-events-none" />
       <div className="absolute bottom-[-150px] right-1/4 w-[350px] h-[350px] rounded-full bg-cyan/[0.04] blur-[100px] animate-float-reverse pointer-events-none" />
 

@@ -82,7 +82,12 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex bg-background grain-overlay relative overflow-hidden">
+    <>
+      <Helmet>
+        <title>Log In — Greet</title>
+        <meta name="description" content="Sign in to your Greet dashboard to manage your AI receptionist." />
+      </Helmet>
+      <div className="min-h-screen flex bg-background grain-overlay relative overflow-hidden">
       {/* Ambient orbs */}
       <div className="absolute top-[-200px] left-[-100px] w-[500px] h-[500px] rounded-full bg-primary/[0.06] blur-[120px] animate-float pointer-events-none" />
       <div className="absolute bottom-[-150px] right-[-50px] w-[400px] h-[400px] rounded-full bg-cyan/[0.04] blur-[100px] animate-float-reverse pointer-events-none" />
