@@ -137,7 +137,7 @@ const ForgotPassword = () => {
           </>
         )}
       </motion.div>
-    </div>
+    </>
   );
 };
 
