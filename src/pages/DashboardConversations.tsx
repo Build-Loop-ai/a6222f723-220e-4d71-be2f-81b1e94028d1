@@ -79,11 +79,6 @@ const DashboardConversations = () => {
             })
           );
 
-          const countMap: Record<string, number> = {};
-          (msgCounts || []).forEach((m) => {
-            countMap[m.conversation_id] = (countMap[m.conversation_id] || 0) + 1;
-          });
-
           setConversations(
             (data || []).map((c) => ({ ...c, message_count: countMap[c.id] || 0 }))
           );
