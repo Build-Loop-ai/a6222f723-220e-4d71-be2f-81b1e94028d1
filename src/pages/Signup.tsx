@@ -94,7 +94,12 @@ const Signup = () => {
   ];
 
   return (
-    <div className="min-h-screen flex bg-background grain-overlay relative overflow-hidden">
+    <>
+      <Helmet>
+        <title>Sign Up — Greet</title>
+        <meta name="description" content="Create your Greet account and set up your AI receptionist in minutes." />
+      </Helmet>
+      <div className="min-h-screen flex bg-background grain-overlay relative overflow-hidden">
       {/* Ambient orbs */}
       <div className="absolute top-[-200px] right-[-100px] w-[500px] h-[500px] rounded-full bg-primary/[0.06] blur-[120px] animate-float pointer-events-none" />
       <div className="absolute bottom-[-150px] left-[-50px] w-[400px] h-[400px] rounded-full bg-cyan/[0.04] blur-[100px] animate-float-reverse pointer-events-none" />
