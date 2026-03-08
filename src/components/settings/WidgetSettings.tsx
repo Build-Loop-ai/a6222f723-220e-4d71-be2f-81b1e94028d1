@@ -659,7 +659,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           </div>
 
           {/* ── Left zone: label + design controls ── */}
-          <div className="flex items-center gap-2 shrink-0 w-[45%]">
+          <div className="flex items-center gap-2 shrink-0 min-w-0 overflow-hidden">
             <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-primary/15 to-emerald-500/10 flex items-center justify-center shadow-sm shadow-primary/10 shrink-0">
               <Wand2 className="h-3.5 w-3.5 text-primary" />
             </div>
