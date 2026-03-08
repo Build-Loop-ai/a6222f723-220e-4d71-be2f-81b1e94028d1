@@ -1,109 +1,113 @@
 
 
-## Dramatically Improve AI Agent Quality
+# Production Readiness Analysis — Release 1
 
-### Problem Summary
+## System Overview
 
-There are two major quality gaps in how the AI agents answer questions:
+Greet is an AI website assistant SaaS: users sign up, crawl their website, and get an embeddable chat widget powered by AI. The system includes onboarding, dashboard, widget builder, team management, billing (Stripe), voice calls (Vapi), and an admin panel.
 
-1. **Voice Agent (Vapi)**: The system prompt includes business hours, services, and address, but has absolutely no knowledge of the actual website content (site_pages). If a caller asks "What do you offer?" or "Tell me about your pricing", the voice agent has nothing to work with.
+---
 
-2. **Chat Agent (widget-chat)**: Uses a very basic keyword search (splitting on spaces, filtering words > 3 chars) which misses many relevant pages. It also truncates each page to only 1,000 characters, losing important details.
+## Critical Issues (Must Fix Before Production)
 
-### Plan
+### 1. Onboarding Business Type Mismatch
+The onboarding page (`Onboarding.tsx` line 41) defines only 5 business types: `dental_clinic`, `medical_practice`, `salon`, `restaurant`, `other`. But the database migration expanded the enum to 35+ types, and `BusinessSettings.tsx` shows the full list. **If a user selects one of the expanded types in settings after onboarding, it works — but the onboarding dropdown is outdated and inconsistent.** This needs to be synced.
 
-#### 1. Inject website knowledge into the Vapi voice agent
+### 2. Signup → Onboarding: Email Confirmation Race Condition
+`signUp` in `useAuth.tsx` calls `supabase.auth.signUp()` which (by default) requires email confirmation. But `Signup.tsx` immediately navigates to `/onboarding` after signup (line 55). If email confirmation is enabled, the user won't have a valid session yet and will be bounced to `/login` by `ProtectedRoute`. **Either auto-confirm must be explicitly enabled, or the signup flow needs a "check your email" step.** Currently there is no indication to the user to verify their email.
 
-**File: `supabase/functions/create-vapi-assistant/index.ts`**
+### 3. Invitation Flow: Signup Without Email Confirmation
+`AcceptInvitation.tsx` calls `signUp()` and immediately navigates to `/dashboard` (line 151). Same issue — if email confirmation is required, this will fail silently. The `handle_invitation_acceptance` trigger fires on profile creation, but the user won't have a confirmed session.
 
-- After fetching org and settings, also fetch all `site_pages` for the organization
-- Build a condensed knowledge base from site page summaries and key content (up to ~4,000 tokens to stay within Vapi's system prompt limits)
-- Add a new "## Website Knowledge Base" section to the system prompt containing:
-  - Page titles and their summaries
-  - Key content snippets from the most important pages (home, about, services, pricing, contact, FAQ)
-- Prioritize pages by relevance: pages with titles containing "about", "services", "pricing", "FAQ", "contact" come first
+### 4. Missing STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET
+These secrets are not in the secrets list. `stripe-checkout`, `stripe-portal`, and `stripe-webhook` all depend on them. The checkout flow will throw "Payments not configured" errors. **Stripe must be fully configured or billing UI should be hidden/gracefully degraded.**
 
-#### 2. Improve chat agent content retrieval
+### 5. `crawl-site` Edge Function: Auth Bypass When Called from `complete-onboarding`
+`complete-onboarding` calls `crawl-site` with `Authorization: Bearer ${serviceRoleKey}`. But `crawl-site` validates the user via `supabase.auth.getUser(token)` using an anon-key client — the service role key is not a valid user JWT. This means the **crawl will fail with 401 during onboarding**. The function needs to handle service-role auth as well.
 
-**File: `supabase/functions/widget-chat/index.ts`**
+### 6. `site_maps` and `site_pages` Upsert Conflicts
+The `crawl-site` function uses `upsert` with `onConflict: "organization_id,url"` for both tables. The schema confirms these unique constraints exist. However, the function first **deletes all rows** then inserts — the upsert is redundant. More importantly, if the delete fails (RLS), old data remains and upserts could silently fail on constraint mismatches.
 
-- Replace the naive keyword search with a smarter approach:
-  - Normalize search terms: lowercase, remove common stop words (the, is, a, an, etc.)
-  - Score pages using term frequency (count occurrences, not just boolean includes)
-  - Boost title/summary matches higher than body matches (3x weight)
-  - Include bi-grams (two-word phrases) for better matching
-- Increase content preview from 1,000 to 3,000 characters per page
-- Increase max relevant pages from 5 to 8
-- When no keyword matches are found, include more fallback pages (up to 5 instead of 3)
+### 7. Widget Embed Script: No Domain Validation
+`widget-loader` serves the widget JS to anyone with a valid API key. The `allowed_domains` column exists in `widget_configs` but is never checked. Any website can embed any customer's widget.
 
-#### 3. Enhance the chat system prompt
+---
 
-**File: `supabase/functions/widget-chat/index.ts`**
+## Significant Issues (Should Fix)
 
-- Fetch additional business context: organization_settings (business_hours, services, extracted_business_data)
-- Include this structured data in the system prompt so the chat agent can answer questions about hours, services, and pricing even when the page search misses
-- Improve the system prompt instructions to be more helpful:
-  - Encourage providing specific, detailed answers rather than just pointing to URLs
-  - Include business hours and services directly so common questions can be answered instantly
-  - Add instructions to handle greetings, thanks, and small talk naturally
+### 8. `complete-onboarding` Uses Service Role to Insert `user_roles`
+This bypasses RLS correctly, but there is no check that the user doesn't already have an organization. If called twice (e.g. network retry), it creates a duplicate organization. **Add idempotency: check if user already has an org before creating one.**
 
-#### 4. Keep Vapi assistant in sync on re-crawl
+### 9. Dashboard: 50-conversation Limit
+`Dashboard.tsx` fetches only 50 conversations. `todayConversations` is filtered from this set — so on busy days with >50 conversations, today's metrics will be undercounted. Use a date filter in the query instead.
 
-**File: `supabase/functions/crawl-site/index.ts`**
+### 10. `widget-chat` Fetches ALL Site Pages
+Line 138-140: `select("url, title, summary, content_markdown").eq("organization_id", orgId)` with no limit. For sites with 200+ pages, this is a massive payload in memory. Add a reasonable limit or use pagination.
 
-- After crawling completes and summaries are generated, check if the org has a Vapi assistant
-- If yes, trigger `create-vapi-assistant` (which already handles update-or-create) to refresh the voice agent's knowledge with the new content
+### 11. No Rate Limiting on Widget Chat
+The `widget-chat` endpoint has no rate limiting beyond what the AI gateway provides. A bad actor could spam messages, consuming AI credits and creating thousands of conversation rows.
 
-### Technical Details
+### 12. Stripe Webhook: No `verify_jwt = false` in config.toml
+The `stripe-webhook` function is not listed in `config.toml`, meaning it uses the default `verify_jwt = true`. Stripe cannot send a valid JWT — **webhook calls will be rejected with 401**. Must add `[functions.stripe-webhook] verify_jwt = false`.
 
-**Voice agent knowledge injection (create-vapi-assistant):**
+### 13. Missing Edge Functions in config.toml
+Several functions that need JWT-free access are missing from config.toml: `stripe-webhook`, `vapi-webhook`, `health-check`, `send-email`, `hero-chat`. Any function called externally (webhooks) or without auth needs `verify_jwt = false`.
 
-```text
-buildSystemPrompt() will be updated to:
+### 14. `DashboardCalls.tsx` Route Exists but No Route in App.tsx
+There's a `DashboardCalls` page file but no `/dashboard/calls` route in `App.tsx`. The calls list is unreachable through navigation.
 
-1. Query site_pages for the org
-2. Sort pages by priority (about/services/pricing/FAQ pages first)
-3. Build a condensed knowledge section:
-   - Each page: "Page: {title} | {summary}"
-   - For top 5 pages: include first 800 chars of content
-   - For remaining pages: summary only
-4. Insert as "## Website Knowledge Base" section in prompt
-```
+---
 
-**Chat agent improved search:**
+## Minor Issues (Polish)
 
-```text
-Current: split message by spaces, filter len > 3, boolean includes
-New: 
-  - Remove stop words (the, is, a, an, what, how, do, can, etc.)
-  - Score = (title matches * 3) + (summary matches * 2) + (body matches * 1)
-  - Count occurrences, not just boolean
-  - Include bigrams: "business hours" matches better than "business" + "hours" separately
-```
+### 15. Onboarding Crawl is Fake
+Step 2 of onboarding simulates progress with `setTimeout` (lines 127-136). The actual crawl happens in `complete-onboarding` after org creation. The "0 pages discovered" text shown after fake crawl is misleading. Should either show "will be crawled after setup" or do a real preview.
 
-**Prompt enhancement for chat:**
+### 16. Inconsistent Auth Pattern
+`crawl-site` uses `getUser(token)`, `complete-onboarding` uses `getUser()`, `stripe-checkout` uses `getUser(token)`. Should standardize on `getClaims()` per the guidelines.
+
+### 17. `AuthCallback.tsx` 5-Second Timeout
+Falls back to `/login` after 5 seconds. On slow connections or when processing OAuth tokens, this could interrupt legitimate sign-ins. Consider increasing or removing the hard timeout.
+
+### 18. `BillingCard` — No Handling for Missing Plans
+If Stripe products aren't synced to the `plans` table, the billing upgrade flow shows nothing. Should show a message like "Plans coming soon" rather than empty state.
+
+### 19. `profiles` Table: No INSERT RLS Policy
+The `handle_new_user` trigger inserts profiles via `SECURITY DEFINER`, which works. But if the trigger fails or profile needs to be recreated, there's no way for a user to insert their own profile row.
+
+---
+
+## Recommended Fix Priority for Release 1
 
 ```text
-Current system prompt context:
-  - Org name, description, special instructions
-  - Matched page content (truncated)
+Priority 1 (Blocking):
+├── #5  Fix crawl-site auth for service-role calls during onboarding
+├── #12 Add stripe-webhook to config.toml with verify_jwt = false
+├── #13 Add all webhook/public functions to config.toml
+├── #2  Handle email confirmation in signup flow
+└── #3  Handle email confirmation in invitation flow
 
-New system prompt context:
-  - Org name, description, special instructions
-  - Business hours (formatted)
-  - Services list with descriptions
-  - Matched page content (larger, better ranked)
-  - Extracted business data (phone, address)
+Priority 2 (High Impact):
+├── #1  Sync onboarding business types with full enum
+├── #4  Configure Stripe secrets or gracefully degrade billing UI
+├── #8  Add idempotency to complete-onboarding
+├── #9  Fix dashboard conversation query to filter by date
+├── #10 Add limit to site_pages query in widget-chat
+├── #11 Add basic rate limiting to widget-chat
+└── #14 Add /dashboard/calls route or remove the page
+
+Priority 3 (Polish):
+├── #7  Enforce allowed_domains in widget-loader
+├── #15 Make onboarding crawl step honest about what's happening
+├── #16 Standardize edge function auth pattern
+├── #17 Increase AuthCallback timeout
+├── #18 Handle empty plans gracefully in billing
+└── #19 Consider adding profiles INSERT policy
 ```
 
-**Auto-sync after crawl:**
+---
 
-After crawl-site finishes generating summaries, it will call the create-vapi-assistant function internally to update the voice agent's knowledge base with the fresh content.
+## Summary
 
-### Expected Outcome
-
-- Voice agent can answer detailed questions about the business based on actual website content
-- Chat agent finds more relevant pages and provides richer, more detailed answers
-- Both agents have access to structured business data (hours, services, contact info) for instant answers to common questions
-- Re-crawling the website automatically updates both the chat and voice agents
+The core flows (signup → onboard → dashboard → widget) are well-structured but have **5 blocking issues** that will cause failures in production: the crawl auth bypass during onboarding, missing Stripe webhook JWT config, email confirmation handling, and missing config.toml entries for webhook functions. Fixing these along with the high-impact items will give you a solid Release 1.
 
