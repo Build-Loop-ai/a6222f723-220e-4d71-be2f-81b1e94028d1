@@ -112,8 +112,11 @@ Deno.serve(async (req) => {
     console.log(`Discovered ${urls.length} URLs`);
 
     // Clear old site_maps and site_pages for this org
-    await supabaseAdmin.from("site_maps").delete().eq("organization_id", organizationId);
-    await supabaseAdmin.from("site_pages").delete().eq("organization_id", organizationId);
+    const { error: deleteMapErr } = await supabaseAdmin.from("site_maps").delete().eq("organization_id", organizationId);
+    if (deleteMapErr) console.warn("Failed to clear old site_maps:", deleteMapErr);
+    
+    const { error: deletePagesErr } = await supabaseAdmin.from("site_pages").delete().eq("organization_id", organizationId);
+    if (deletePagesErr) console.warn("Failed to clear old site_pages:", deletePagesErr);
 
     // Store discovered URLs in site_maps
     if (urls.length > 0) {
@@ -125,9 +128,8 @@ Deno.serve(async (req) => {
 
       for (let i = 0; i < siteMapRows.length; i += 100) {
         const batch = siteMapRows.slice(i, i + 100);
-        await supabaseAdmin.from("site_maps").upsert(batch, {
-          onConflict: "organization_id,url",
-        });
+        const { error: insertErr } = await supabaseAdmin.from("site_maps").insert(batch);
+        if (insertErr) console.warn(`Failed to insert site_maps batch ${i}:`, insertErr);
       }
     }
 
@@ -197,9 +199,8 @@ Deno.serve(async (req) => {
     if (scrapedPages.length > 0) {
       for (let i = 0; i < scrapedPages.length; i += 20) {
         const batch = scrapedPages.slice(i, i + 20);
-        await supabaseAdmin.from("site_pages").upsert(batch, {
-          onConflict: "organization_id,url",
-        });
+        const { error: insertErr } = await supabaseAdmin.from("site_pages").insert(batch);
+        if (insertErr) console.warn(`Failed to insert site_pages batch ${i}:`, insertErr);
       }
 
       const scrapedUrls = scrapedPages.map((p) => p.url);
