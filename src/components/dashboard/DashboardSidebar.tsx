@@ -8,6 +8,7 @@ import {
   BookOpen,
   Sparkles,
   MessageSquareText,
+  Phone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
