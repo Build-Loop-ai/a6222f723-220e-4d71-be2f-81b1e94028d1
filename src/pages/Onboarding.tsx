@@ -38,7 +38,45 @@ const STEPS = [
   { id: 3, title: "Customize Widget", icon: Palette },
 ];
 
-type BusinessType = "dental_clinic" | "medical_practice" | "salon" | "restaurant" | "other";
+const BUSINESS_TYPES = [
+  { value: "dental_clinic", label: "Dental Clinic" },
+  { value: "medical_practice", label: "Medical Practice" },
+  { value: "salon", label: "Salon" },
+  { value: "restaurant", label: "Restaurant" },
+  { value: "saas", label: "SaaS" },
+  { value: "agency", label: "Agency" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "consulting", label: "Consulting" },
+  { value: "law_firm", label: "Law Firm" },
+  { value: "accounting", label: "Accounting" },
+  { value: "real_estate", label: "Real Estate" },
+  { value: "insurance", label: "Insurance" },
+  { value: "fitness", label: "Fitness" },
+  { value: "spa", label: "Spa" },
+  { value: "automotive", label: "Automotive" },
+  { value: "education", label: "Education" },
+  { value: "nonprofit", label: "Nonprofit" },
+  { value: "healthcare", label: "Healthcare" },
+  { value: "construction", label: "Construction" },
+  { value: "retail", label: "Retail" },
+  { value: "hospitality", label: "Hospitality" },
+  { value: "technology", label: "Technology" },
+  { value: "marketing", label: "Marketing" },
+  { value: "financial_services", label: "Financial Services" },
+  { value: "photography", label: "Photography" },
+  { value: "cleaning", label: "Cleaning" },
+  { value: "plumbing", label: "Plumbing" },
+  { value: "electrician", label: "Electrician" },
+  { value: "landscaping", label: "Landscaping" },
+  { value: "pet_services", label: "Pet Services" },
+  { value: "logistics", label: "Logistics" },
+  { value: "travel", label: "Travel" },
+  { value: "food_delivery", label: "Food Delivery" },
+  { value: "coaching", label: "Coaching" },
+  { value: "other", label: "Other" },
+] as const;
+
+type BusinessType = typeof BUSINESS_TYPES[number]["value"];
 
 interface CrawledPage {
   url: string;
