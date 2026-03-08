@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, MessageSquareText, MessageSquare, Settings } from "lucide-react";
+import { LayoutDashboard, MessageSquareText, MessageSquare, Phone, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
