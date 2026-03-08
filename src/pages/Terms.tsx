@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Phone, ArrowLeft } from "lucide-react";
+import { Helmet } from "react-helmet";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 
 const Terms = () => {
@@ -7,6 +8,10 @@ const Terms = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Terms of Service – Greet</title>
+        <meta name="description" content="Read the Terms of Service for Greet, your AI-powered virtual receptionist." />
+      </Helmet>
       <div className="max-w-3xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="mb-12">
