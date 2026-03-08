@@ -33,7 +33,18 @@ import NotFound from "./pages/NotFound";
 import WidgetEmbed from "./pages/WidgetEmbed";
 import WidgetLivePreview from "./pages/WidgetLivePreview";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      meta: {
+        onError: (error: Error) => {
+          console.error("Query error:", error.message);
+        },
+      },
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

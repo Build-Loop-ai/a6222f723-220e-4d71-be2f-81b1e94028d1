@@ -19,6 +19,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: MessageSquareText, label: "Widget", href: "/dashboard/widget" },
   { icon: MessageSquare, label: "Conversations", href: "/dashboard/conversations" },
+  { icon: Phone, label: "Calls", href: "/dashboard/calls" },
   { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
   { icon: BookOpen, label: "Knowledge Base", href: "/dashboard/knowledge-base" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },

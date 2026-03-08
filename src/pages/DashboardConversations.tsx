@@ -67,10 +67,17 @@ const DashboardConversations = () => {
         // Get message counts per conversation
         const convIds = (data || []).map((c) => c.id);
         if (convIds.length > 0) {
-          const { data: msgCounts } = await supabase
-            .from("chat_messages")
-            .select("conversation_id")
-            .in("conversation_id", convIds);
+          // Fetch message counts per conversation individually to avoid 1000-row limit
+          const countMap: Record<string, number> = {};
+          await Promise.all(
+            convIds.map(async (id) => {
+              const { count } = await supabase
+                .from("chat_messages")
+                .select("id", { count: "exact", head: true })
+                .eq("conversation_id", id);
+              countMap[id] = count || 0;
+            })
+          );
 
           const countMap: Record<string, number> = {};
           (msgCounts || []).forEach((m) => {

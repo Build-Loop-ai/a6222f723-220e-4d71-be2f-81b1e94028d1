@@ -6,6 +6,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Home", href: "/dashboard" },
   { icon: MessageSquareText, label: "Widget", href: "/dashboard/widget" },
   { icon: MessageSquare, label: "Chats", href: "/dashboard/conversations" },
+  { icon: Phone, label: "Calls", href: "/dashboard/calls" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];
 
