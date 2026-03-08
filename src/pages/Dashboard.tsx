@@ -48,13 +48,18 @@ const Dashboard = () => {
 
         setUserName(profile.full_name || user.email?.split("@")[0] || "");
 
+        // Fetch today's conversations + recent for activity stream
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
         const [convRes, widgetRes] = await Promise.all([
           supabase
             .from("conversations")
             .select("id, visitor_id, channel, started_at, ended_at, status, page_url")
             .eq("organization_id", profile.organization_id)
+            .gte("started_at", todayStart.toISOString())
             .order("started_at", { ascending: false })
-            .limit(50),
+            .limit(200),
           supabase
             .from("widget_configs")
             .select("id")

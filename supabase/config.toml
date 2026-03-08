@@ -14,3 +14,21 @@ verify_jwt = false
 
 [functions.vapi-proxy]
 verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.vapi-webhook]
+verify_jwt = false
+
+[functions.health-check]
+verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false
+
+[functions.hero-chat]
+verify_jwt = false
+
+[functions.complete-onboarding]
+verify_jwt = false

@@ -40,6 +40,24 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Enforce allowed_domains if configured
+  const allowedDomains: string[] = config.allowed_domains || [];
+  if (allowedDomains.length > 0) {
+    const origin = req.headers.get("Origin") || req.headers.get("Referer") || "";
+    let requestDomain = "";
+    try {
+      requestDomain = new URL(origin).hostname;
+    } catch {
+      // If no valid origin, allow (could be direct request or server-side)
+    }
+    if (requestDomain && !allowedDomains.some((d: string) => requestDomain === d || requestDomain.endsWith("." + d))) {
+      return new Response("// Domain not authorized", {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/javascript" },
+      });
+    }
+  }
+
   // If voice call is enabled, fetch VAPI config
   let vapiPublicKey = null;
   let vapiAssistantId = null;

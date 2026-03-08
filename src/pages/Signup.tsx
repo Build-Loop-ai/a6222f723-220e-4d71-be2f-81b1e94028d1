@@ -51,8 +51,10 @@ const Signup = () => {
         return;
       }
       sessionStorage.setItem("pendingClinicName", data.clinicName);
-      toast({ title: "Account created!", description: "Let's set up your AI receptionist." });
-      navigate("/onboarding");
+      toast({ 
+        title: "Check your email!", 
+        description: "We've sent you a confirmation link. Please verify your email to continue." 
+      });
     } catch (err) {
       if (err instanceof z.ZodError) {
         const fieldErrors: Record<string, string> = {};

@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardConversations from "./pages/DashboardConversations";
 import DashboardConversationDetail from "./pages/DashboardConversationDetail";
 import DashboardCallDetail from "./pages/DashboardCallDetail";
+import DashboardCalls from "./pages/DashboardCalls";
 import DashboardAnalytics from "./pages/DashboardAnalytics";
 import DashboardKnowledgeBase from "./pages/DashboardKnowledgeBase";
 import DashboardWidget from "./pages/DashboardWidget";
@@ -66,6 +67,7 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="conversations" element={<DashboardConversations />} />
               <Route path="conversations/:conversationId" element={<DashboardConversationDetail />} />
+              <Route path="calls" element={<DashboardCalls />} />
               <Route path="calls/:callId" element={<DashboardCallDetail />} />
               <Route path="analytics" element={<DashboardAnalytics />} />
               <Route path="knowledge-base" element={<DashboardKnowledgeBase />} />

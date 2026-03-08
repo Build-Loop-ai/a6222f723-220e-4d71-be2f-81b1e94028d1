@@ -137,7 +137,8 @@ Deno.serve(async (req) => {
       supabaseAdmin
         .from("site_pages")
         .select("url, title, summary, content_markdown")
-        .eq("organization_id", orgId),
+        .eq("organization_id", orgId)
+        .limit(100),
     ]);
 
     const orgSettings = settingsResult.data;
