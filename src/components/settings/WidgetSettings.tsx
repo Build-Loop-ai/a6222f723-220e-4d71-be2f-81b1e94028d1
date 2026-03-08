@@ -744,6 +744,132 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
           </div>
         </div>
 
+        {/* ━━━━ Design sub-toolbar (second row, only when Design tab active) ━━━━ */}
+        {activePanel === "style" && !tryMode && (
+          <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-foreground/[0.06] bg-background/80 backdrop-blur-sm">
+            {/* Inline color swatches */}
+            <div className="hidden md:flex items-center gap-1 px-1.5 py-1 rounded-xl bg-foreground/[0.03] border border-foreground/[0.05]">
+              {PRESET_COLORS.slice(0, 6).map((c) => (
+                <motion.button
+                  key={c}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => u("accent_color", c)}
+                  className={`h-[18px] w-[18px] rounded-full transition-all ${
+                    config.accent_color === c
+                      ? "ring-2 ring-primary ring-offset-1 ring-offset-white/80 shadow-md"
+                      : "hover:shadow-sm ring-1 ring-black/[0.06]"
+                  }`}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+              <input
+                type="color"
+                value={config.accent_color}
+                onChange={(e) => u("accent_color", e.target.value)}
+                className="h-[18px] w-[18px] cursor-pointer rounded-full border-0 bg-transparent p-0 ml-0.5"
+              />
+            </div>
+
+            <div className="hidden lg:block h-5 w-px bg-foreground/[0.08]" />
+
+            {/* Font popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="hidden lg:flex items-center gap-1 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.07] border border-foreground/[0.06] px-2.5 py-1.5 text-[10px] font-medium text-foreground/55 hover:text-foreground/75 transition-all">
+                  <Type className="h-3 w-3" />
+                  <span style={{ fontFamily: config.font_family }}>{FONT_OPTIONS.find(f => f.value === config.font_family)?.label || "Font"}</span>
+                  <ChevronDown className="h-2.5 w-2.5 opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-1.5 glass-light-strong border-white/60 shadow-xl z-50 rounded-xl" align="start" sideOffset={8}>
+                <div className="space-y-0.5">
+                  {FONT_OPTIONS.map((f) => (
+                    <button
+                      key={f.value}
+                      onClick={() => uNow("font_family", f.value)}
+                      className={`w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs transition-all ${
+                        config.font_family === f.value
+                          ? "bg-primary/10 text-primary font-semibold"
+                          : "text-foreground/60 hover:bg-foreground/[0.04]"
+                      }`}
+                    >
+                      <span className="text-sm font-bold w-6" style={{ fontFamily: f.value }}>{f.preview}</span>
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Corners popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="hidden lg:flex items-center gap-1 rounded-xl bg-foreground/[0.04] hover:bg-foreground/[0.07] border border-foreground/[0.06] px-2.5 py-1.5 text-[10px] font-medium text-foreground/55 hover:text-foreground/75 transition-all">
+                  <LayoutGrid className="h-3 w-3" />
+                  <span>{RADIUS_OPTIONS.find(r => r.value === config.border_radius)?.label || "Corners"}</span>
+                  <ChevronDown className="h-2.5 w-2.5 opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-44 p-1.5 glass-light-strong border-white/60 shadow-xl z-50 rounded-xl" align="start" sideOffset={8}>
+                <div className="space-y-0.5">
+                  {RADIUS_OPTIONS.map((r) => (
+                    <button
+                      key={r.value}
+                      onClick={() => uNow("border_radius", r.value)}
+                      className={`w-full flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs transition-all ${
+                        config.border_radius === r.value
+                          ? "bg-primary/10 text-primary font-semibold"
+                          : "text-foreground/60 hover:bg-foreground/[0.04]"
+                      }`}
+                    >
+                      <div className="h-4 w-4 border-2 border-current" style={{ borderRadius: r.css === "9999px" ? "50%" : r.css }} />
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            <div className="hidden md:block h-5 w-px bg-foreground/[0.08]" />
+
+            {/* Feature toggle icons */}
+            <button
+              onClick={() => uNow("voice_enabled", !config.voice_enabled)}
+              className={`hidden md:flex h-7 w-7 rounded-xl items-center justify-center transition-all duration-200 ${
+                config.voice_enabled
+                  ? "bg-primary/12 text-primary shadow-sm shadow-primary/10"
+                  : "bg-foreground/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-foreground/[0.07]"
+              }`}
+              title="Voice input"
+            >
+              <Mic className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => uNow("voice_call_enabled", !config.voice_call_enabled)}
+              className={`hidden md:flex h-7 w-7 rounded-xl items-center justify-center transition-all duration-200 ${
+                config.voice_call_enabled
+                  ? "bg-primary/12 text-primary shadow-sm shadow-primary/10"
+                  : "bg-foreground/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-foreground/[0.07]"
+              }`}
+              title="Voice call (VAPI)"
+            >
+              <Phone className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => uNow("show_branding", !config.show_branding)}
+              className={`hidden md:flex h-7 w-7 rounded-xl items-center justify-center transition-all duration-200 ${
+                config.show_branding
+                  ? "bg-primary/12 text-primary shadow-sm shadow-primary/10"
+                  : "bg-foreground/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-foreground/[0.07]"
+              }`}
+              title="Show branding"
+            >
+              <CircleDot className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* ━━━━ Slide-down dropdown panel ━━━━ */}
         <AnimatePresence>
           {!tryMode && dropdownOpen && (activePanel !== "style" || editingZone) && (
