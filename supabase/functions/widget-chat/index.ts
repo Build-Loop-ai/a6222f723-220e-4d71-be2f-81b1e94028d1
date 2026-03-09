@@ -350,7 +350,41 @@ ${pageContext || "No pages crawled yet. Help the visitor as best you can."}`;
         }
         controller.enqueue(chunk);
       },
-      async flush() {
+      async flush(controller) {
+        // Fallback: if streaming returned empty, retry non-streaming
+        if (!fullResponse.trim()) {
+          console.warn("Streaming returned empty response, retrying non-streaming...");
+          try {
+            const retryRes = await fetch(
+              "https://ai.gateway.lovable.dev/v1/chat/completions",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  model: "google/gemini-2.5-flash",
+                  messages,
+                  stream: false,
+                }),
+              }
+            );
+            if (retryRes.ok) {
+              const retryData = await retryRes.json();
+              const retryContent = retryData.choices?.[0]?.message?.content;
+              if (retryContent) {
+                fullResponse = retryContent;
+                // Emit as SSE so the client receives it
+                const sseChunk = `data: ${JSON.stringify({ choices: [{ delta: { content: retryContent } }] })}\n\ndata: [DONE]\n\n`;
+                controller.enqueue(new TextEncoder().encode(sseChunk));
+              }
+            }
+          } catch (retryErr) {
+            console.error("Non-streaming fallback failed:", retryErr);
+          }
+        }
+
         if (fullResponse) {
           const urlMatch = fullResponse.match(/https?:\/\/[^\s)>]+/);
           try {
