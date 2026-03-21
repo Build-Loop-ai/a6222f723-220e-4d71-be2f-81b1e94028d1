@@ -41,74 +41,68 @@ function StackingCard({
 }) {
   return (
     <div
-      className="relative"
+      className="sticky w-full flex justify-center"
       style={{
-        height: index === total - 1 ? "115vh" : "135vh",
+        top: `${120 + index * 24}px`,
+        zIndex: index + 1,
+        paddingBottom: "clamp(40px, 8vw, 100px)",
       }}
     >
       <div
-        className="sticky w-full flex justify-center"
+        className="rounded-2xl overflow-hidden w-full md:w-[85%] border"
         style={{
-          top: `calc(clamp(5rem, 8vw, 7.5rem) + ${index * 1.5}rem)`,
-          zIndex: index + 1,
+          background: CARD_BACKGROUNDS[index] ?? "hsl(var(--card))",
+          color: "hsl(var(--foreground))",
+          borderColor: "hsl(var(--border))",
+          boxShadow: "0 -4px 30px rgba(0,0,0,0.15)",
         }}
       >
         <div
-          className="rounded-2xl overflow-hidden w-full md:w-[85%] border"
-          style={{
-            background: CARD_BACKGROUNDS[index] ?? "hsl(var(--card))",
-            color: "hsl(var(--foreground))",
-            borderColor: "hsl(var(--border))",
-            boxShadow: "var(--shadow-xl)",
-          }}
+          className="grid grid-cols-1 md:grid-cols-2 min-h-[320px] md:min-h-[540px]"
+          style={{ gap: "var(--space-xl) var(--space-gap)", padding: "var(--space-card)" }}
         >
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 min-h-[320px] md:min-h-[540px]"
-            style={{ gap: "var(--space-xl) var(--space-gap)", padding: "var(--space-card)" }}
-          >
-            <div className="flex flex-col justify-between" style={{ gap: "var(--space-m)" }}>
-              <div className="flex items-center gap-3">
-                <span
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{
-                    background: "hsl(var(--foreground))",
-                    color: "hsl(var(--background))",
-                  }}
-                >
-                  {step.number}
-                </span>
-                <span
-                  className="font-medium uppercase tracking-widest text-muted-foreground"
-                  style={{ fontSize: "var(--text-small)" }}
-                >
-                  Step
-                </span>
-              </div>
-
-              <div className="flex flex-col" style={{ gap: "var(--space-s)" }}>
-                <h3
-                  className="font-bold leading-tight tracking-tight"
-                  style={{ fontSize: "var(--text-h2)" }}
-                >
-                  {step.title}
-                </h3>
-                <p
-                  className="leading-relaxed text-muted-foreground"
-                  style={{ fontSize: "var(--text-body-lg)", maxWidth: "var(--prose-max)" }}
-                >
-                  {step.description}
-                </p>
-              </div>
-            </div>
-
-            <div className="hidden md:flex items-center justify-center">
+          <div className="flex flex-col justify-between" style={{ gap: "var(--space-m)" }}>
+            <div className="flex items-center gap-3">
               <span
-                className="font-display font-[900] text-foreground/10"
-                style={{ fontSize: "clamp(6rem, 12vw, 14rem)" }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{
+                  background: "hsl(var(--foreground))",
+                  color: "hsl(var(--background))",
+                }}
               >
                 {step.number}
               </span>
+              <span
+                className="font-medium uppercase tracking-widest text-muted-foreground"
+                style={{ fontSize: "var(--text-small)" }}
+              >
+                Step
+              </span>
             </div>
+
+            <div className="flex flex-col" style={{ gap: "var(--space-s)" }}>
+              <h3
+                className="font-bold leading-tight tracking-tight"
+                style={{ fontSize: "var(--text-h2)" }}
+              >
+                {step.title}
+              </h3>
+              <p
+                className="leading-relaxed text-muted-foreground"
+                style={{ fontSize: "var(--text-body-lg)", maxWidth: "var(--prose-max)" }}
+              >
+                {step.description}
+              </p>
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center justify-center">
+            <span
+              className="font-display font-[900] text-foreground/10"
+              style={{ fontSize: "clamp(6rem, 12vw, 14rem)" }}
+            >
+              {step.number}
+            </span>
           </div>
         </div>
       </div>
@@ -196,7 +190,7 @@ const HowItWorks = () => {
 
       <div
         className="container-large"
-        style={{ position: "relative", zIndex: 2, paddingBottom: "20vh" }}
+        style={{ position: "relative", zIndex: 2 }}
       >
         {steps.map((step, i) => (
           <StackingCard key={step.number} step={step} index={i} total={steps.length} />
