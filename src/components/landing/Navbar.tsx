@@ -45,7 +45,7 @@ const Navbar = () => {
         <div className="w-full" style={{ paddingLeft: "clamp(1rem, 3vw, 2.5rem)", paddingRight: "clamp(1rem, 3vw, 2.5rem)" }}>
           <div className="flex items-center justify-between w-full" style={{ padding: "16px 0" }}>
             {/* Logo */}
-            <Link to="/" className="font-display text-xl font-[800] tracking-tight text-gradient">
+            <Link to="/" className="font-display text-xl font-[800] tracking-tight text-white">
               greet
             </Link>
 
