@@ -13,10 +13,14 @@ const navLinks = [
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+      setPastHero(window.scrollY > window.innerHeight * 0.85);
+    };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -79,10 +83,15 @@ const Navbar = () => {
               </Link>
               <Link to="/signup" className="hidden md:inline-flex">
                 <button
-                  className="px-5 py-2.5 text-sm font-medium rounded-[10px] text-primary-foreground transition-all duration-200 hover:scale-[0.98]"
+                  className="px-5 py-2.5 text-sm font-medium rounded-[10px] transition-all duration-500 hover:scale-[0.98]"
                   style={{
-                    background: "linear-gradient(135deg, hsl(var(--green)) 0%, hsl(var(--cyan)) 100%)",
-                    boxShadow: "0 2px 12px hsl(var(--green-glow))",
+                    background: pastHero
+                      ? "linear-gradient(135deg, hsl(var(--green)) 0%, hsl(var(--cyan)) 100%)"
+                      : "rgba(255,255,255,0.95)",
+                    color: pastHero ? "white" : "hsl(168 80% 28%)",
+                    boxShadow: pastHero
+                      ? "0 2px 12px hsl(var(--green-glow))"
+                      : "0 2px 12px rgba(0,0,0,0.1)",
                   }}
                 >
                   Get Started
