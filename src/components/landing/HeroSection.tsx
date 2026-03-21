@@ -20,6 +20,12 @@ const HeroSection = () => {
   const orbScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.6]);
   const orbOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
+  const [pastHero, setPastHero] = useState(false);
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (v) => setPastHero(v > 0.85));
+    return unsubscribe;
+  }, [scrollYProgress]);
+
   const [wordIndex, setWordIndex] = useState(0);
   const [urlValue, setUrlValue] = useState("");
   const [isTypingUrl, setIsTypingUrl] = useState(false);
