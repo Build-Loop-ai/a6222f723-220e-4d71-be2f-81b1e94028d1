@@ -24,7 +24,7 @@ const Index = () => {
       </Helmet>
       <Navbar />
       <HeroSection />
-      <SocialProofBar />
+      
       <IntroSection />
       <HowItWorks />
       <FeaturesSection />
