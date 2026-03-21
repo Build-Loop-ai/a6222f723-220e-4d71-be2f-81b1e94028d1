@@ -1,165 +1,187 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Link as LinkIcon, SlidersHorizontal, Rocket } from "lucide-react";
 import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+
+const MARQUEE_TEXT = "How it works";
+const MARQUEE_REPEAT = 20;
 
 const steps = [
   {
-    num: "01",
+    number: "01",
     title: "Paste your URL",
-    desc: "Enter any website URL. Greet crawls the entire sitemap and reads every page, product, service, and FAQ automatically.",
-    icon: LinkIcon,
-    visual: (
-      <div className="space-y-3">
-        <div className="glass rounded-xl p-3 flex items-center gap-3">
-          <div className="flex-1 px-3 py-2 rounded-lg text-xs text-muted-foreground" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            vandermolen.nl
-          </div>
-          <div className="px-3 py-2 rounded-lg text-xs font-medium text-primary" style={{ background: "rgba(52,215,123,0.10)", border: "1px solid rgba(52,215,123,0.15)" }}>
-            Crawling...
-          </div>
-        </div>
-      </div>
-    ),
+    description:
+      "Enter any website URL. Greet crawls the entire sitemap and reads every page, product, service, and FAQ automatically.",
   },
   {
-    num: "02",
+    number: "02",
     title: "Customize your agent",
-    desc: "Set the tone, add custom documents, configure lead capture. Your agent matches your brand perfectly.",
-    icon: SlidersHorizontal,
-    visual: (
-      <div className="space-y-2">
-        {["Voice Mode", "Lead Capture", "Auto-Reply"].map((label, i) => (
-          <div key={i} className="glass rounded-lg p-2.5 flex items-center justify-between">
-            <span className="text-xs text-foreground">{label}</span>
-            <div className={`w-8 h-5 rounded-full relative ${i < 2 ? "bg-primary/30" : "bg-foreground/10"}`}>
-              <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${i < 2 ? "left-3.5 bg-primary" : "left-0.5 bg-foreground/30"}`} />
-            </div>
-          </div>
-        ))}
-      </div>
-    ),
+    description:
+      "Set the tone, add custom documents, configure lead capture. Your agent matches your brand perfectly.",
   },
   {
-    num: "03",
+    number: "03",
     title: "Go live in minutes",
-    desc: "Copy one line of code or use our plugin. The chat widget appears on your site, ready to help every visitor.",
-    icon: Rocket,
-    visual: (
-      <div className="glass rounded-xl p-3">
-        <code className="font-mono text-[11px] text-primary leading-relaxed block">
-          {'<script src="greet.js"></script>'}
-        </code>
-      </div>
-    ),
+    description:
+      "Copy one line of code or use our plugin. The chat widget appears on your site, ready to help every visitor.",
   },
 ];
 
+function StackingCard({
+  step,
+  index,
+  total,
+}: {
+  step: (typeof steps)[0];
+  index: number;
+  total: number;
+}) {
+  // Progressively lighter green-tinted dark cards
+  const lightness = 6 + index * 4;
+  const saturation = 40 + index * 8;
+
+  return (
+    <div
+      className="sticky w-full flex justify-center"
+      style={{
+        top: `${120 + index * 24}px`,
+        zIndex: index + 1,
+        paddingBottom: "clamp(40px, 8vw, 100px)",
+      }}
+    >
+      <div
+        className="rounded-2xl overflow-hidden w-full md:w-[85%]"
+        style={{
+          background: `hsl(148 ${saturation}% ${lightness}%)`,
+          color: "hsl(var(--foreground))",
+          boxShadow: "0 -4px 30px rgba(0,0,0,0.3)",
+        }}
+      >
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 min-h-[320px] md:min-h-[480px]"
+          style={{ gap: "var(--space-xl) var(--space-gap)", padding: "var(--space-card)" }}
+        >
+          {/* Left: text */}
+          <div className="flex flex-col justify-between" style={{ gap: "var(--space-m)" }}>
+            <div className="flex items-center gap-3">
+              <span
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))" }}
+              >
+                {step.number}
+              </span>
+              <span
+                className="font-medium uppercase tracking-widest opacity-70"
+                style={{ fontSize: "var(--text-small)" }}
+              >
+                Step
+              </span>
+            </div>
+            <div className="flex flex-col" style={{ gap: "var(--space-s)" }}>
+              <h3
+                className="font-bold leading-tight tracking-tight"
+                style={{ fontSize: "var(--text-h2)" }}
+              >
+                {step.title}
+              </h3>
+              <p
+                className="leading-relaxed opacity-60"
+                style={{ fontSize: "var(--text-body-lg)", maxWidth: "var(--prose-max)" }}
+              >
+                {step.description}
+              </p>
+            </div>
+          </div>
+
+          {/* Right: decorative number */}
+          <div className="hidden md:flex items-center justify-center">
+            <span
+              className="font-display font-[900] text-foreground/10"
+              style={{ fontSize: "clamp(6rem, 12vw, 14rem)" }}
+            >
+              {step.number}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const HowItWorks = () => {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   });
-
-  const bgY = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
-  const glowScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1.1, 0.9]);
+  const marqueeX = useTransform(scrollYProgress, [0, 1], ["-30%", "10%"]);
 
   return (
-    <section ref={sectionRef} className="relative py-32 md:py-44 overflow-hidden">
-      {/* DRAMATIC IMMERSIVE BACKGROUND — green atmosphere */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        background: "linear-gradient(180deg, #070810 0%, #081A10 30%, #0D2A18 50%, #081A10 70%, #070810 100%)",
-      }} />
-
-      {/* Large breathing green glow */}
-      <motion.div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1400px] h-[1000px] pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse, rgba(52,215,123,0.14) 0%, rgba(52,215,123,0.04) 40%, transparent 70%)",
-          scale: glowScale,
-          y: bgY,
-        }}
-      />
-
-      {/* Cyan accent */}
-      <motion.div
-        className="absolute top-[20%] right-[-200px] w-[600px] h-[600px] pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(0,194,224,0.08) 0%, transparent 60%)" }}
-        animate={{ x: [0, 20, 0], y: [0, -30, 0] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* Particles */}
-      <div className="particles-container">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div
-            key={i}
-            className="particle"
-            style={{
-              left: `${10 + Math.random() * 80}%`,
-              bottom: "-10px",
-              width: `${2 + Math.random() * 2}px`,
-              height: `${2 + Math.random() * 2}px`,
-              animationDuration: `${12 + Math.random() * 18}s`,
-              animationDelay: `${Math.random() * 10}s`,
-              opacity: 0.2 + Math.random() * 0.3,
-            }}
-          />
-        ))}
+    <section
+      ref={sectionRef}
+      className="relative"
+      style={{
+        paddingTop: "var(--space-section-y)",
+        paddingBottom: "var(--space-section-y)",
+        background: "#050506",
+        clipPath: "inset(0 0 0 0)",
+      }}
+    >
+      {/* Dot grid background — sticky, clipped by clipPath */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, rgba(52,215,123,0.12) 1.5px, transparent 1.5px)",
+            backgroundSize: "24px 24px",
+            opacity: 0.3,
+          }}
+        />
       </div>
 
-      <div className="max-w-[1140px] mx-auto px-6 md:px-12 relative z-10">
-        {/* Header */}
-        <div className="max-w-3xl mb-16 md:mb-24">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="section-label mb-5">
-            How It Works
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="font-display font-[700] leading-[1.1] tracking-[-0.02em] text-foreground"
-            style={{ fontSize: "clamp(36px, 5vw, 48px)" }}
-          >
-            Three steps, one result.
-          </motion.h2>
-        </div>
+      {/* Fade overlays */}
+      <div
+        className="absolute inset-x-0 top-0 pointer-events-none"
+        style={{ height: "300px", zIndex: 1, background: "linear-gradient(to bottom, #050506, transparent)" }}
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 pointer-events-none"
+        style={{ height: "300px", zIndex: 1, background: "linear-gradient(to top, #050506, transparent)" }}
+      />
 
-        {/* Cards */}
-        <div className="grid md:grid-cols-3 gap-5">
-          {steps.map((step, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 80, rotateX: 10 }}
-              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.8, delay: idx * 0.15, ease: [0.22, 1, 0.36, 1] }}
-              className="glass glass-premium rounded-[28px] p-10 group hover:border-[rgba(52,215,123,0.2)] transition-all duration-500"
-              style={{ transformStyle: "preserve-3d" }}
-              whileHover={{ y: -8, boxShadow: "0 0 60px rgba(52,215,123,0.1), 0 20px 60px rgba(0,0,0,0.4)" }}
-            >
-              {/* Number */}
-              <div className="font-display font-[800] text-gradient mb-6" style={{ fontSize: "48px" }}>
-                {step.num}
-              </div>
-
-              {/* Icon */}
-              <div
-                className="w-12 h-12 rounded-[14px] flex items-center justify-center mb-6"
-                style={{ background: "rgba(52,215,123,0.10)", border: "1px solid rgba(52,215,123,0.12)" }}
+      {/* Scroll marquee */}
+      <div
+        className="overflow-hidden relative"
+        style={{ paddingTop: "var(--space-l)", paddingBottom: "var(--space-l)", zIndex: 2 }}
+      >
+        <motion.div className="flex items-center whitespace-nowrap gap-0" style={{ x: marqueeX }}>
+          {Array.from({ length: MARQUEE_REPEAT }).map((_, i) => (
+            <span key={i} className="flex items-center shrink-0">
+              <span
+                className="tracking-tight leading-none font-black text-foreground"
+                style={{
+                  fontSize: "clamp(1.75rem, 7vw, 6rem)",
+                  paddingLeft: "var(--space-m)",
+                  paddingRight: "var(--space-m)",
+                }}
               >
-                <step.icon className="w-6 h-6 text-primary" />
-              </div>
-
-              <h3 className="font-display text-xl font-[700] text-foreground mb-3 tracking-[-0.01em]">{step.title}</h3>
-              <p className="text-[15px] text-muted-foreground leading-relaxed mb-6">{step.desc}</p>
-
-              {/* Visual */}
-              <div className="mt-auto">{step.visual}</div>
-            </motion.div>
+                {MARQUEE_TEXT}
+              </span>
+              <span
+                className="w-3 h-3 md:w-4 md:h-4 rounded-full shrink-0 bg-primary"
+                style={{ transform: "translateY(6px)" }}
+              />
+            </span>
           ))}
-        </div>
+        </motion.div>
+      </div>
+
+      <div className="h-[100px]" />
+
+      {/* Stacking cards */}
+      <div className="container-large" style={{ position: "relative", zIndex: 2 }}>
+        {steps.map((step, i) => (
+          <StackingCard key={step.number} step={step} index={i} total={steps.length} />
+        ))}
       </div>
     </section>
   );

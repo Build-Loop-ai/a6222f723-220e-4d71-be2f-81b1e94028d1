@@ -468,66 +468,16 @@ const HeroSection = () => {
 
   return (
     <>
-      <section ref={sectionRef} className="relative min-h-[110vh] overflow-hidden flex flex-col items-center justify-center">
-        {/* === BACKGROUND === */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: "#050508" }}>
-          <motion.div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            style={{ scale: orbScale, opacity: orbOpacity }}
-          >
-            <motion.div
-              className="w-[600px] h-[600px] md:w-[900px] md:h-[900px] rounded-full"
-              style={{
-                background: "radial-gradient(circle, rgba(52,215,123,0.2) 0%, rgba(0,194,224,0.1) 30%, rgba(52,215,123,0.03) 55%, transparent 70%)",
-                filter: "blur(60px)",
-              }}
-              animate={{ scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </motion.div>
-
-          <motion.div
-            className="absolute top-[10%] left-[15%] w-[300px] h-[300px] rounded-full"
-            style={{ background: "radial-gradient(circle, rgba(0,194,224,0.08) 0%, transparent 70%)", filter: "blur(40px)" }}
-            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-[15%] right-[10%] w-[400px] h-[400px] rounded-full"
-            style={{ background: "radial-gradient(circle, rgba(52,215,123,0.06) 0%, transparent 60%)", filter: "blur(40px)" }}
-            animate={{ x: [0, -25, 0], y: [0, 30, 0] }}
-            transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
-          />
-
+      <section ref={sectionRef} className="relative min-h-[110vh] overflow-hidden flex flex-col items-center justify-center" style={{ background: "#050506" }}>
+        {/* Clean solid background — no auroras, no particles */}
+        <div className="absolute inset-0 pointer-events-none">
           <div
-            className="absolute inset-0 opacity-[0.03]"
+            className="absolute inset-0 opacity-[0.015]"
             style={{
-              backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-              backgroundSize: "80px 80px",
-              mask: "radial-gradient(ellipse at center, black 20%, transparent 70%)",
-              WebkitMask: "radial-gradient(ellipse at center, black 20%, transparent 70%)",
+              backgroundImage: "radial-gradient(circle, rgba(52,215,123,0.3) 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
             }}
           />
-          <div className="absolute inset-0 grain-overlay" />
-        </div>
-
-        {/* Particles */}
-        <div className="particles-container">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className="particle"
-              style={{
-                left: `${5 + Math.random() * 90}%`,
-                bottom: "-10px",
-                width: `${1.5 + Math.random() * 2.5}px`,
-                height: `${1.5 + Math.random() * 2.5}px`,
-                animationDuration: `${10 + Math.random() * 20}s`,
-                animationDelay: `${Math.random() * 10}s`,
-                opacity: 0.1 + Math.random() * 0.3,
-              }}
-            />
-          ))}
         </div>
 
         {/* === CONTENT === */}
