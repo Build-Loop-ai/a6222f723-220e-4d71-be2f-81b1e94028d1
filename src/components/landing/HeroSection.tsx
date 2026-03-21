@@ -588,9 +588,9 @@ const HeroSection = () => {
             <div
               className="relative flex items-center gap-3 p-2 rounded-2xl transition-all duration-500"
               style={{
-                background: "rgba(255,255,255,0.06)",
-                border: showWidget ? "1px solid rgba(52,215,123,0.3)" : "1px solid rgba(255,255,255,0.1)",
-                boxShadow: showWidget ? "0 0 40px rgba(52,215,123,0.1), 0 0 80px rgba(52,215,123,0.05)" : "0 8px 32px rgba(0,0,0,0.3)",
+                background: "rgba(255,255,255,0.15)",
+                border: showWidget ? "1px solid rgba(255,255,255,0.5)" : "1px solid rgba(255,255,255,0.25)",
+                boxShadow: showWidget ? "0 0 40px rgba(255,255,255,0.1)" : "0 8px 32px rgba(0,0,0,0.15)",
                 backdropFilter: "blur(16px)",
               }}
             >
