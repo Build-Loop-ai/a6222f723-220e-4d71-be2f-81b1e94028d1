@@ -64,9 +64,9 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
                   width: "44px",
                   height: "44px",
                   borderRadius: "12px",
-                  background: "hsl(var(--primary) / 0.12)",
+                  background: "rgba(255,255,255,0.08)",
                   color: "hsl(var(--primary))",
-                  border: "1px solid hsl(var(--primary) / 0.2)",
+                  border: "1px solid rgba(255,255,255,0.12)",
                 }}
               >
                 {step.number}
