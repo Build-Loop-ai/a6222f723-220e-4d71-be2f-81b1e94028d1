@@ -370,7 +370,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     if (error) toast.error("Failed to save");
   };
 
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debouncedSave = useCallback(
     (updates: Partial<WidgetConfig>) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);

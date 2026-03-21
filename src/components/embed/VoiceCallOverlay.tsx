@@ -100,11 +100,11 @@ export function VoiceCallOverlay({
     return () => {
       console.log("[VoiceCall] Unmounting – cleaning up listeners");
       if (timerRef.current) clearInterval(timerRef.current);
-      vapi.off("call-start", onCallStart);
-      vapi.off("call-end", onCallEnd);
-      vapi.off("speech-start", onSpeechStart);
-      vapi.off("speech-end", onSpeechEnd);
-      vapi.off("error", onError);
+      try { (vapi as any).removeListener("call-start", onCallStart); } catch {}
+      try { (vapi as any).removeListener("call-end", onCallEnd); } catch {}
+      try { (vapi as any).removeListener("speech-start", onSpeechStart); } catch {}
+      try { (vapi as any).removeListener("speech-end", onSpeechEnd); } catch {}
+      try { (vapi as any).removeListener("error", onError); } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

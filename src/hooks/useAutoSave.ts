@@ -21,9 +21,9 @@ export function useAutoSave<T>({
 }: UseAutoSaveOptions<T>) {
   const [status, setStatus] = useState<SaveStatus>("idle");
   const [syncStatus, setSyncStatus] = useState<SaveStatus>("idle");
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const savedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isFirstRender = useRef(true);
   const lastSavedData = useRef<string>("");
 
