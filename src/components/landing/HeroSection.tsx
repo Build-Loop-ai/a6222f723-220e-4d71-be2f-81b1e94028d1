@@ -324,7 +324,7 @@ const HeroSection = () => {
                       style={
                         msg.role === "user"
                           ? { background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }
-                          : undefined
+                          : { background: "rgba(0,0,0,0.04)" }
                       }
                     >
                       {msg.content}
