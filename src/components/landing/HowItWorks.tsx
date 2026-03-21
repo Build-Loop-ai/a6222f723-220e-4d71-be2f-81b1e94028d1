@@ -138,7 +138,6 @@ const HowItWorks = () => {
       style={{
         paddingTop: "var(--space-section-y)",
         paddingBottom: "var(--space-section-y)",
-        clipPath: "inset(0 0 0 0)",
       }}
     >
       {/* Dot grid background */}

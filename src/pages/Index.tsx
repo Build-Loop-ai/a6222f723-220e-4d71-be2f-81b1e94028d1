@@ -13,7 +13,7 @@ import Footer from "@/components/landing/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ background: "#050506" }}>
+    <div className="min-h-screen" style={{ background: "#050506", overflowX: "clip" }}>
       <Helmet>
         <title>Greet – AI Receptionist for Your Business</title>
         <meta name="description" content="Greet is an AI-powered virtual receptionist that answers calls, books appointments, and chats with your website visitors 24/7." />
