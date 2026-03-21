@@ -190,7 +190,7 @@ const HowItWorks = () => {
 
       <div
         className="container-large"
-        style={{ position: "relative", zIndex: 2, paddingBottom: "20vh" }}
+        style={{ position: "relative", zIndex: 2 }}
       >
         {steps.map((step, i) => (
           <StackingCard key={step.number} step={step} index={i} total={steps.length} />
