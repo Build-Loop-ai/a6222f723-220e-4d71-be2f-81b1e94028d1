@@ -348,7 +348,7 @@ const HeroSection = () => {
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
                 className="flex flex-col items-center justify-center py-8 gap-5"
-                style={{ background: "#0D0D0F" }}
+                style={{ background: "#ffffff" }}
               >
                 <div className="relative">
                   <motion.div
