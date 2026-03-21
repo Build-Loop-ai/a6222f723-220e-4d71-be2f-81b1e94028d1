@@ -666,3 +666,15 @@
     transform: translateY(0) scale(1);
   }
 }
+
+/* Hero animated gradient */
+@keyframes hero-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 100% 25%; }
+  50% { background-position: 50% 100%; }
+  75% { background-position: 0% 75%; }
+}
+@keyframes hero-glow-drift {
+  0%, 100% { opacity: 0.6; transform: scale(1) translate(0, 0); }
+  50% { opacity: 1; transform: scale(1.15) translate(3%, -2%); }
+}

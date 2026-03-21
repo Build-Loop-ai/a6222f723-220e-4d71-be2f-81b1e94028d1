@@ -468,17 +468,50 @@ const HeroSection = () => {
 
   return (
     <>
-      <section ref={sectionRef} className="relative min-h-[110vh] overflow-hidden flex flex-col items-center justify-center" style={{ background: "#050506" }}>
-        {/* Clean solid background — no auroras, no particles */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div
-            className="absolute inset-0 opacity-[0.015]"
-            style={{
-              backgroundImage: "radial-gradient(circle, rgba(52,215,123,0.3) 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
-          />
-        </div>
+      <section
+        ref={sectionRef}
+        className="relative min-h-[110vh] overflow-hidden flex flex-col items-center justify-center"
+      >
+        {/* === Animated gradient background === */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "linear-gradient(125deg, #050506 0%, #0a1a12 18%, #0d2818 32%, #051a1c 50%, #0a0d1a 68%, #120d18 82%, #050506 100%)",
+            backgroundSize: "400% 400%",
+            animation: "hero-gradient-shift 12s ease-in-out infinite",
+          }}
+        />
+
+        {/* Radial glow overlays for depth */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 80% 60% at 30% 40%, hsla(148,68%,52%,0.08) 0%, transparent 60%)",
+            animation: "hero-glow-drift 8s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 70% 50% at 70% 60%, hsla(190,100%,44%,0.06) 0%, transparent 60%)",
+            animation: "hero-glow-drift 10s ease-in-out infinite reverse",
+          }}
+        />
+
+        {/* Dark overlay for text readability */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(to top, rgba(5,5,6,0.7) 0%, rgba(5,5,6,0.3) 40%, rgba(5,5,6,0.15) 100%)" }}
+        />
+
+        {/* Subtle grain */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+            backgroundSize: "128px 128px",
+          }}
+        />
 
         {/* === CONTENT === */}
         <motion.div style={{ y: contentY }} className="relative z-10 w-full max-w-[1100px] mx-auto px-6 text-center flex flex-col items-center">
@@ -488,7 +521,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full mb-10"
-            style={{ background: "rgba(52,215,123,0.06)", border: "1px solid rgba(52,215,123,0.12)" }}
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(12px)" }}
           >
             <span className="w-2 h-2 rounded-full bg-primary pulse-live" />
             <span className="font-mono text-[10px] tracking-[3px] uppercase text-primary">Now in public beta</span>
@@ -540,7 +573,8 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-[560px] leading-relaxed mb-12"
+            className="text-lg md:text-xl max-w-[560px] leading-relaxed mb-12"
+            style={{ color: "rgba(255,255,255,0.7)" }}
           >
             Paste a URL. Greet crawls every page, learns your business, and deploys an AI chat widget visitors can talk&nbsp;to.
           </motion.p>
@@ -555,9 +589,10 @@ const HeroSection = () => {
             <div
               className="relative flex items-center gap-3 p-2 rounded-2xl transition-all duration-500"
               style={{
-                background: "rgba(255,255,255,0.04)",
-                border: showWidget ? "1px solid rgba(52,215,123,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.06)",
+                border: showWidget ? "1px solid rgba(52,215,123,0.3)" : "1px solid rgba(255,255,255,0.1)",
                 boxShadow: showWidget ? "0 0 40px rgba(52,215,123,0.1), 0 0 80px rgba(52,215,123,0.05)" : "0 8px 32px rgba(0,0,0,0.3)",
+                backdropFilter: "blur(16px)",
               }}
             >
               <div className="flex items-center gap-2.5 flex-1 px-4 py-3.5">
@@ -578,8 +613,8 @@ const HeroSection = () => {
                 style={{
                   background: showWidget
                     ? "linear-gradient(135deg, hsl(148 68% 52%) 0%, hsl(190 100% 44%) 100%)"
-                    : "rgba(255,255,255,0.06)",
-                  color: showWidget ? "white" : "hsl(var(--muted-foreground))",
+                    : "rgba(255,255,255,0.08)",
+                  color: showWidget ? "white" : "rgba(255,255,255,0.5)",
                 }}
                 animate={showWidget ? { scale: [1, 1.05, 1] } : {}}
                 transition={{ duration: 0.3 }}
@@ -609,7 +644,7 @@ const HeroSection = () => {
               </button>
             </Link>
             <Link to="/demo">
-              <button className="px-8 py-4 rounded-[14px] text-base font-medium text-muted-foreground hover:text-foreground transition-all duration-200">
+              <button className="px-8 py-4 rounded-[14px] text-base font-medium transition-all duration-200" style={{ color: "rgba(255,255,255,0.55)" }}>
                 Watch Demo →
               </button>
             </Link>
@@ -629,7 +664,7 @@ const HeroSection = () => {
             ].map((item, idx) => (
               <div key={idx} className="flex flex-col gap-1 items-center">
                 <span className="text-base md:text-lg font-semibold text-foreground">{item.value}</span>
-                <span className="font-mono text-[9px] tracking-[3px] uppercase text-muted-foreground">{item.label}</span>
+                <span className="font-mono text-[9px] tracking-[3px] uppercase" style={{ color: "rgba(255,255,255,0.4)" }}>{item.label}</span>
               </div>
             ))}
           </motion.div>
@@ -650,7 +685,6 @@ const HeroSection = () => {
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
               >
                 {widgetContent}
-                {/* Glow ring */}
                 <div
                   className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-8 rounded-full"
                   style={{ background: "radial-gradient(ellipse, rgba(52,215,123,0.15) 0%, transparent 70%)", filter: "blur(12px)" }}
@@ -667,9 +701,10 @@ const HeroSection = () => {
           transition={{ delay: 3 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
         >
-          <span className="font-mono text-[9px] tracking-[3px] uppercase text-muted-foreground">Scroll</span>
+          <span className="font-mono text-[9px] tracking-[3px] uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>Scroll</span>
           <motion.div
-            className="w-5 h-8 rounded-full border border-white/10 flex items-start justify-center p-1"
+            className="w-5 h-8 rounded-full border flex items-start justify-center p-1"
+            style={{ borderColor: "rgba(255,255,255,0.1)" }}
             animate={{ opacity: [0.4, 0.8, 0.4] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
