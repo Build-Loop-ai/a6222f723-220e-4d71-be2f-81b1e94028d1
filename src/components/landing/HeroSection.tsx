@@ -424,9 +424,9 @@ const HeroSection = () => {
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                   placeholder="Ask anything about Greet.ai..."
-                  className="flex-1 px-3 py-2 rounded-xl text-[12px] text-foreground placeholder:text-muted-foreground glass bg-transparent outline-none border-none"
+                  className="flex-1 px-3 py-2 rounded-xl text-[12px] text-gray-800 placeholder:text-gray-400 bg-transparent outline-none border-none"
                   disabled={isStreaming}
-                  style={{ background: "rgba(255,255,255,0.04)" }}
+                  style={{ background: "rgba(0,0,0,0.04)" }}
                 />
                 <button
                   onClick={() => setWidgetTab("voice")}
