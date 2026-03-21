@@ -20,6 +20,12 @@ const HeroSection = () => {
   const orbScale = useTransform(scrollYProgress, [0, 0.5], [1, 1.6]);
   const orbOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
+  const [pastHero, setPastHero] = useState(false);
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (v) => setPastHero(v > 0.85));
+    return unsubscribe;
+  }, [scrollYProgress]);
+
   const [wordIndex, setWordIndex] = useState(0);
   const [urlValue, setUrlValue] = useState("");
   const [isTypingUrl, setIsTypingUrl] = useState(false);
@@ -752,14 +758,18 @@ const HeroSection = () => {
           >
             <button
               onClick={() => setWidgetDismissed(false)}
-              className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl"
+              className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 hover:scale-110 hover:shadow-xl"
               style={{
-                background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))",
-                boxShadow: "0 4px 24px rgba(52,215,123,0.3)",
+                background: pastHero
+                  ? "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))"
+                  : "rgba(255,255,255,0.95)",
+                boxShadow: pastHero
+                  ? "0 4px 24px rgba(52,215,123,0.3)"
+                  : "0 4px 24px rgba(0,0,0,0.15)",
               }}
               aria-label="Open chat widget"
             >
-              <MessageCircle className="w-6 h-6 text-white" />
+              <MessageCircle className={`w-6 h-6 transition-colors duration-500 ${pastHero ? "text-white" : "text-[hsl(168,80%,30%)]"}`} />
             </button>
           </motion.div>
         )}
