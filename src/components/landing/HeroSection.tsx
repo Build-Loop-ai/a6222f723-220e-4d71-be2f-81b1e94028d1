@@ -221,16 +221,16 @@ const HeroSection = () => {
     <div
       className="w-[320px] rounded-[20px] overflow-hidden"
       style={{
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 80px rgba(52,215,123,0.06)",
+        background: "#ffffff",
+        border: "1px solid rgba(0,0,0,0.08)",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04)",
       }}
     >
       {/* Header */}
-      <div className="px-5 py-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(52,215,123,0.12) 0%, rgba(0,194,224,0.08) 100%)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="px-5 py-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(52,215,123,0.08) 0%, rgba(0,194,224,0.05) 100%)", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
         <div className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-[800] text-sm" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))", color: "white" }}>G</div>
         <div className="flex-1">
-          <h4 className="font-display text-[13px] font-[700] text-foreground">Greet.ai</h4>
+          <h4 className="font-display text-[13px] font-[700] text-gray-900">Greet.ai</h4>
           <div className="flex items-center gap-1.5 text-[11px] text-primary">
             <span className="w-1.5 h-1.5 rounded-full bg-primary pulse-live" />
             Live Demo
@@ -240,7 +240,7 @@ const HeroSection = () => {
 
       {widgetPhase === "building" ? (
         /* Building phase */
-        <div className="px-4 py-8 flex flex-col items-center gap-4" style={{ background: "#0D0D0F", minHeight: "200px" }}>
+        <div className="px-4 py-8 flex flex-col items-center gap-4" style={{ background: "#ffffff", minHeight: "200px" }}>
           <motion.div
             className="w-12 h-12 rounded-full flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }}
@@ -261,13 +261,13 @@ const HeroSection = () => {
                 <motion.span
                   className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0"
                   style={{
-                    background: idx <= buildStep ? "hsl(148 68% 52%)" : "rgba(255,255,255,0.1)",
-                    color: idx <= buildStep ? "white" : "rgba(255,255,255,0.3)",
+                    background: idx <= buildStep ? "hsl(148 68% 52%)" : "rgba(0,0,0,0.08)",
+                    color: idx <= buildStep ? "white" : "rgba(0,0,0,0.3)",
                   }}
                 >
                   {idx < buildStep ? "✓" : idx === buildStep ? "…" : ""}
                 </motion.span>
-                <span className={idx <= buildStep ? "text-foreground" : "text-muted-foreground/40"}>
+                <span className={idx <= buildStep ? "text-gray-900" : "text-gray-300"}>
                   {step}
                 </span>
               </motion.div>
@@ -278,7 +278,7 @@ const HeroSection = () => {
         /* Ready phase — tabs + chat/voice */
         <>
           {/* Tab toggle */}
-          <div className="flex px-3 pt-2 gap-1" style={{ background: "#0D0D0F" }}>
+          <div className="flex px-3 pt-2 gap-1" style={{ background: "#ffffff" }}>
             {(["chat", "voice"] as const).map((tab) => (
               <button
                 key={tab}
@@ -286,7 +286,7 @@ const HeroSection = () => {
                 className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-semibold transition-all"
                 style={{
                   background: widgetTab === tab ? "rgba(52,215,123,0.1)" : "transparent",
-                  color: widgetTab === tab ? "hsl(148 68% 52%)" : "rgba(255,255,255,0.35)",
+                  color: widgetTab === tab ? "hsl(148 68% 42%)" : "rgba(0,0,0,0.35)",
                 }}
               >
                 {tab === "chat" ? <MessageCircle className="w-3 h-3" /> : <Phone className="w-3 h-3" />}
@@ -305,7 +305,7 @@ const HeroSection = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
                 className="px-4 py-4 space-y-2.5 overflow-y-auto"
-                style={{ background: "#0D0D0F", maxHeight: "260px", minHeight: "140px" }}
+                style={{ background: "#ffffff", maxHeight: "260px", minHeight: "140px" }}
               >
                 {chatMessages.map((msg, idx) => (
                   <motion.div
@@ -319,12 +319,12 @@ const HeroSection = () => {
                       className={`max-w-[88%] px-3.5 py-2.5 text-[12px] leading-relaxed ${
                         msg.role === "user"
                           ? "rounded-2xl rounded-br-md text-white"
-                          : "rounded-2xl rounded-bl-md text-foreground glass"
+                          : "rounded-2xl rounded-bl-md text-gray-800"
                       }`}
                       style={
                         msg.role === "user"
                           ? { background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }
-                          : undefined
+                          : { background: "rgba(0,0,0,0.04)" }
                       }
                     >
                       {msg.content}
@@ -348,7 +348,7 @@ const HeroSection = () => {
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
                 className="flex flex-col items-center justify-center py-8 gap-5"
-                style={{ background: "#0D0D0F" }}
+                style={{ background: "#ffffff" }}
               >
                 <div className="relative">
                   <motion.div
@@ -356,7 +356,7 @@ const HeroSection = () => {
                     style={{
                       background: voiceActive
                         ? "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))"
-                        : "rgba(255,255,255,0.06)",
+                        : "rgba(0,0,0,0.05)",
                     }}
                     animate={
                       voiceActive
@@ -365,7 +365,7 @@ const HeroSection = () => {
                     }
                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <Phone className="w-7 h-7 text-white" />
+                    <Phone className="w-7 h-7" style={{ color: voiceActive ? "white" : "rgba(0,0,0,0.4)" }} />
                   </motion.div>
                   {voiceActive && (
                     <>
@@ -403,10 +403,10 @@ const HeroSection = () => {
                 )}
 
                 <div className="text-center">
-                  <p className="text-[13px] font-medium text-foreground">
+                  <p className="text-[13px] font-medium text-gray-900">
                     {voiceActive ? "AI is speaking…" : "Connecting…"}
                   </p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+                  <p className="text-[11px] text-gray-500 mt-0.5 font-mono">
                     {voiceActive ? `0:${voiceSeconds.toString().padStart(2, "0")}` : "Starting call"}
                   </p>
                 </div>
@@ -415,7 +415,7 @@ const HeroSection = () => {
           </AnimatePresence>
 
           {/* Input */}
-          <div className="px-3 py-2.5 flex items-center gap-2" style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="px-3 py-2.5 flex items-center gap-2" style={{ background: "rgba(0,0,0,0.02)", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
             {widgetTab === "chat" ? (
               <>
                 <input
@@ -424,14 +424,14 @@ const HeroSection = () => {
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                   placeholder="Ask anything about Greet.ai..."
-                  className="flex-1 px-3 py-2 rounded-xl text-[12px] text-foreground placeholder:text-muted-foreground glass bg-transparent outline-none border-none"
+                  className="flex-1 px-3 py-2 rounded-xl text-[12px] text-gray-800 placeholder:text-gray-400 bg-transparent outline-none border-none"
                   disabled={isStreaming}
-                  style={{ background: "rgba(255,255,255,0.04)" }}
+                  style={{ background: "rgba(0,0,0,0.04)" }}
                 />
                 <button
                   onClick={() => setWidgetTab("voice")}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-white/5 shrink-0"
-                  style={{ background: "rgba(52,215,123,0.1)" }}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors hover:bg-primary/10 shrink-0"
+                  style={{ background: "rgba(52,215,123,0.08)" }}
                 >
                   <Mic className="w-3 h-3 text-primary" />
                 </button>
