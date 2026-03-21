@@ -758,10 +758,14 @@ const HeroSection = () => {
           >
             <button
               onClick={() => setWidgetDismissed(false)}
-              className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl"
+              className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 hover:scale-110 hover:shadow-xl"
               style={{
-                background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))",
-                boxShadow: "0 4px 24px rgba(52,215,123,0.3)",
+                background: pastHero
+                  ? "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))"
+                  : "rgba(255,255,255,0.95)",
+                boxShadow: pastHero
+                  ? "0 4px 24px rgba(52,215,123,0.3)"
+                  : "0 4px 24px rgba(0,0,0,0.15)",
               }}
               aria-label="Open chat widget"
             >
