@@ -28,6 +28,8 @@ const MARQUEE_TEXT = "How it works";
 const MARQUEE_REPEAT = 20;
 
 function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number }) {
+  const lightness = 8 + index * 6;
+
   return (
     <div
       className="sticky w-full flex justify-center"
@@ -38,16 +40,15 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
       }}
     >
       <motion.div
-        className="rounded-3xl overflow-hidden w-full md:w-[88%] border"
+        className="rounded-3xl overflow-hidden w-full md:w-[88%]"
         initial={{ opacity: 0, y: 60, scale: 0.96 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.7, delay: 0.05 * index, ease: easeOut }}
         style={{
-          background: "hsl(var(--card))",
-          color: "hsl(var(--foreground))",
-          borderColor: "hsl(var(--border))",
-          boxShadow: "0 -2px 40px rgba(0,0,0,0.1), 0 20px 60px rgba(0,0,0,0.08)",
+          background: `hsl(220 20% ${lightness}%)`,
+          color: "#F8F6F0",
+          boxShadow: "0 -2px 40px rgba(0,0,0,0.35), 0 20px 60px rgba(0,0,0,0.15)",
         }}
       >
         <div
