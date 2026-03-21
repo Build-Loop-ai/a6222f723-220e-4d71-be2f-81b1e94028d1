@@ -356,7 +356,7 @@ const HeroSection = () => {
                     style={{
                       background: voiceActive
                         ? "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))"
-                        : "rgba(255,255,255,0.06)",
+                        : "rgba(0,0,0,0.05)",
                     }}
                     animate={
                       voiceActive
