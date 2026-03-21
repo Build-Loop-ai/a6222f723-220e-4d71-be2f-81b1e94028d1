@@ -221,9 +221,9 @@ const HeroSection = () => {
     <div
       className="w-[320px] rounded-[20px] overflow-hidden"
       style={{
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 80px rgba(52,215,123,0.06)",
+        background: "#ffffff",
+        border: "1px solid rgba(0,0,0,0.08)",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04)",
       }}
     >
       {/* Header */}
