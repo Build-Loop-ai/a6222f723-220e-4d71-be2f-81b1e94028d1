@@ -663,8 +663,8 @@ const HeroSection = () => {
               { label: "Free trial", value: "14 days" },
             ].map((item, idx) => (
               <div key={idx} className="flex flex-col gap-1 items-center">
-                <span className="text-base md:text-lg font-semibold text-foreground">{item.value}</span>
-                <span className="font-mono text-[9px] tracking-[3px] uppercase" style={{ color: "rgba(255,255,255,0.4)" }}>{item.label}</span>
+                <span className="text-base md:text-lg font-semibold text-white">{item.value}</span>
+                <span className="font-mono text-[9px] tracking-[3px] uppercase text-white/50">{item.label}</span>
               </div>
             ))}
           </motion.div>
