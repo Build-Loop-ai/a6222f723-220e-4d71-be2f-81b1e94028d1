@@ -573,8 +573,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
-            className="text-lg md:text-xl max-w-[560px] leading-relaxed mb-12"
-            style={{ color: "rgba(255,255,255,0.7)" }}
+            className="text-lg md:text-xl max-w-[560px] leading-relaxed mb-12 text-white/80"
           >
             Paste a URL. Greet crawls every page, learns your business, and deploys an AI chat widget visitors can talk&nbsp;to.
           </motion.p>
