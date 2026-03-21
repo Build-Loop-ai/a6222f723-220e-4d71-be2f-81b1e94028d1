@@ -611,9 +611,9 @@ const HeroSection = () => {
                 className="px-6 py-3.5 rounded-xl text-sm font-semibold text-white shrink-0 transition-all"
                 style={{
                   background: showWidget
-                    ? "linear-gradient(135deg, hsl(148 68% 52%) 0%, hsl(190 100% 44%) 100%)"
-                    : "rgba(255,255,255,0.08)",
-                  color: showWidget ? "white" : "rgba(255,255,255,0.5)",
+                    ? "rgba(255,255,255,0.95)"
+                    : "rgba(255,255,255,0.15)",
+                  color: showWidget ? "hsl(168 80% 30%)" : "rgba(255,255,255,0.7)",
                 }}
                 animate={showWidget ? { scale: [1, 1.05, 1] } : {}}
                 transition={{ duration: 0.3 }}
