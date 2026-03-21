@@ -482,9 +482,9 @@ const HeroSection = () => {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(135deg, hsl(168 80% 38%) 0%, hsl(174 72% 46%) 20%, hsl(160 65% 50%) 40%, hsl(148 68% 52%) 60%, hsl(170 80% 42%) 80%, hsl(185 85% 40%) 100%)",
-            backgroundSize: "400% 400%",
-            animation: "hero-gradient-shift 12s ease-in-out infinite",
+            background: "linear-gradient(135deg, hsl(185 90% 35%) 0%, hsl(168 80% 42%) 15%, hsl(148 68% 52%) 30%, hsl(160 70% 45%) 45%, hsl(190 100% 40%) 60%, hsl(170 75% 38%) 75%, hsl(148 68% 48%) 90%, hsl(185 90% 35%) 100%)",
+            backgroundSize: "600% 600%",
+            animation: "hero-gradient-shift 8s ease-in-out infinite",
           }}
         />
 
