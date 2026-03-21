@@ -478,29 +478,38 @@ const HeroSection = () => {
         ref={sectionRef}
         className="relative min-h-[110vh] overflow-hidden flex flex-col items-center justify-center"
       >
-        {/* === Vibrant teal-green animated gradient === */}
+        {/* === Fluid teal-green animated gradient === */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "linear-gradient(135deg, hsl(185 90% 35%) 0%, hsl(168 80% 42%) 15%, hsl(148 68% 52%) 30%, hsl(160 70% 45%) 45%, hsl(190 100% 40%) 60%, hsl(170 75% 38%) 75%, hsl(148 68% 48%) 90%, hsl(185 90% 35%) 100%)",
-            backgroundSize: "600% 600%",
-            animation: "hero-gradient-shift 8s ease-in-out infinite",
-          }}
+          style={{ background: "hsl(168 70% 38%)" }}
         />
-
-        {/* Radial glow overlays for depth & dimension */}
+        {/* Drifting color orbs that blend together */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 80% 60% at 20% 30%, hsla(190,100%,50%,0.3) 0%, transparent 60%)",
-            animation: "hero-glow-drift 8s ease-in-out infinite",
+            background: "radial-gradient(ellipse 120% 80% at 20% 30%, hsl(190 100% 42%) 0%, transparent 55%)",
+            animation: "hero-orb-1 10s ease-in-out infinite",
           }}
         />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 70% 50% at 80% 70%, hsla(148,68%,40%,0.25) 0%, transparent 60%)",
-            animation: "hero-glow-drift 10s ease-in-out infinite reverse",
+            background: "radial-gradient(ellipse 100% 90% at 80% 70%, hsl(148 68% 50%) 0%, transparent 55%)",
+            animation: "hero-orb-2 12s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 90% 70% at 60% 20%, hsl(175 80% 44%) 0%, transparent 50%)",
+            animation: "hero-orb-3 14s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse 80% 100% at 30% 80%, hsl(155 65% 42%) 0%, transparent 50%)",
+            animation: "hero-orb-2 16s ease-in-out infinite reverse",
           }}
         />
 
