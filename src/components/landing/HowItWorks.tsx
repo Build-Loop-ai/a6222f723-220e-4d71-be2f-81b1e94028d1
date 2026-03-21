@@ -72,8 +72,8 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
                 {step.number}
               </div>
               <span
-                className="font-medium uppercase tracking-widest text-muted-foreground"
-                style={{ fontSize: "var(--text-small, 0.75rem)" }}
+                className="font-medium uppercase tracking-widest"
+                style={{ fontSize: "var(--text-small, 0.75rem)", color: "rgba(248,246,240,0.5)" }}
               >
                 Step
               </span>
