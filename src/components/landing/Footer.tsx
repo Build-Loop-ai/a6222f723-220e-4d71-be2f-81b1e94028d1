@@ -37,7 +37,16 @@ const Footer = () => {
   const [contactOpen, setContactOpen] = useState(false);
 
   return (
-    <footer className="text-foreground rounded-t-[1rem] md:rounded-t-[3.5rem]" style={{ backgroundColor: "#0A0F0D" }}>
+    <footer
+      className="text-foreground rounded-t-[1rem] md:rounded-t-[3.5rem]"
+      style={{
+        background: "rgba(5,5,6,0.22)",
+        backgroundImage: "linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0))",
+        WebkitBackdropFilter: "blur(26px)",
+        backdropFilter: "blur(26px)",
+        boxShadow: "0 -10px 30px rgba(0, 0, 0, 0.30)",
+      }}
+    >
       {/* CTA Band */}
       <div className="container-large" style={{ paddingTop: "var(--space-2xl)", paddingBottom: "var(--space-2xl)" }}>
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between" style={{ gap: "var(--space-xl)" }}>
