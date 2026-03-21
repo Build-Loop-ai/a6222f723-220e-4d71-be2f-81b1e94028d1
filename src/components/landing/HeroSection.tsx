@@ -261,8 +261,8 @@ const HeroSection = () => {
                 <motion.span
                   className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0"
                   style={{
-                    background: idx <= buildStep ? "hsl(148 68% 52%)" : "rgba(255,255,255,0.1)",
-                    color: idx <= buildStep ? "white" : "rgba(255,255,255,0.3)",
+                    background: idx <= buildStep ? "hsl(148 68% 52%)" : "rgba(0,0,0,0.08)",
+                    color: idx <= buildStep ? "white" : "rgba(0,0,0,0.3)",
                   }}
                 >
                   {idx < buildStep ? "✓" : idx === buildStep ? "…" : ""}
