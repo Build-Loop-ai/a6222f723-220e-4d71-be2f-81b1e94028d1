@@ -79,7 +79,7 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
               </span>
               <div
                 className="h-px flex-1 hidden md:block"
-                style={{ background: "linear-gradient(to right, hsl(var(--border)), transparent)" }}
+                style={{ background: "linear-gradient(to right, rgba(255,255,255,0.12), transparent)" }}
               />
             </div>
 
