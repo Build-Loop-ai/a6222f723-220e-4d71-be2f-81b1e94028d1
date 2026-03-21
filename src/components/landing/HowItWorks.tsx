@@ -1,9 +1,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-const MARQUEE_TEXT = "How it works";
-const MARQUEE_REPEAT = 20;
-
 const steps = [
   {
     number: "01",
@@ -25,6 +22,9 @@ const steps = [
   },
 ];
 
+const MARQUEE_TEXT = "How it works";
+const MARQUEE_REPEAT = 20;
+
 function StackingCard({
   step,
   index,
@@ -34,9 +34,8 @@ function StackingCard({
   index: number;
   total: number;
 }) {
-  // Progressively lighter green-tinted dark cards
-  const lightness = 6 + index * 4;
-  const saturation = 40 + index * 8;
+  // Progressively lighter green-tinted dark cards (matching Flomo pattern)
+  const lightness = 8 + index * 6;
 
   return (
     <div
@@ -50,21 +49,24 @@ function StackingCard({
       <div
         className="rounded-2xl overflow-hidden w-full md:w-[85%]"
         style={{
-          background: `hsl(148 ${saturation}% ${lightness}%)`,
+          background: `hsl(148 40% ${lightness}%)`,
           color: "hsl(var(--foreground))",
           boxShadow: "0 -4px 30px rgba(0,0,0,0.3)",
         }}
       >
         <div
-          className="grid grid-cols-1 md:grid-cols-2 min-h-[320px] md:min-h-[480px]"
+          className="grid grid-cols-1 md:grid-cols-2 min-h-[320px] md:min-h-[540px]"
           style={{ gap: "var(--space-xl) var(--space-gap)", padding: "var(--space-card)" }}
         >
-          {/* Left: text */}
+          {/* Left: text content */}
           <div className="flex flex-col justify-between" style={{ gap: "var(--space-m)" }}>
             <div className="flex items-center gap-3">
               <span
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                style={{ background: "hsl(var(--foreground))", color: "hsl(var(--background))" }}
+                style={{
+                  background: "hsl(var(--foreground))",
+                  color: "hsl(var(--background))",
+                }}
               >
                 {step.number}
               </span>
@@ -121,39 +123,49 @@ const HowItWorks = () => {
       style={{
         paddingTop: "var(--space-section-y)",
         paddingBottom: "var(--space-section-y)",
-        background: "#050506",
         clipPath: "inset(0 0 0 0)",
       }}
     >
-      {/* Dot grid background — sticky, clipped by clipPath */}
+      {/* Dot grid background — sticky, clipped by clipPath on section */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <div
           className="absolute inset-0"
           style={{
             backgroundImage:
-              "radial-gradient(circle, rgba(52,215,123,0.12) 1.5px, transparent 1.5px)",
+              "radial-gradient(circle, rgba(52,215,123,0.15) 1.5px, transparent 1.5px)",
             backgroundSize: "24px 24px",
-            opacity: 0.3,
+            opacity: 0.5,
           }}
         />
       </div>
 
-      {/* Fade overlays */}
+      {/* Fade overlays — absolute so they scroll with section edges */}
       <div
         className="absolute inset-x-0 top-0 pointer-events-none"
-        style={{ height: "300px", zIndex: 1, background: "linear-gradient(to bottom, #050506, transparent)" }}
+        style={{
+          height: "300px",
+          zIndex: 1,
+          background: "linear-gradient(to bottom, hsl(var(--background)), transparent)",
+        }}
       />
       <div
         className="absolute inset-x-0 bottom-0 pointer-events-none"
-        style={{ height: "300px", zIndex: 1, background: "linear-gradient(to top, #050506, transparent)" }}
+        style={{
+          height: "300px",
+          zIndex: 1,
+          background: "linear-gradient(to top, hsl(var(--background)), transparent)",
+        }}
       />
 
-      {/* Scroll marquee */}
+      {/* Scroll marquee above cards */}
       <div
         className="overflow-hidden relative"
         style={{ paddingTop: "var(--space-l)", paddingBottom: "var(--space-l)", zIndex: 2 }}
       >
-        <motion.div className="flex items-center whitespace-nowrap gap-0" style={{ x: marqueeX }}>
+        <motion.div
+          className="flex items-center whitespace-nowrap gap-0"
+          style={{ x: marqueeX }}
+        >
           {Array.from({ length: MARQUEE_REPEAT }).map((_, i) => (
             <span key={i} className="flex items-center shrink-0">
               <span
