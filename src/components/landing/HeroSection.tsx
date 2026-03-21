@@ -769,7 +769,7 @@ const HeroSection = () => {
               }}
               aria-label="Open chat widget"
             >
-              <MessageCircle className="w-6 h-6 text-white" />
+              <MessageCircle className={`w-6 h-6 transition-colors duration-500 ${pastHero ? "text-white" : "text-[hsl(168,80%,30%)]"}`} />
             </button>
           </motion.div>
         )}
