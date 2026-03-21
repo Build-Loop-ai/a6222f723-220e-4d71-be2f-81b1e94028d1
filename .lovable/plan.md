@@ -1,109 +1,97 @@
 
 
-## Dramatically Improve AI Agent Quality
+# Redesign Greet Landing Page Using Flomo Design Patterns
 
-### Problem Summary
+## What We're Doing
+Replacing the current dark, aurora-heavy Greet landing page with the clean, structured design language from the Flomo Launchpad project — but keeping Greet's dark color scheme (green/cyan brand, #050506 background) and all Greet-specific content.
 
-There are two major quality gaps in how the AI agents answer questions:
+## Design Patterns to Adopt from Flomo
 
-1. **Voice Agent (Vapi)**: The system prompt includes business hours, services, and address, but has absolutely no knowledge of the actual website content (site_pages). If a caller asks "What do you offer?" or "Tell me about your pricing", the voice agent has nothing to work with.
+The Flomo project uses a fundamentally different design philosophy:
+- **Fluid typography/spacing scale** via CSS custom properties (`--text-h1`, `--space-section-y`, etc.)
+- **Container class** (`container-large` at 1400px) instead of fixed `max-w-[1140px]`
+- **Section labels** with a colored dot + small text (e.g. `● How It Works`)
+- **Scroll-driven word reveal** for intro text
+- **Stat cards** with animated canvas blob backgrounds
+- **Stacking cards** for process/steps (sticky cards that stack on scroll)
+- **Scroll-driven marquees** instead of CSS-only marquees
+- **Benefit cards** with hover lift + shadow, clean white card style
+- **Two-column CTA** with dark card + form
+- **Clean footer** with rounded top corners and link columns
+- **No floating particles, no aurora blobs, no animated backgrounds**
 
-2. **Chat Agent (widget-chat)**: Uses a very basic keyword search (splitting on spaces, filtering words > 3 chars) which misses many relevant pages. It also truncates each page to only 1,000 characters, losing important details.
+## What Changes (mapped to Greet sections)
 
-### Plan
+### 1. Global CSS (`src/index.css`)
+Add Flomo's fluid typography and spacing scale as CSS custom properties, plus utility classes (`container-large`, `heading-1`, `heading-2`, `section-label`, `btn-primary`, `btn-secondary`). Keep all existing Greet color variables.
 
-#### 1. Inject website knowledge into the Vapi voice agent
+### 2. Hero Section (`HeroSection.tsx`)
+Keep the existing interactive widget demo (it's unique to Greet). But adopt:
+- Flomo's clean layout: left text + right widget, no aurora orbs
+- Fluid type scale for headline
+- Solid dark background instead of animated gradients
+- Dot + label pattern for section tag
 
-**File: `supabase/functions/create-vapi-assistant/index.ts`**
+### 3. Social Proof / Logo Banner (`SocialProofBar.tsx`)
+Replace with Flomo's `LogoBanner` pattern: simple horizontal marquee of text logos, muted color, minimal padding. No glass pills.
 
-- After fetching org and settings, also fetch all `site_pages` for the organization
-- Build a condensed knowledge base from site page summaries and key content (up to ~4,000 tokens to stay within Vapi's system prompt limits)
-- Add a new "## Website Knowledge Base" section to the system prompt containing:
-  - Page titles and their summaries
-  - Key content snippets from the most important pages (home, about, services, pricing, contact, FAQ)
-- Prioritize pages by relevance: pages with titles containing "about", "services", "pricing", "FAQ", "contact" come first
+### 4. How It Works (`HowItWorks.tsx`)
+Replace glass cards with Flomo's **stacking card** pattern:
+- Sticky cards that overlap as you scroll
+- Dark cards with progressively lighter backgrounds (using Greet's green hues)
+- Scroll-driven marquee text above the cards
+- Clean layout: left text, right visual
 
-#### 2. Improve chat agent content retrieval
+### 5. Features Section (`FeaturesSection.tsx`)
+Replace aurora background with clean solid background. Adopt Flomo's `WhyFlomo` layout:
+- Large headline with accent-colored word
+- 3-column grid of clean cards with icon, title, description
+- Cards with subtle shadow + hover lift (adapted to dark theme: dark card bg instead of white)
 
-**File: `supabase/functions/widget-chat/index.ts`**
+### 6. Demo Section (`DemoSection.tsx`)
+Simplify: remove underwater particles, side accents, animated glows. Keep the browser mockup but on a clean dark background with minimal glow.
 
-- Replace the naive keyword search with a smarter approach:
-  - Normalize search terms: lowercase, remove common stop words (the, is, a, an, etc.)
-  - Score pages using term frequency (count occurrences, not just boolean includes)
-  - Boost title/summary matches higher than body matches (3x weight)
-  - Include bi-grams (two-word phrases) for better matching
-- Increase content preview from 1,000 to 3,000 characters per page
-- Increase max relevant pages from 5 to 8
-- When no keyword matches are found, include more fallback pages (up to 5 instead of 3)
+### 7. Pricing Section
+Keep as-is (already distinct from Flomo's structure).
 
-#### 3. Enhance the chat system prompt
+### 8. FAQ Section
+Keep as-is.
 
-**File: `supabase/functions/widget-chat/index.ts`**
+### 9. CTA Section (`CTASection.tsx`)
+Adopt Flomo's two-column CTA: left dark card with headline + contact info + button, right card with a contact form or "Get Started" flow. Adapt to Greet's green gradient buttons.
 
-- Fetch additional business context: organization_settings (business_hours, services, extracted_business_data)
-- Include this structured data in the system prompt so the chat agent can answer questions about hours, services, and pricing even when the page search misses
-- Improve the system prompt instructions to be more helpful:
-  - Encourage providing specific, detailed answers rather than just pointing to URLs
-  - Include business hours and services directly so common questions can be answered instantly
-  - Add instructions to handle greetings, thanks, and small talk naturally
+### 10. Footer (`Footer.tsx`)
+Adopt Flomo's footer layout: rounded top corners, CTA band at top, link columns below, dark background (`#050506`).
 
-#### 4. Keep Vapi assistant in sync on re-crawl
+### 11. Navbar (`Navbar.tsx`)
+Adopt Flomo's frosted glass navbar with rounded bottom corners. Keep Greet links and branding.
 
-**File: `supabase/functions/crawl-site/index.ts`**
+## Color Mapping (Flomo → Greet)
+| Flomo | Greet equivalent |
+|---|---|
+| `#020F26` (navy) | `#050506` / `#0D0D0F` (dark bg) |
+| `#FF4900` (accent orange) | `hsl(148 68% 52%)` (green) / `hsl(190 100% 44%)` (cyan) |
+| `#F8F6F0` (off-white) | `hsl(240 5% 96%)` (foreground) |
+| White cards | Dark glass cards (`rgba(255,255,255,0.03)`) |
+| `hsl(var(--accent))` dots | Green `hsl(148 68% 52%)` dots |
 
-- After crawling completes and summaries are generated, check if the org has a Vapi assistant
-- If yes, trigger `create-vapi-assistant` (which already handles update-or-create) to refresh the voice agent's knowledge with the new content
+## Files to Create/Modify
+1. **`src/index.css`** — Add fluid scale variables and utility classes
+2. **`src/components/landing/Navbar.tsx`** — Rounded bottom corners, frosted style
+3. **`src/components/landing/HeroSection.tsx`** — Clean layout, remove auroras
+4. **`src/components/landing/SocialProofBar.tsx`** — Simple marquee
+5. **`src/components/landing/HowItWorks.tsx`** — Stacking cards + scroll marquee
+6. **`src/components/landing/FeaturesSection.tsx`** — Clean grid, no aurora
+7. **`src/components/landing/DemoSection.tsx`** — Simplify background
+8. **`src/components/landing/CTASection.tsx`** — Two-column CTA layout
+9. **`src/components/landing/Footer.tsx`** — Rounded top, CTA band, columns
+10. **`src/pages/Index.tsx`** — Potentially reorder/add sections
 
-### Technical Details
-
-**Voice agent knowledge injection (create-vapi-assistant):**
-
-```text
-buildSystemPrompt() will be updated to:
-
-1. Query site_pages for the org
-2. Sort pages by priority (about/services/pricing/FAQ pages first)
-3. Build a condensed knowledge section:
-   - Each page: "Page: {title} | {summary}"
-   - For top 5 pages: include first 800 chars of content
-   - For remaining pages: summary only
-4. Insert as "## Website Knowledge Base" section in prompt
-```
-
-**Chat agent improved search:**
-
-```text
-Current: split message by spaces, filter len > 3, boolean includes
-New: 
-  - Remove stop words (the, is, a, an, what, how, do, can, etc.)
-  - Score = (title matches * 3) + (summary matches * 2) + (body matches * 1)
-  - Count occurrences, not just boolean
-  - Include bigrams: "business hours" matches better than "business" + "hours" separately
-```
-
-**Prompt enhancement for chat:**
-
-```text
-Current system prompt context:
-  - Org name, description, special instructions
-  - Matched page content (truncated)
-
-New system prompt context:
-  - Org name, description, special instructions
-  - Business hours (formatted)
-  - Services list with descriptions
-  - Matched page content (larger, better ranked)
-  - Extracted business data (phone, address)
-```
-
-**Auto-sync after crawl:**
-
-After crawl-site finishes generating summaries, it will call the create-vapi-assistant function internally to update the voice agent's knowledge base with the fresh content.
-
-### Expected Outcome
-
-- Voice agent can answer detailed questions about the business based on actual website content
-- Chat agent finds more relevant pages and provides richer, more detailed answers
-- Both agents have access to structured business data (hours, services, contact info) for instant answers to common questions
-- Re-crawling the website automatically updates both the chat and voice agents
+## What We Keep Unchanged
+- All Greet content/copy
+- Interactive hero chat widget
+- Pricing section structure
+- FAQ section
+- All dashboard/app pages
+- Color palette (green/cyan on dark)
 
