@@ -240,7 +240,7 @@ const HeroSection = () => {
 
       {widgetPhase === "building" ? (
         /* Building phase */
-        <div className="px-4 py-8 flex flex-col items-center gap-4" style={{ background: "#0D0D0F", minHeight: "200px" }}>
+        <div className="px-4 py-8 flex flex-col items-center gap-4" style={{ background: "#ffffff", minHeight: "200px" }}>
           <motion.div
             className="w-12 h-12 rounded-full flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))" }}
