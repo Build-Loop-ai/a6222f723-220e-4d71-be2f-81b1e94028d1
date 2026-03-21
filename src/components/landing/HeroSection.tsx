@@ -632,10 +632,11 @@ const HeroSection = () => {
           >
             <Link to="/signup">
               <button
-                className="group px-8 py-4 rounded-[14px] text-base font-semibold text-white transition-all duration-300 hover:scale-[1.03] flex items-center gap-2"
+                className="group px-8 py-4 rounded-[14px] text-base font-semibold transition-all duration-300 hover:scale-[1.03] flex items-center gap-2"
                 style={{
-                  background: "linear-gradient(135deg, hsl(148 68% 52%) 0%, hsl(190 100% 44%) 100%)",
-                  boxShadow: "0 4px 24px hsla(148, 68%, 52%, 0.25)",
+                  background: "rgba(255,255,255,0.95)",
+                  color: "hsl(168 80% 28%)",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.15)",
                 }}
               >
                 Start Free Trial
