@@ -227,10 +227,10 @@ const HeroSection = () => {
       }}
     >
       {/* Header */}
-      <div className="px-5 py-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(52,215,123,0.12) 0%, rgba(0,194,224,0.08) 100%)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="px-5 py-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(52,215,123,0.08) 0%, rgba(0,194,224,0.05) 100%)", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
         <div className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-[800] text-sm" style={{ background: "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))", color: "white" }}>G</div>
         <div className="flex-1">
-          <h4 className="font-display text-[13px] font-[700] text-foreground">Greet.ai</h4>
+          <h4 className="font-display text-[13px] font-[700] text-gray-900">Greet.ai</h4>
           <div className="flex items-center gap-1.5 text-[11px] text-primary">
             <span className="w-1.5 h-1.5 rounded-full bg-primary pulse-live" />
             Live Demo
