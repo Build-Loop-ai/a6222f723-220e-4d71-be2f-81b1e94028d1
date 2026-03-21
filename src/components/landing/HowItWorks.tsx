@@ -111,8 +111,8 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
           {/* Right — large number */}
           <div className="hidden md:flex items-center justify-center">
             <span
-              className="font-display font-[900] text-foreground/10"
-              style={{ fontSize: "clamp(6rem, 12vw, 14rem)" }}
+              className="font-display font-[900]"
+              style={{ fontSize: "clamp(6rem, 12vw, 14rem)", color: "rgba(255,255,255,0.06)" }}
             >
               {step.number}
             </span>
