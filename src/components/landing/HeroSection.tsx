@@ -644,7 +644,7 @@ const HeroSection = () => {
               </button>
             </Link>
             <Link to="/demo">
-              <button className="px-8 py-4 rounded-[14px] text-base font-medium transition-all duration-200" style={{ color: "rgba(255,255,255,0.55)" }}>
+              <button className="px-8 py-4 rounded-[14px] text-base font-medium transition-all duration-200 text-white/70 hover:text-white">
                 Watch Demo →
               </button>
             </Link>
