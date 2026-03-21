@@ -24,6 +24,11 @@ const steps = [
 
 const MARQUEE_TEXT = "How it works";
 const MARQUEE_REPEAT = 20;
+const CARD_BACKGROUNDS = [
+  "hsl(var(--card))",
+  "hsl(var(--secondary))",
+  "hsl(var(--accent))",
+];
 
 function StackingCard({
   step,
@@ -34,73 +39,76 @@ function StackingCard({
   index: number;
   total: number;
 }) {
-  // Progressively lighter green-tinted dark cards (matching Flomo pattern)
-  const lightness = 8 + index * 6;
-
   return (
     <div
-      className="sticky w-full flex justify-center"
+      className="relative"
       style={{
-        top: `${120 + index * 24}px`,
-        zIndex: index + 1,
-        paddingBottom: "clamp(40px, 8vw, 100px)",
+        height: index === total - 1 ? "115vh" : "135vh",
       }}
     >
       <div
-        className="rounded-2xl overflow-hidden w-full md:w-[85%]"
+        className="sticky w-full flex justify-center"
         style={{
-          background: `hsl(148 40% ${lightness}%)`,
-          color: "hsl(var(--foreground))",
-          boxShadow: "0 -4px 30px rgba(0,0,0,0.3)",
+          top: `calc(clamp(5rem, 8vw, 7.5rem) + ${index * 1.5}rem)`,
+          zIndex: index + 1,
         }}
       >
         <div
-          className="grid grid-cols-1 md:grid-cols-2 min-h-[320px] md:min-h-[540px]"
-          style={{ gap: "var(--space-xl) var(--space-gap)", padding: "var(--space-card)" }}
+          className="rounded-2xl overflow-hidden w-full md:w-[85%] border"
+          style={{
+            background: CARD_BACKGROUNDS[index] ?? "hsl(var(--card))",
+            color: "hsl(var(--foreground))",
+            borderColor: "hsl(var(--border))",
+            boxShadow: "var(--shadow-xl)",
+          }}
         >
-          {/* Left: text content */}
-          <div className="flex flex-col justify-between" style={{ gap: "var(--space-m)" }}>
-            <div className="flex items-center gap-3">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 min-h-[320px] md:min-h-[540px]"
+            style={{ gap: "var(--space-xl) var(--space-gap)", padding: "var(--space-card)" }}
+          >
+            <div className="flex flex-col justify-between" style={{ gap: "var(--space-m)" }}>
+              <div className="flex items-center gap-3">
+                <span
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{
+                    background: "hsl(var(--foreground))",
+                    color: "hsl(var(--background))",
+                  }}
+                >
+                  {step.number}
+                </span>
+                <span
+                  className="font-medium uppercase tracking-widest text-muted-foreground"
+                  style={{ fontSize: "var(--text-small)" }}
+                >
+                  Step
+                </span>
+              </div>
+
+              <div className="flex flex-col" style={{ gap: "var(--space-s)" }}>
+                <h3
+                  className="font-bold leading-tight tracking-tight"
+                  style={{ fontSize: "var(--text-h2)" }}
+                >
+                  {step.title}
+                </h3>
+                <p
+                  className="leading-relaxed text-muted-foreground"
+                  style={{ fontSize: "var(--text-body-lg)", maxWidth: "var(--prose-max)" }}
+                >
+                  {step.description}
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden md:flex items-center justify-center">
               <span
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                style={{
-                  background: "hsl(var(--foreground))",
-                  color: "hsl(var(--background))",
-                }}
+                className="font-display font-[900] text-foreground/10"
+                style={{ fontSize: "clamp(6rem, 12vw, 14rem)" }}
               >
                 {step.number}
               </span>
-              <span
-                className="font-medium uppercase tracking-widest opacity-70"
-                style={{ fontSize: "var(--text-small)" }}
-              >
-                Step
-              </span>
             </div>
-            <div className="flex flex-col" style={{ gap: "var(--space-s)" }}>
-              <h3
-                className="font-bold leading-tight tracking-tight"
-                style={{ fontSize: "var(--text-h2)" }}
-              >
-                {step.title}
-              </h3>
-              <p
-                className="leading-relaxed opacity-60"
-                style={{ fontSize: "var(--text-body-lg)", maxWidth: "var(--prose-max)" }}
-              >
-                {step.description}
-              </p>
-            </div>
-          </div>
-
-          {/* Right: decorative number */}
-          <div className="hidden md:flex items-center justify-center">
-            <span
-              className="font-display font-[900] text-foreground/10"
-              style={{ fontSize: "clamp(6rem, 12vw, 14rem)" }}
-            >
-              {step.number}
-            </span>
           </div>
         </div>
       </div>
@@ -126,20 +134,18 @@ const HowItWorks = () => {
         clipPath: "inset(0 0 0 0)",
       }}
     >
-      {/* Dot grid background — sticky, clipped by clipPath on section */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <div
           className="absolute inset-0"
           style={{
             backgroundImage:
-              "radial-gradient(circle, rgba(52,215,123,0.15) 1.5px, transparent 1.5px)",
+              "radial-gradient(circle, hsl(var(--border)) 1.5px, transparent 1.5px)",
             backgroundSize: "24px 24px",
-            opacity: 0.5,
+            opacity: 0.55,
           }}
         />
       </div>
 
-      {/* Fade overlays — absolute so they scroll with section edges */}
       <div
         className="absolute inset-x-0 top-0 pointer-events-none"
         style={{
@@ -157,7 +163,6 @@ const HowItWorks = () => {
         }}
       />
 
-      {/* Scroll marquee above cards */}
       <div
         className="overflow-hidden relative"
         style={{ paddingTop: "var(--space-l)", paddingBottom: "var(--space-l)", zIndex: 2 }}
@@ -189,8 +194,10 @@ const HowItWorks = () => {
 
       <div className="h-[100px]" />
 
-      {/* Stacking cards */}
-      <div className="container-large" style={{ position: "relative", zIndex: 2 }}>
+      <div
+        className="container-large"
+        style={{ position: "relative", zIndex: 2, paddingBottom: "20vh" }}
+      >
         {steps.map((step, i) => (
           <StackingCard key={step.number} step={step} index={i} total={steps.length} />
         ))}
