@@ -541,7 +541,7 @@ const HeroSection = () => {
                     initial="hidden"
                     animate="visible"
                     variants={letterVariants}
-                    className="inline-block text-foreground"
+                    className="inline-block text-white"
                     style={{ transformOrigin: "bottom" }}
                   >
                     {letter === " " ? "\u00A0" : letter}
