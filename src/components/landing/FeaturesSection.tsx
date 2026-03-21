@@ -1,6 +1,7 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Globe, Mic, ArrowUpRight, UserPlus, FileText, Languages } from "lucide-react";
-import { useRef } from "react";
+
+const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const features = [
   { icon: Globe, title: "Auto-learns from your site", desc: "Greet reads every page on your sitemap. When you update content, the AI updates automatically. Zero manual training." },
@@ -11,86 +12,90 @@ const features = [
   { icon: Languages, title: "22+ languages", desc: "Visitors chat in their language, Greet responds fluently. Dutch, English, German, Spanish, and 18 more." },
 ];
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.1 + i * 0.08, duration: 0.55, ease: easeOut },
+  }),
+};
+
 const FeaturesSection = () => {
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-
-  const leftOrbX = useTransform(scrollYProgress, [0, 1], ["-10%", "5%"]);
-  const rightOrbX = useTransform(scrollYProgress, [0, 1], ["10%", "-5%"]);
-
   return (
-    <section ref={sectionRef} id="features" className="relative py-32 md:py-44 overflow-hidden">
-      {/* BOLD SPLIT-TONE BACKGROUND — cyan left, green right */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        background: "linear-gradient(180deg, #070810 0%, #070D12 30%, #080F14 50%, #070D12 70%, #070810 100%)",
-      }} />
-
-      {/* Cyan aurora — left */}
-      <motion.div
-        className="absolute top-[10%] left-[-200px] w-[800px] h-[800px] pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(0,194,224,0.15) 0%, rgba(0,194,224,0.03) 40%, transparent 65%)",
-          x: leftOrbX,
-        }}
-      />
-
-      {/* Green aurora — right */}
-      <motion.div
-        className="absolute bottom-[10%] right-[-200px] w-[800px] h-[800px] pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(52,215,123,0.12) 0%, rgba(52,215,123,0.02) 40%, transparent 65%)",
-          x: rightOrbX,
-        }}
-      />
-
-      {/* Horizontal glow line */}
-      <div className="absolute top-0 left-0 right-0 h-px" style={{ background: "linear-gradient(90deg, transparent 10%, rgba(0,194,224,0.2) 50%, transparent 90%)" }} />
-
-      <div className="max-w-[1140px] mx-auto px-6 md:px-12 relative z-10">
-        {/* Header */}
-        <div className="max-w-3xl mb-16 md:mb-20">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="section-label mb-5">
+    <section
+      id="features"
+      style={{
+        paddingTop: "var(--space-section-y)",
+        paddingBottom: "var(--space-section-y)",
+        background: "#050506",
+      }}
+    >
+      <div className="container-large">
+        {/* Tag */}
+        <div className="flex items-center gap-2.5" style={{ marginBottom: "var(--space-m)" }}>
+          <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+          <span className="font-medium text-foreground" style={{ fontSize: "var(--text-small)" }}>
             Features
-          </motion.div>
-          <motion.h2
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="font-display font-[700] leading-[1.1] tracking-[-0.02em] text-foreground"
-            style={{ fontSize: "clamp(36px, 5vw, 48px)" }}
-          >
-            Everything your website needs to talk
-          </motion.h2>
+          </span>
         </div>
 
-        {/* Feature grid */}
-        <div className="grid md:grid-cols-2 gap-5">
-          {features.map((f, idx) => (
+        {/* Large heading */}
+        <h2
+          className="text-foreground tracking-tight"
+          style={{
+            fontSize: "clamp(1.8rem, 7vw, 6rem)",
+            fontWeight: 900,
+            lineHeight: 1.1,
+            maxWidth: "100%",
+            marginBottom: "clamp(1.75rem, 3vw, 5rem)",
+          }}
+        >
+          Everything your website
+          <br />
+          needs to <span className="text-primary">talk</span>
+          <span className="text-cyan">.</span>
+        </h2>
+
+        {/* Features grid */}
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:ml-auto md:max-w-[70%] md:mt-32"
+          style={{ gap: "calc(var(--space-xl) * 0.6) calc(var(--space-gap) * 0.6)" }}
+        >
+          {features.map((f, i) => (
             <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 80, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              key={f.title}
+              custom={i}
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.7, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{
-                y: -6,
-                boxShadow: "0 0 60px rgba(0,194,224,0.08), 0 20px 60px rgba(0,0,0,0.3)",
-                borderColor: "rgba(255,255,255,0.14)",
+              variants={fadeUp}
+              className="flex flex-col rounded-lg"
+              style={{
+                gap: "var(--space-s)",
+                padding: "var(--space-card)",
+                background: "hsl(var(--card))",
+                boxShadow: "0 2px 20px rgba(0, 0, 0, 0.2)",
               }}
-              className="glass rounded-[20px] p-9 group transition-all duration-500 cursor-default"
             >
               <div
-                className="w-12 h-12 rounded-[14px] flex items-center justify-center mb-6"
-                style={{ background: "rgba(0,194,224,0.10)", border: "1px solid rgba(0,194,224,0.12)" }}
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{ background: "hsl(var(--green-dim))" }}
               >
-                <f.icon className="w-5 h-5 text-cyan" />
+                <f.icon size={22} className="text-primary" strokeWidth={2.2} />
               </div>
-              <h3 className="font-display text-lg font-[700] text-foreground mb-2 tracking-[-0.01em]">{f.title}</h3>
-              <p className="text-[15px] text-muted-foreground leading-relaxed">{f.desc}</p>
+              <h3
+                className="font-bold text-foreground tracking-tight"
+                style={{ fontSize: "var(--text-body-lg)" }}
+              >
+                {f.title}
+              </h3>
+              <p
+                className="text-muted-foreground leading-relaxed"
+                style={{ fontSize: "var(--text-body)", maxWidth: "360px" }}
+              >
+                {f.desc}
+              </p>
             </motion.div>
           ))}
         </div>
