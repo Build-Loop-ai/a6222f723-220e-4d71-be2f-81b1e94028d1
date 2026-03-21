@@ -85,18 +85,20 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
 
             <div className="flex flex-col gap-4 flex-1 justify-center">
               <h3
-                className="font-bold tracking-tight text-foreground"
+                className="font-bold tracking-tight"
                 style={{
                   fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)",
                   lineHeight: 1.1,
+                  color: "#F8F6F0",
                 }}
               >
                 {step.title}
               </h3>
               <p
-                className="leading-relaxed text-muted-foreground"
+                className="leading-relaxed"
                 style={{
                   fontSize: "clamp(0.95rem, 1.6vw, 1.1rem)",
+                  color: "rgba(248, 246, 240, 0.5)",
                   maxWidth: "420px",
                   lineHeight: 1.65,
                 }}
