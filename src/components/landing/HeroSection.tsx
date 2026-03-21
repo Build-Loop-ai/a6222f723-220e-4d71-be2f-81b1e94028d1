@@ -365,7 +365,7 @@ const HeroSection = () => {
                     }
                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <Phone className="w-7 h-7 text-white" />
+                    <Phone className="w-7 h-7" style={{ color: voiceActive ? "white" : "rgba(0,0,0,0.4)" }} />
                   </motion.div>
                   {voiceActive && (
                     <>
