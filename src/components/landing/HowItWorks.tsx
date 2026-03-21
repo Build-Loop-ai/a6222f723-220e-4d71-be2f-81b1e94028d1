@@ -28,6 +28,8 @@ const MARQUEE_TEXT = "How it works";
 const MARQUEE_REPEAT = 20;
 
 function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number }) {
+  const lightness = 8 + index * 6;
+
   return (
     <div
       className="sticky w-full flex justify-center"
@@ -38,16 +40,15 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
       }}
     >
       <motion.div
-        className="rounded-3xl overflow-hidden w-full md:w-[88%] border"
+        className="rounded-3xl overflow-hidden w-full md:w-[88%]"
         initial={{ opacity: 0, y: 60, scale: 0.96 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.7, delay: 0.05 * index, ease: easeOut }}
         style={{
-          background: "hsl(var(--card))",
-          color: "hsl(var(--foreground))",
-          borderColor: "hsl(var(--border))",
-          boxShadow: "0 -2px 40px rgba(0,0,0,0.1), 0 20px 60px rgba(0,0,0,0.08)",
+          background: `hsl(220 20% ${lightness}%)`,
+          color: "#F8F6F0",
+          boxShadow: "0 -2px 40px rgba(0,0,0,0.35), 0 20px 60px rgba(0,0,0,0.15)",
         }}
       >
         <div
@@ -63,39 +64,41 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
                   width: "44px",
                   height: "44px",
                   borderRadius: "12px",
-                  background: "hsl(var(--primary) / 0.12)",
+                  background: "rgba(255,255,255,0.08)",
                   color: "hsl(var(--primary))",
-                  border: "1px solid hsl(var(--primary) / 0.2)",
+                  border: "1px solid rgba(255,255,255,0.12)",
                 }}
               >
                 {step.number}
               </div>
               <span
-                className="font-medium uppercase tracking-widest text-muted-foreground"
-                style={{ fontSize: "var(--text-small, 0.75rem)" }}
+                className="font-medium uppercase tracking-widest"
+                style={{ fontSize: "var(--text-small, 0.75rem)", color: "rgba(248,246,240,0.5)" }}
               >
                 Step
               </span>
               <div
                 className="h-px flex-1 hidden md:block"
-                style={{ background: "linear-gradient(to right, hsl(var(--border)), transparent)" }}
+                style={{ background: "linear-gradient(to right, rgba(255,255,255,0.12), transparent)" }}
               />
             </div>
 
             <div className="flex flex-col gap-4 flex-1 justify-center">
               <h3
-                className="font-bold tracking-tight text-foreground"
+                className="font-bold tracking-tight"
                 style={{
                   fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)",
                   lineHeight: 1.1,
+                  color: "#F8F6F0",
                 }}
               >
                 {step.title}
               </h3>
               <p
-                className="leading-relaxed text-muted-foreground"
+                className="leading-relaxed"
                 style={{
                   fontSize: "clamp(0.95rem, 1.6vw, 1.1rem)",
+                  color: "rgba(248, 246, 240, 0.5)",
                   maxWidth: "420px",
                   lineHeight: 1.65,
                 }}
@@ -108,8 +111,8 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
           {/* Right — large number */}
           <div className="hidden md:flex items-center justify-center">
             <span
-              className="font-display font-[900] text-foreground/10"
-              style={{ fontSize: "clamp(6rem, 12vw, 14rem)" }}
+              className="font-display font-[900]"
+              style={{ fontSize: "clamp(6rem, 12vw, 14rem)", color: "rgba(255,255,255,0.06)" }}
             >
               {step.number}
             </span>
