@@ -521,10 +521,10 @@ const HeroSection = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full mb-10"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(12px)" }}
+            style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", backdropFilter: "blur(12px)" }}
           >
-            <span className="w-2 h-2 rounded-full bg-primary pulse-live" />
-            <span className="font-mono text-[10px] tracking-[3px] uppercase text-primary">Now in public beta</span>
+            <span className="w-2 h-2 rounded-full bg-white pulse-live" />
+            <span className="font-mono text-[10px] tracking-[3px] uppercase text-white font-semibold">Now in public beta</span>
           </motion.div>
 
           {/* Headline */}
