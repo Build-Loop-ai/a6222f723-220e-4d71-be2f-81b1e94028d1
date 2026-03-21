@@ -472,41 +472,41 @@ const HeroSection = () => {
         ref={sectionRef}
         className="relative min-h-[110vh] overflow-hidden flex flex-col items-center justify-center"
       >
-        {/* === Animated gradient background === */}
+        {/* === Vibrant teal-green animated gradient === */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(125deg, #050506 0%, #0a1a12 18%, #0d2818 32%, #051a1c 50%, #0a0d1a 68%, #120d18 82%, #050506 100%)",
+            background: "linear-gradient(135deg, hsl(168 80% 38%) 0%, hsl(174 72% 46%) 20%, hsl(160 65% 50%) 40%, hsl(148 68% 52%) 60%, hsl(170 80% 42%) 80%, hsl(185 85% 40%) 100%)",
             backgroundSize: "400% 400%",
             animation: "hero-gradient-shift 12s ease-in-out infinite",
           }}
         />
 
-        {/* Radial glow overlays for depth */}
+        {/* Radial glow overlays for depth & dimension */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 80% 60% at 30% 40%, hsla(148,68%,52%,0.08) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse 80% 60% at 20% 30%, hsla(190,100%,50%,0.3) 0%, transparent 60%)",
             animation: "hero-glow-drift 8s ease-in-out infinite",
           }}
         />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 70% 50% at 70% 60%, hsla(190,100%,44%,0.06) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse 70% 50% at 80% 70%, hsla(148,68%,40%,0.25) 0%, transparent 60%)",
             animation: "hero-glow-drift 10s ease-in-out infinite reverse",
           }}
         />
 
-        {/* Dark overlay for text readability */}
+        {/* Bottom vignette for content readability */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(to top, rgba(5,5,6,0.7) 0%, rgba(5,5,6,0.3) 40%, rgba(5,5,6,0.15) 100%)" }}
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 50%)" }}
         />
 
         {/* Subtle grain */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          className="absolute inset-0 pointer-events-none opacity-[0.04]"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
             backgroundSize: "128px 128px",
@@ -521,10 +521,10 @@ const HeroSection = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full mb-10"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", backdropFilter: "blur(12px)" }}
+            style={{ background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.3)", backdropFilter: "blur(12px)" }}
           >
-            <span className="w-2 h-2 rounded-full bg-primary pulse-live" />
-            <span className="font-mono text-[10px] tracking-[3px] uppercase text-primary">Now in public beta</span>
+            <span className="w-2 h-2 rounded-full bg-white pulse-live" />
+            <span className="font-mono text-[10px] tracking-[3px] uppercase text-white font-semibold">Now in public beta</span>
           </motion.div>
 
           {/* Headline */}
@@ -541,7 +541,7 @@ const HeroSection = () => {
                     initial="hidden"
                     animate="visible"
                     variants={letterVariants}
-                    className="inline-block text-foreground"
+                    className="inline-block text-white"
                     style={{ transformOrigin: "bottom" }}
                   >
                     {letter === " " ? "\u00A0" : letter}
@@ -560,8 +560,8 @@ const HeroSection = () => {
                 animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                 exit={{ y: -60, opacity: 0, filter: "blur(8px)" }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="font-display font-[800] tracking-[-0.04em] text-gradient"
-                style={{ fontSize: "clamp(48px, 8vw, 96px)", lineHeight: "1" }}
+                className="font-display font-[800] tracking-[-0.04em] text-white"
+                style={{ fontSize: "clamp(48px, 8vw, 96px)", lineHeight: "1", textShadow: "0 2px 20px rgba(0,0,0,0.15)" }}
               >
                 {ROTATING_WORDS[wordIndex]}
               </motion.h2>
@@ -573,8 +573,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
-            className="text-lg md:text-xl max-w-[560px] leading-relaxed mb-12"
-            style={{ color: "rgba(255,255,255,0.7)" }}
+            className="text-lg md:text-xl max-w-[560px] leading-relaxed mb-12 text-white/80"
           >
             Paste a URL. Greet crawls every page, learns your business, and deploys an AI chat widget visitors can talk&nbsp;to.
           </motion.p>
@@ -589,15 +588,15 @@ const HeroSection = () => {
             <div
               className="relative flex items-center gap-3 p-2 rounded-2xl transition-all duration-500"
               style={{
-                background: "rgba(255,255,255,0.06)",
-                border: showWidget ? "1px solid rgba(52,215,123,0.3)" : "1px solid rgba(255,255,255,0.1)",
-                boxShadow: showWidget ? "0 0 40px rgba(52,215,123,0.1), 0 0 80px rgba(52,215,123,0.05)" : "0 8px 32px rgba(0,0,0,0.3)",
+                background: "rgba(255,255,255,0.15)",
+                border: showWidget ? "1px solid rgba(255,255,255,0.5)" : "1px solid rgba(255,255,255,0.25)",
+                boxShadow: showWidget ? "0 0 40px rgba(255,255,255,0.1)" : "0 8px 32px rgba(0,0,0,0.15)",
                 backdropFilter: "blur(16px)",
               }}
             >
               <div className="flex items-center gap-2.5 flex-1 px-4 py-3.5">
-                <Globe className="w-5 h-5 text-muted-foreground shrink-0" />
-                <span className={`text-base ${urlValue ? "text-foreground" : "text-muted-foreground"} transition-colors`}>
+                <Globe className="w-5 h-5 text-white/60 shrink-0" />
+                <span className={`text-base ${urlValue ? "text-white" : "text-white/60"} transition-colors`}>
                   {urlValue || "yourwebsite.com"}
                 </span>
                 {isTypingUrl && !showWidget && (
@@ -612,9 +611,9 @@ const HeroSection = () => {
                 className="px-6 py-3.5 rounded-xl text-sm font-semibold text-white shrink-0 transition-all"
                 style={{
                   background: showWidget
-                    ? "linear-gradient(135deg, hsl(148 68% 52%) 0%, hsl(190 100% 44%) 100%)"
-                    : "rgba(255,255,255,0.08)",
-                  color: showWidget ? "white" : "rgba(255,255,255,0.5)",
+                    ? "rgba(255,255,255,0.95)"
+                    : "rgba(255,255,255,0.15)",
+                  color: showWidget ? "hsl(168 80% 30%)" : "rgba(255,255,255,0.7)",
                 }}
                 animate={showWidget ? { scale: [1, 1.05, 1] } : {}}
                 transition={{ duration: 0.3 }}
@@ -633,10 +632,11 @@ const HeroSection = () => {
           >
             <Link to="/signup">
               <button
-                className="group px-8 py-4 rounded-[14px] text-base font-semibold text-white transition-all duration-300 hover:scale-[1.03] flex items-center gap-2"
+                className="group px-8 py-4 rounded-[14px] text-base font-semibold transition-all duration-300 hover:scale-[1.03] flex items-center gap-2"
                 style={{
-                  background: "linear-gradient(135deg, hsl(148 68% 52%) 0%, hsl(190 100% 44%) 100%)",
-                  boxShadow: "0 4px 24px hsla(148, 68%, 52%, 0.25)",
+                  background: "rgba(255,255,255,0.95)",
+                  color: "hsl(168 80% 28%)",
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.15)",
                 }}
               >
                 Start Free Trial
@@ -644,7 +644,7 @@ const HeroSection = () => {
               </button>
             </Link>
             <Link to="/demo">
-              <button className="px-8 py-4 rounded-[14px] text-base font-medium transition-all duration-200" style={{ color: "rgba(255,255,255,0.55)" }}>
+              <button className="px-8 py-4 rounded-[14px] text-base font-medium transition-all duration-200 text-white/70 hover:text-white">
                 Watch Demo →
               </button>
             </Link>
@@ -663,8 +663,8 @@ const HeroSection = () => {
               { label: "Free trial", value: "14 days" },
             ].map((item, idx) => (
               <div key={idx} className="flex flex-col gap-1 items-center">
-                <span className="text-base md:text-lg font-semibold text-foreground">{item.value}</span>
-                <span className="font-mono text-[9px] tracking-[3px] uppercase" style={{ color: "rgba(255,255,255,0.4)" }}>{item.label}</span>
+                <span className="text-base md:text-lg font-semibold text-white">{item.value}</span>
+                <span className="font-mono text-[9px] tracking-[3px] uppercase text-white/50">{item.label}</span>
               </div>
             ))}
           </motion.div>
@@ -701,15 +701,15 @@ const HeroSection = () => {
           transition={{ delay: 3 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
         >
-          <span className="font-mono text-[9px] tracking-[3px] uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>Scroll</span>
+          <span className="font-mono text-[9px] tracking-[3px] uppercase text-white/50">Scroll</span>
           <motion.div
             className="w-5 h-8 rounded-full border flex items-start justify-center p-1"
-            style={{ borderColor: "rgba(255,255,255,0.1)" }}
-            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            style={{ borderColor: "rgba(255,255,255,0.25)" }}
+            animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
             <motion.div
-              className="w-1 h-2 rounded-full bg-primary"
+              className="w-1 h-2 rounded-full bg-white"
               animate={{ y: [0, 10, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             />
