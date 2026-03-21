@@ -312,7 +312,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [tryMode, setTryMode] = useState(false);
   const [vapiAssistantId, setVapiAssistantId] = useState<string | null>(null);
-  const iframeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const iframeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -370,7 +370,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
     if (error) toast.error("Failed to save");
   };
 
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debouncedSave = useCallback(
     (updates: Partial<WidgetConfig>) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
