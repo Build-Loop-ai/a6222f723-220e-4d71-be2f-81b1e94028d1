@@ -319,7 +319,7 @@ const HeroSection = () => {
                       className={`max-w-[88%] px-3.5 py-2.5 text-[12px] leading-relaxed ${
                         msg.role === "user"
                           ? "rounded-2xl rounded-br-md text-white"
-                          : "rounded-2xl rounded-bl-md text-foreground glass"
+                          : "rounded-2xl rounded-bl-md text-gray-800"
                       }`}
                       style={
                         msg.role === "user"
