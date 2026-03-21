@@ -701,11 +701,11 @@ const HeroSection = () => {
           transition={{ delay: 3 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
         >
-          <span className="font-mono text-[9px] tracking-[3px] uppercase" style={{ color: "rgba(255,255,255,0.35)" }}>Scroll</span>
+          <span className="font-mono text-[9px] tracking-[3px] uppercase text-white/50">Scroll</span>
           <motion.div
             className="w-5 h-8 rounded-full border flex items-start justify-center p-1"
-            style={{ borderColor: "rgba(255,255,255,0.1)" }}
-            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            style={{ borderColor: "rgba(255,255,255,0.25)" }}
+            animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
             <motion.div
