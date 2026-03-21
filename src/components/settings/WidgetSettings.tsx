@@ -312,7 +312,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [tryMode, setTryMode] = useState(false);
   const [vapiAssistantId, setVapiAssistantId] = useState<string | null>(null);
-  const iframeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const iframeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
