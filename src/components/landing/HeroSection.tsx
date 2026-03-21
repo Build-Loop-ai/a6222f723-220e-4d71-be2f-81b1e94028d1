@@ -472,41 +472,41 @@ const HeroSection = () => {
         ref={sectionRef}
         className="relative min-h-[110vh] overflow-hidden flex flex-col items-center justify-center"
       >
-        {/* === Animated gradient background === */}
+        {/* === Vibrant teal-green animated gradient === */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(125deg, #050506 0%, #0a1a12 18%, #0d2818 32%, #051a1c 50%, #0a0d1a 68%, #120d18 82%, #050506 100%)",
+            background: "linear-gradient(135deg, hsl(168 80% 38%) 0%, hsl(174 72% 46%) 20%, hsl(160 65% 50%) 40%, hsl(148 68% 52%) 60%, hsl(170 80% 42%) 80%, hsl(185 85% 40%) 100%)",
             backgroundSize: "400% 400%",
             animation: "hero-gradient-shift 12s ease-in-out infinite",
           }}
         />
 
-        {/* Radial glow overlays for depth */}
+        {/* Radial glow overlays for depth & dimension */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 80% 60% at 30% 40%, hsla(148,68%,52%,0.08) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse 80% 60% at 20% 30%, hsla(190,100%,50%,0.3) 0%, transparent 60%)",
             animation: "hero-glow-drift 8s ease-in-out infinite",
           }}
         />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 70% 50% at 70% 60%, hsla(190,100%,44%,0.06) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse 70% 50% at 80% 70%, hsla(148,68%,40%,0.25) 0%, transparent 60%)",
             animation: "hero-glow-drift 10s ease-in-out infinite reverse",
           }}
         />
 
-        {/* Dark overlay for text readability */}
+        {/* Bottom vignette for content readability */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(to top, rgba(5,5,6,0.7) 0%, rgba(5,5,6,0.3) 40%, rgba(5,5,6,0.15) 100%)" }}
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 50%)" }}
         />
 
         {/* Subtle grain */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
+          className="absolute inset-0 pointer-events-none opacity-[0.04]"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
             backgroundSize: "128px 128px",
