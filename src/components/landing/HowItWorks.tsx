@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
+const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
 const steps = [
   {
     number: "01",
@@ -24,78 +26,86 @@ const steps = [
 
 const MARQUEE_TEXT = "How it works";
 const MARQUEE_REPEAT = 20;
-const CARD_BACKGROUNDS = [
-  "hsl(var(--card))",
-  "hsl(var(--secondary))",
-  "hsl(var(--accent))",
-];
 
-function StackingCard({
-  step,
-  index,
-  total,
-}: {
-  step: (typeof steps)[0];
-  index: number;
-  total: number;
-}) {
+function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number }) {
   return (
     <div
       className="sticky w-full flex justify-center"
       style={{
-        top: `${120 + index * 24}px`,
+        top: `${110 + index * 28}px`,
         zIndex: index + 1,
-        paddingBottom: "clamp(40px, 8vw, 100px)",
+        paddingBottom: "clamp(36px, 7vw, 80px)",
       }}
     >
-      <div
-        className="rounded-2xl overflow-hidden w-full md:w-[85%] border"
+      <motion.div
+        className="rounded-3xl overflow-hidden w-full md:w-[88%] border"
+        initial={{ opacity: 0, y: 60, scale: 0.96 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.7, delay: 0.05 * index, ease: easeOut }}
         style={{
-          background: CARD_BACKGROUNDS[index] ?? "hsl(var(--card))",
+          background: "hsl(var(--card))",
           color: "hsl(var(--foreground))",
           borderColor: "hsl(var(--border))",
-          boxShadow: "0 -4px 30px rgba(0,0,0,0.15)",
+          boxShadow: "0 -2px 40px rgba(0,0,0,0.1), 0 20px 60px rgba(0,0,0,0.08)",
         }}
       >
         <div
-          className="grid grid-cols-1 md:grid-cols-2 min-h-[320px] md:min-h-[540px]"
-          style={{ gap: "var(--space-xl) var(--space-gap)", padding: "var(--space-card)" }}
+          className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] min-h-[300px] md:min-h-[480px]"
+          style={{ padding: "clamp(2rem, 4vw, 3.5rem)" }}
         >
-          <div className="flex flex-col justify-between" style={{ gap: "var(--space-m)" }}>
-            <div className="flex items-center gap-3">
-              <span
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+          {/* Left content */}
+          <div className="flex flex-col justify-between gap-8">
+            <div className="flex items-center gap-4">
+              <div
+                className="flex items-center justify-center font-mono text-sm font-bold"
                 style={{
-                  background: "hsl(var(--foreground))",
-                  color: "hsl(var(--background))",
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "12px",
+                  background: "hsl(var(--primary) / 0.12)",
+                  color: "hsl(var(--primary))",
+                  border: "1px solid hsl(var(--primary) / 0.2)",
                 }}
               >
                 {step.number}
-              </span>
+              </div>
               <span
                 className="font-medium uppercase tracking-widest text-muted-foreground"
-                style={{ fontSize: "var(--text-small)" }}
+                style={{ fontSize: "var(--text-small, 0.75rem)" }}
               >
                 Step
               </span>
+              <div
+                className="h-px flex-1 hidden md:block"
+                style={{ background: "linear-gradient(to right, hsl(var(--border)), transparent)" }}
+              />
             </div>
 
-            <div className="flex flex-col" style={{ gap: "var(--space-s)" }}>
+            <div className="flex flex-col gap-4 flex-1 justify-center">
               <h3
-                className="font-bold leading-tight tracking-tight"
-                style={{ fontSize: "var(--text-h2)" }}
+                className="font-bold tracking-tight text-foreground"
+                style={{
+                  fontSize: "clamp(1.75rem, 3.5vw, 2.75rem)",
+                  lineHeight: 1.1,
+                }}
               >
                 {step.title}
               </h3>
               <p
                 className="leading-relaxed text-muted-foreground"
-                style={{ fontSize: "var(--text-body-lg)", maxWidth: "var(--prose-max)" }}
+                style={{
+                  fontSize: "clamp(0.95rem, 1.6vw, 1.1rem)",
+                  maxWidth: "420px",
+                  lineHeight: 1.65,
+                }}
               >
                 {step.description}
               </p>
             </div>
           </div>
 
+          {/* Right — large number */}
           <div className="hidden md:flex items-center justify-center">
             <span
               className="font-display font-[900] text-foreground/10"
@@ -105,7 +115,7 @@ function StackingCard({
             </span>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -128,6 +138,7 @@ const HowItWorks = () => {
         clipPath: "inset(0 0 0 0)",
       }}
     >
+      {/* Dot grid background */}
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <div
           className="absolute inset-0"
@@ -157,6 +168,7 @@ const HowItWorks = () => {
         }}
       />
 
+      {/* Scroll-driven marquee */}
       <div
         className="overflow-hidden relative"
         style={{ paddingTop: "var(--space-l)", paddingBottom: "var(--space-l)", zIndex: 2 }}
@@ -186,14 +198,12 @@ const HowItWorks = () => {
         </motion.div>
       </div>
 
-      <div className="h-[100px]" />
+      <div className="h-[80px]" />
 
-      <div
-        className="container-large"
-        style={{ position: "relative", zIndex: 2 }}
-      >
+      {/* Stacking cards */}
+      <div className="container-large" style={{ position: "relative", zIndex: 2 }}>
         {steps.map((step, i) => (
-          <StackingCard key={step.number} step={step} index={i} total={steps.length} />
+          <StackingCard key={step.number} step={step} index={i} />
         ))}
       </div>
     </section>
