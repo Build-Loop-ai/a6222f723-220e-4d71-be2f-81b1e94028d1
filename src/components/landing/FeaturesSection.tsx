@@ -53,8 +53,7 @@ const FeaturesSection = () => {
         >
           Everything your website
           <br />
-          needs to <span className="text-primary">talk</span>
-          <span className="text-cyan">.</span>
+          needs to <span style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--cyan)))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>talk.</span>
         </h2>
 
         {/* Features grid */}
