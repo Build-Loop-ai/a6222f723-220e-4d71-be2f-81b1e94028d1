@@ -267,7 +267,7 @@ const HeroSection = () => {
                 >
                   {idx < buildStep ? "✓" : idx === buildStep ? "…" : ""}
                 </motion.span>
-                <span className={idx <= buildStep ? "text-foreground" : "text-muted-foreground/40"}>
+                <span className={idx <= buildStep ? "text-gray-900" : "text-gray-300"}>
                   {step}
                 </span>
               </motion.div>
