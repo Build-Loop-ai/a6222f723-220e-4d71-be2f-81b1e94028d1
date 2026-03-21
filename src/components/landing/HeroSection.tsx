@@ -415,7 +415,7 @@ const HeroSection = () => {
           </AnimatePresence>
 
           {/* Input */}
-          <div className="px-3 py-2.5 flex items-center gap-2" style={{ background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <div className="px-3 py-2.5 flex items-center gap-2" style={{ background: "rgba(0,0,0,0.02)", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
             {widgetTab === "chat" ? (
               <>
                 <input
