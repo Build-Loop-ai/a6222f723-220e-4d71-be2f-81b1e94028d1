@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet";
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
-import SocialProofBar from "@/components/landing/SocialProofBar";
+
 import IntroSection from "@/components/landing/IntroSection";
 import HowItWorks from "@/components/landing/HowItWorks";
 import FeaturesSection from "@/components/landing/FeaturesSection";
@@ -24,7 +24,7 @@ const Index = () => {
       </Helmet>
       <Navbar />
       <HeroSection />
-      <SocialProofBar />
+      
       <IntroSection />
       <HowItWorks />
       <FeaturesSection />
