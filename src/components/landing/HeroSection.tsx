@@ -709,7 +709,7 @@ const HeroSection = () => {
             transition={{ duration: 2, repeat: Infinity }}
           >
             <motion.div
-              className="w-1 h-2 rounded-full bg-primary"
+              className="w-1 h-2 rounded-full bg-white"
               animate={{ y: [0, 10, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             />
