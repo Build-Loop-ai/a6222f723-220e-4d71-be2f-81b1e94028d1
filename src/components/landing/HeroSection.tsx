@@ -560,8 +560,8 @@ const HeroSection = () => {
                 animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                 exit={{ y: -60, opacity: 0, filter: "blur(8px)" }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="font-display font-[800] tracking-[-0.04em] text-gradient"
-                style={{ fontSize: "clamp(48px, 8vw, 96px)", lineHeight: "1" }}
+                className="font-display font-[800] tracking-[-0.04em] text-white"
+                style={{ fontSize: "clamp(48px, 8vw, 96px)", lineHeight: "1", textShadow: "0 2px 20px rgba(0,0,0,0.15)" }}
               >
                 {ROTATING_WORDS[wordIndex]}
               </motion.h2>
