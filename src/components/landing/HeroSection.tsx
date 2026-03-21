@@ -403,10 +403,10 @@ const HeroSection = () => {
                 )}
 
                 <div className="text-center">
-                  <p className="text-[13px] font-medium text-foreground">
+                  <p className="text-[13px] font-medium text-gray-900">
                     {voiceActive ? "AI is speaking…" : "Connecting…"}
                   </p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+                  <p className="text-[11px] text-gray-500 mt-0.5 font-mono">
                     {voiceActive ? `0:${voiceSeconds.toString().padStart(2, "0")}` : "Starting call"}
                   </p>
                 </div>
