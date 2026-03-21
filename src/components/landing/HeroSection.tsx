@@ -595,8 +595,8 @@ const HeroSection = () => {
               }}
             >
               <div className="flex items-center gap-2.5 flex-1 px-4 py-3.5">
-                <Globe className="w-5 h-5 text-muted-foreground shrink-0" />
-                <span className={`text-base ${urlValue ? "text-foreground" : "text-muted-foreground"} transition-colors`}>
+                <Globe className="w-5 h-5 text-white/60 shrink-0" />
+                <span className={`text-base ${urlValue ? "text-white" : "text-white/60"} transition-colors`}>
                   {urlValue || "yourwebsite.com"}
                 </span>
                 {isTypingUrl && !showWidget && (
