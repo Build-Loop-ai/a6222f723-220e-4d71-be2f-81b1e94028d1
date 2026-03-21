@@ -305,7 +305,7 @@ const HeroSection = () => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
                 className="px-4 py-4 space-y-2.5 overflow-y-auto"
-                style={{ background: "#0D0D0F", maxHeight: "260px", minHeight: "140px" }}
+                style={{ background: "#ffffff", maxHeight: "260px", minHeight: "140px" }}
               >
                 {chatMessages.map((msg, idx) => (
                   <motion.div
