@@ -278,7 +278,7 @@ const HeroSection = () => {
         /* Ready phase — tabs + chat/voice */
         <>
           {/* Tab toggle */}
-          <div className="flex px-3 pt-2 gap-1" style={{ background: "#0D0D0F" }}>
+          <div className="flex px-3 pt-2 gap-1" style={{ background: "#ffffff" }}>
             {(["chat", "voice"] as const).map((tab) => (
               <button
                 key={tab}
@@ -286,7 +286,7 @@ const HeroSection = () => {
                 className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-semibold transition-all"
                 style={{
                   background: widgetTab === tab ? "rgba(52,215,123,0.1)" : "transparent",
-                  color: widgetTab === tab ? "hsl(148 68% 52%)" : "rgba(255,255,255,0.35)",
+                  color: widgetTab === tab ? "hsl(148 68% 42%)" : "rgba(0,0,0,0.35)",
                 }}
               >
                 {tab === "chat" ? <MessageCircle className="w-3 h-3" /> : <Phone className="w-3 h-3" />}
