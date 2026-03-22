@@ -32,7 +32,7 @@ const HeroBlobCanvas = () => {
     };
 
     const draw = () => {
-      t += 0.012;
+      t += 0.055;
       const w = canvas.width;
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
