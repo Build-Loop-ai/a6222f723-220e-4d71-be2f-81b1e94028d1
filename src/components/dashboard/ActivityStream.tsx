@@ -68,10 +68,10 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
           {/* Concentric rings illustration */}
           <div className="relative w-24 h-24 mx-auto mb-5">
             <div className="absolute inset-0 rounded-full border-2 border-primary/10 animate-ping" style={{ animationDuration: '3s' }} />
-            <div className="absolute inset-3 rounded-full border-2 border-primary/15 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
-            <div className="absolute inset-6 rounded-full border-2 border-primary/20 animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }} />
+            <div className="absolute inset-3 rounded-full border-2 border-cyan/15 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
+            <div className="absolute inset-6 rounded-full border-2 border-green/20 animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }} />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-emerald-500/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-cyan/10 flex items-center justify-center">
                 <MessageSquare className="w-6 h-6 text-primary/60" />
               </div>
             </div>

@@ -7,8 +7,8 @@ interface PerformanceCardProps {
 }
 
 const COLORS = [
-  "hsl(148 68% 42%)",
-  "hsl(38 92% 50%)",
+  "hsl(var(--green))",
+  "hsl(var(--warning))",
   "hsl(225 12% 65%)",
 ];
 
@@ -32,7 +32,7 @@ const PerformanceCard = ({ resolved, escalated, abandoned }: PerformanceCardProp
         <div className="flex items-center gap-6">
           <div className="relative w-28 h-28 shrink-0">
             {/* Gradient ring behind the chart */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/15 via-emerald-500/10 to-cyan-500/15 blur-sm" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/15 via-green/10 to-cyan/15 blur-sm" />
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

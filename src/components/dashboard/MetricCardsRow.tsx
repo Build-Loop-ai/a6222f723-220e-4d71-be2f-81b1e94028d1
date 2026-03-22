@@ -23,18 +23,16 @@ const MetricCardsRow = ({
       label: "Conversations",
       value: conversationsToday,
       icon: MessageSquare,
-      iconColor: "text-emerald-600",
-      glowColor: "hover:shadow-emerald-500/10",
-      gradient: "from-emerald-500/12 to-teal-500/5",
+      iconColor: "text-primary",
+      gradient: "from-primary/12 to-cyan/5",
       hero: true,
     },
     {
       label: "Live Visitors",
       value: activeVisitors,
       icon: Users,
-      iconColor: "text-green-600",
-      glowColor: "hover:shadow-green-500/10",
-      gradient: "from-green-500/15 to-emerald-500/5",
+      iconColor: "text-green",
+      gradient: "from-green/15 to-primary/5",
       hero: true,
       pulse: true,
     },
@@ -42,33 +40,29 @@ const MetricCardsRow = ({
       label: "Messages Sent",
       value: messagesSent,
       icon: Send,
-      iconColor: "text-blue-600",
-      glowColor: "hover:shadow-blue-500/10",
-      gradient: "from-blue-500/12 to-cyan-500/5",
+      iconColor: "text-cyan",
+      gradient: "from-cyan/12 to-primary/5",
     },
     {
       label: "Avg Response",
       value: avgResponseTime,
       icon: Clock,
-      iconColor: "text-violet-600",
-      glowColor: "hover:shadow-violet-500/10",
-      gradient: "from-violet-500/12 to-purple-500/5",
+      iconColor: "text-green-light",
+      gradient: "from-green-light/12 to-cyan/5",
     },
     {
       label: "Pages Shared",
       value: pagesRecommended,
       icon: FileText,
-      iconColor: "text-amber-600",
-      glowColor: "hover:shadow-amber-500/10",
-      gradient: "from-amber-500/12 to-orange-500/5",
+      iconColor: "text-cyan",
+      gradient: "from-cyan/12 to-green/5",
     },
     {
       label: "Satisfaction",
       value: `${satisfactionScore}%`,
       icon: ThumbsUp,
-      iconColor: "text-rose-500",
-      glowColor: "hover:shadow-rose-500/10",
-      gradient: "from-rose-500/10 to-pink-500/5",
+      iconColor: "text-primary",
+      gradient: "from-primary/10 to-green-light/5",
     },
   ];
 
@@ -80,8 +74,7 @@ const MetricCardsRow = ({
           className={cn(
             "relative overflow-hidden rounded-2xl glass-card p-4 space-y-3 animate-fade-in cursor-default group",
             m.hero && "lg:col-span-1",
-            m.glowColor,
-            "hover:shadow-lg"
+            "hover:shadow-lg hover:shadow-primary/10"
           )}
           style={{ animationDelay: `${i * 0.04}s` }}
         >
