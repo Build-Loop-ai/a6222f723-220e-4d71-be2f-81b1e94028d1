@@ -455,53 +455,102 @@ function normalizeCallDirection(vapiType: string | undefined): 'inbound' | 'outb
 }
 
 async function handleEndOfCallReport(payload: any, supabase: any) {
-  const call = payload.message?.call;
+  const msg = payload.message;
+  const call = msg?.call;
   const orgId =
     call?.assistantOverrides?.metadata?.organizationId ||
-    payload.message?.assistant?.metadata?.organizationId;
+    msg?.assistant?.metadata?.organizationId;
 
   console.log("=== END OF CALL REPORT ===");
   console.log("Organization ID:", orgId);
   console.log("Call object keys:", call ? Object.keys(call) : "null");
-  console.log("Call duration field:", call?.duration);
-  console.log("Call durationMs field:", call?.durationMs);
-  console.log("Call durationSeconds field:", call?.durationSeconds);
-  console.log("Call startedAt:", call?.startedAt);
-  console.log("Call endedAt:", call?.endedAt);
+  console.log("Message-level keys:", msg ? Object.keys(msg) : "null");
 
-  // Calculate duration with multiple fallbacks
+  // Vapi sends timestamps/duration at different levels depending on call type
+  // Check: message level, call level, artifact level
+  const startedAt = msg?.startedAt || call?.startedAt || msg?.artifact?.startedAt;
+  const endedAt = msg?.endedAt || call?.endedAt || msg?.artifact?.endedAt;
+  
+  console.log("Resolved startedAt:", startedAt);
+  console.log("Resolved endedAt:", endedAt);
+  console.log("msg.startedAt:", msg?.startedAt);
+  console.log("msg.endedAt:", msg?.endedAt);
+  console.log("msg.durationSeconds:", msg?.durationSeconds);
+  console.log("msg.duration:", msg?.duration);
+  console.log("call.cost:", call?.cost);
+
+  // Calculate duration with multiple fallbacks across all payload locations
   let durationSeconds: number | null = null;
   
-  if (typeof call?.duration === 'number' && call.duration > 0) {
-    // Duration in seconds (most common)
+  // Check message level first (Vapi v2 format)
+  if (typeof msg?.durationSeconds === 'number' && msg.durationSeconds > 0) {
+    durationSeconds = Math.round(msg.durationSeconds);
+    console.log("Using msg.durationSeconds:", durationSeconds);
+  } else if (typeof msg?.duration === 'number' && msg.duration > 0) {
+    durationSeconds = Math.round(msg.duration);
+    console.log("Using msg.duration:", durationSeconds);
+  // Check call level
+  } else if (typeof call?.duration === 'number' && call.duration > 0) {
     durationSeconds = Math.round(call.duration);
     console.log("Using call.duration:", durationSeconds);
   } else if (typeof call?.durationSeconds === 'number' && call.durationSeconds > 0) {
     durationSeconds = Math.round(call.durationSeconds);
     console.log("Using call.durationSeconds:", durationSeconds);
   } else if (typeof call?.durationMs === 'number' && call.durationMs > 0) {
-    // Duration in milliseconds
     durationSeconds = Math.round(call.durationMs / 1000);
     console.log("Using call.durationMs converted:", durationSeconds);
-  } else if (call?.startedAt && call?.endedAt) {
-    // Calculate from start/end times
-    const startTime = new Date(call.startedAt).getTime();
-    const endTime = new Date(call.endedAt).getTime();
+  }
+  
+  // Fallback: calculate from timestamps
+  if (!durationSeconds && startedAt && endedAt) {
+    const startTime = new Date(startedAt).getTime();
+    const endTime = new Date(endedAt).getTime();
     if (!isNaN(startTime) && !isNaN(endTime) && endTime > startTime) {
       durationSeconds = Math.round((endTime - startTime) / 1000);
       console.log("Calculated from start/end times:", durationSeconds);
     }
   }
-  
+
+  // Last resort: extract from cost (Vapi charges ~$0.05/min)
+  if (!durationSeconds && typeof call?.cost === 'number' && call.cost > 0) {
+    // Rough estimate: cost / 0.05 = minutes, * 60 = seconds
+    const estimatedMinutes = call.cost / 0.05;
+    if (estimatedMinutes >= 0.1) {
+      durationSeconds = Math.round(estimatedMinutes * 60);
+      console.log("Estimated from cost:", durationSeconds, "seconds (cost:", call.cost, ")");
+    }
+  }
+
+  // Final fallback: check timestamps from artifact messages
+  if (!durationSeconds && msg?.artifact?.messages?.length > 1) {
+    const messages = msg.artifact.messages;
+    const firstMsg = messages[0];
+    const lastMsg = messages[messages.length - 1];
+    if (firstMsg?.time && lastMsg?.time) {
+      const diff = lastMsg.time - firstMsg.time;
+      if (diff > 0) {
+        durationSeconds = Math.round(diff);
+        console.log("Calculated from message timestamps:", durationSeconds);
+      }
+    } else if (firstMsg?.secondsFromStart !== undefined && lastMsg?.secondsFromStart !== undefined) {
+      const diff = lastMsg.secondsFromStart - firstMsg.secondsFromStart;
+      if (diff > 0) {
+        durationSeconds = Math.round(diff);
+        console.log("Calculated from secondsFromStart:", durationSeconds);
+      }
+    }
+  }
+
   console.log("Final duration_seconds:", durationSeconds);
 
   // Determine call outcome
+  const endedReason = msg?.endedReason || call?.endedReason;
   let outcome = "info_provided";
-  if (call?.endedReason === "assistant-ended-call") outcome = "completed";
-  if (call?.endedReason === "customer-ended-call") outcome = "completed";
-  if (call?.endedReason === "assistant-forwarded-call") outcome = "transferred";
+  if (endedReason === "assistant-ended-call") outcome = "completed";
+  if (endedReason === "customer-ended-call") outcome = "completed";
+  if (endedReason === "assistant-forwarded-call") outcome = "transferred";
   if (
-    payload.message?.artifact?.messages?.some((m: any) =>
+    msg?.artifact?.messages?.some((m: any) =>
       m.toolCalls?.some((t: any) => t.function?.name === "bookAppointment")
     )
   ) {
@@ -512,18 +561,18 @@ async function handleEndOfCallReport(payload: any, supabase: any) {
   const { error } = await supabase.from("call_logs").insert({
     organization_id: orgId,
     vapi_call_id: call?.id,
-    caller_number: call?.customer?.number,
-    direction: normalizeCallDirection(call?.type),
-    started_at: call?.startedAt,
-    ended_at: call?.endedAt,
+    caller_number: call?.customer?.number || msg?.customer?.number,
+    direction: normalizeCallDirection(call?.type || msg?.type),
+    started_at: startedAt || null,
+    ended_at: endedAt || null,
     duration_seconds: durationSeconds,
-    transcript: payload.message?.artifact?.transcript,
-    recording_url: payload.message?.artifact?.recordingUrl,
+    transcript: msg?.artifact?.transcript || msg?.transcript,
+    recording_url: msg?.artifact?.recordingUrl || msg?.recordingUrl,
     outcome: outcome,
-    summary: payload.message?.artifact?.summary || payload.message?.analysis?.summary,
+    summary: msg?.artifact?.summary || msg?.analysis?.summary || msg?.summary,
     metadata: {
-      endedReason: call?.endedReason,
-      cost: call?.cost,
+      endedReason: endedReason,
+      cost: call?.cost || msg?.cost,
     },
   });
 
