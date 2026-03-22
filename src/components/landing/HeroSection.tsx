@@ -42,13 +42,13 @@ const HeroBlobCanvas = () => {
           + Math.sin(t * blob.speed * 2.1 + blob.phase * 0.7) * blob.drift * 0.3);
         const cy = h * (blob.cy + Math.cos(t * blob.speed * 0.8 + blob.phase + 1) * blob.drift
           + Math.cos(t * blob.speed * 1.7 + blob.phase * 1.3) * blob.drift * 0.25);
-        const r = Math.min(w, h) * (0.7 + Math.sin(t * 0.4 + blob.phase) * 0.1);
+        const r = Math.min(w, h) * (0.85 + Math.sin(t * 0.5 + blob.phase) * 0.1);
 
         const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-        grad.addColorStop(0, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.9)`);
-        grad.addColorStop(0.35, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.6)`);
-        grad.addColorStop(0.65, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.25)`);
-        grad.addColorStop(1, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0)`);
+        grad.addColorStop(0, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 1)`);
+        grad.addColorStop(0.4, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.9)`);
+        grad.addColorStop(0.7, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.5)`);
+        grad.addColorStop(1, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.1)`);
 
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
