@@ -21,9 +21,13 @@ export function EmbedCodeSnippet({ apiKey }: EmbedCodeSnippetProps) {
   })();
 </script>`;
 
+  // Use the published app URL for iframe embeds (not the preview domain)
+  const publishedOrigin = `https://a6222f723-220e-4d71-be2f-81b1e94028d1.lovable.app`;
+
   const iframeSnippet = `<!-- Chat Widget (iframe) -->
+<!-- Replace the URL below with your custom domain if you have one -->
 <iframe
-  src="${window.location.origin}/widget?key=${apiKey}"
+  src="${publishedOrigin}/widget?key=${apiKey}"
   style="position:fixed;bottom:0;right:0;width:400px;height:600px;border:none;z-index:9999;"
   allow="microphone"
 ></iframe>`;
