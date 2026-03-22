@@ -4,11 +4,11 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { useRef, useState, useEffect, useCallback } from "react";
 
 const HERO_BLOBS = [
-  { cx: 0.2, cy: 0.3, color: [0, 160, 190], speed: 0.35, phase: 0, drift: 0.3 },
-  { cx: 0.8, cy: 0.7, color: [30, 180, 100], speed: 0.3, phase: 1.8, drift: 0.35 },
-  { cx: 0.6, cy: 0.2, color: [0, 140, 140], speed: 0.4, phase: 3.2, drift: 0.25 },
-  { cx: 0.3, cy: 0.8, color: [20, 150, 90], speed: 0.32, phase: 4.5, drift: 0.32 },
-  { cx: 0.5, cy: 0.5, color: [0, 120, 130], speed: 0.38, phase: 5.8, drift: 0.28 },
+  { cx: 0.2, cy: 0.3, color: [52, 215, 123], speed: 0.45, phase: 0, drift: 0.3 },
+  { cx: 0.8, cy: 0.6, color: [0, 194, 224], speed: 0.40, phase: 1.5, drift: 0.32 },
+  { cx: 0.5, cy: 0.8, color: [52, 215, 123], speed: 0.50, phase: 3.0, drift: 0.26 },
+  { cx: 0.3, cy: 0.5, color: [0, 180, 200], speed: 0.42, phase: 4.5, drift: 0.34 },
+  { cx: 0.7, cy: 0.2, color: [80, 200, 180], speed: 0.48, phase: 5.8, drift: 0.28 },
 ];
 
 const HeroBlobCanvas = () => {
@@ -32,7 +32,7 @@ const HeroBlobCanvas = () => {
     };
 
     const draw = () => {
-      t += 0.012;
+      t += 0.055;
       const w = canvas.width;
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
@@ -42,13 +42,13 @@ const HeroBlobCanvas = () => {
           + Math.sin(t * blob.speed * 2.1 + blob.phase * 0.7) * blob.drift * 0.3);
         const cy = h * (blob.cy + Math.cos(t * blob.speed * 0.8 + blob.phase + 1) * blob.drift
           + Math.cos(t * blob.speed * 1.7 + blob.phase * 1.3) * blob.drift * 0.25);
-        const r = Math.min(w, h) * (0.7 + Math.sin(t * 0.4 + blob.phase) * 0.1);
+        const r = Math.min(w, h) * (0.85 + Math.sin(t * 0.5 + blob.phase) * 0.1);
 
         const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-        grad.addColorStop(0, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.9)`);
-        grad.addColorStop(0.35, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.6)`);
-        grad.addColorStop(0.65, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.25)`);
-        grad.addColorStop(1, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0)`);
+        grad.addColorStop(0, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 1)`);
+        grad.addColorStop(0.4, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.9)`);
+        grad.addColorStop(0.7, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.5)`);
+        grad.addColorStop(1, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.1)`);
 
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
