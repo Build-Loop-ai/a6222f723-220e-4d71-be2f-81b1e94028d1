@@ -84,7 +84,7 @@ const DemoSection = () => {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const bgCanvasRef = useCanvasBlobs(DEMO_BLOBS);
-  const btnCanvasRef = useCanvasBlobs(BUTTON_BLOBS);
+  
   const [crawlPhase, setCrawlPhase] = useState<"idle" | "crawling" | "done">("idle");
   const [visiblePages, setVisiblePages] = useState(0);
 
