@@ -1,48 +1,22 @@
 
-Fix the iframe widget so the unused iframe area is transparent instead of black, while keeping the widget collapsed by default.
 
-## What’s causing it
-The `/widget` page only makes its inner wrapper transparent. The actual document surface (`html`, `body`, and `#root`) still inherits the app’s dark global background, so the iframe rectangle appears black in external iframe testers. Also, the embedded widget layout should behave like a floating widget inside the iframe, not like a full-page app.
+# Fix Widget Embed: Shadow & Cutoff
 
-## Plan
-1. Add a dedicated “embed mode” for the `/widget` route
-- In `src/pages/WidgetEmbed.tsx`, apply a route-scoped embed class or inline document styles on mount
-- Force `html`, `body`, and `#root` to:
-  - `background: transparent`
-  - no dark theme fill
-  - full height
-- Clean these styles up on unmount so the rest of the app is unaffected
+## Problems
+1. **Shadow**: The panel uses `shadow-2xl` which creates a visible backdrop shadow around the widget in the iframe.
+2. **Cutoff at top**: The panel height `min(520px, calc(100vh - 90px))` plus `bottom-24` (96px) positioning means the panel can extend above the iframe viewport. The iframe snippet is only `600px` tall — not enough headroom.
 
-2. Refine the embedded widget layout
-- In `src/components/embed/ChatWidget.tsx`, wrap embedded mode in a transparent full-frame container
-- Keep the widget collapsed initially
-- Keep toggle behavior exactly as it works now
+## Changes
 
-3. Make the open panel float inside the iframe instead of occupying the full iframe surface
-- In `src/components/embed/ChatPanel.tsx`, change embedded mode from a full white `h-full w-full` panel to a floating card anchored near the bubble
-- Preserve transparency around the panel so the host page shows through
-- Keep normal non-embed behavior unchanged
+### 1. `src/components/embed/ChatPanel.tsx`
+- Remove `shadow-2xl` from the embedded container class (replace with `shadow-lg` or `shadow-none`)
+- Change embedded height constraint to `calc(100vh - 100px)` to guarantee it fits above the bubble with margin
 
-4. Prevent cutoff without reintroducing a full-screen white/black canvas
-- Constrain the embedded panel with responsive sizing, e.g.:
-  - width capped to iframe width minus margins
-  - height capped to iframe height minus bubble/header spacing
-- Use embedded-specific positioning so the panel opens upward cleanly inside small iframe sizes
+### 2. `src/components/embed/EmbedCodeSnippet.tsx`
+- Increase the iframe height in the snippet from `600px` to `700px` to give more room for the chat panel
 
-5. Add a small embed hardening pass
-- Make the embedded bubble/panel use iframe-scoped positioning for consistency
-- Confirm the generated iframe snippet still points to the published URL, not a preview URL
+### Technical Detail
+- Line 216: Change `shadow-2xl` → `shadow-lg` in the embedded branch
+- Line 216: Change height from `h-[min(520px,calc(100vh-90px))]` → `h-[min(520px,calc(100vh-100px))]`
+- Line 31: Change iframe `height:600px` → `height:700px`
 
-## Files to update
-- `src/pages/WidgetEmbed.tsx`
-- `src/components/embed/ChatWidget.tsx`
-- `src/components/embed/ChatPanel.tsx`
-- `src/index.css` (or equivalent route-scoped embed styles)
-
-## Technical details
-The key fix is not the widget card itself; it’s the page chrome behind it. Right now the iframe document still renders the app’s dark background. The correct solution is:
-- transparent document background in widget route
-- transparent wrapper around the widget
-- floating embedded panel with bounded dimensions
-
-That will make the iframe look like a true overlay widget instead of a black mini-page.
