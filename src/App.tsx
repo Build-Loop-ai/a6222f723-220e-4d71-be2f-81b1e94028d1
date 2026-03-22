@@ -31,6 +31,7 @@ import Admin from "./pages/Admin";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import Walkthrough from "./pages/Walkthrough";
 import CookieConsent from "./components/CookieConsent";
 import WidgetEmbed from "./pages/WidgetEmbed";
 import WidgetLivePreview from "./pages/WidgetLivePreview";
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/accept-invitation" element={<AcceptInvitation />} />
+            <Route path="/walkthrough" element={<Walkthrough />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/onboarding" element={
               <ProtectedRoute>
