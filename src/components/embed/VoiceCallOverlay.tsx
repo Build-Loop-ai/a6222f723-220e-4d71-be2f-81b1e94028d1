@@ -1,9 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { Phone, PhoneOff } from "lucide-react";
+import { Phone, PhoneOff, ExternalLink, X } from "lucide-react";
 import { stopVapiCall, resetVapiClient } from "@/lib/vapi-client";
 import type Vapi from "@vapi-ai/web";
 
 type CallStatus = "connecting" | "listening" | "speaking" | "ended";
+
+interface SharedLink {
+  url: string;
+  title: string;
+  id: string;
+}
 
 interface VoiceCallOverlayProps {
   vapiInstance: Vapi;
@@ -19,6 +25,7 @@ export function VoiceCallOverlay({
   const [status, setStatus] = useState<CallStatus>("connecting");
   const [seconds, setSeconds] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [sharedLinks, setSharedLinks] = useState<SharedLink[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const endingRef = useRef(false);
   const onEndRef = useRef(onEnd);
@@ -26,10 +33,7 @@ export function VoiceCallOverlay({
   const maxDuration = 300;
 
   const doEnd = (reason?: string) => {
-    if (endingRef.current) {
-      console.log("[VoiceCall] doEnd skipped – already ending");
-      return;
-    }
+    if (endingRef.current) return;
     endingRef.current = true;
     console.log("[VoiceCall] Ending call, reason:", reason || "user hangup");
 
@@ -46,6 +50,10 @@ export function VoiceCallOverlay({
   const doEndRef = useRef(doEnd);
   doEndRef.current = doEnd;
 
+  const dismissLink = (id: string) => {
+    setSharedLinks((prev) => prev.filter((l) => l.id !== id));
+  };
+
   useEffect(() => {
     console.log("[VoiceCall] Mounting – attaching event listeners to running Vapi instance");
     const vapi = vapiInstance;
@@ -55,7 +63,7 @@ export function VoiceCallOverlay({
       setStatus("listening");
       timerRef.current = setInterval(() => {
         setSeconds((s) => {
-          if (s + 1 >= 300) {
+          if (s + 1 >= maxDuration) {
             doEndRef.current("Max duration reached");
             return s;
           }
@@ -91,11 +99,39 @@ export function VoiceCallOverlay({
       doEndRef.current(msg);
     };
 
+    const onMessage = (msg: any) => {
+      // Detect navigateToPage tool calls from the assistant
+      if (msg?.type === "tool-calls" || msg?.toolCalls) {
+        const toolCalls = msg.toolCalls || msg.toolCallList || [];
+        for (const tc of toolCalls) {
+          if (tc?.function?.name === "navigateToPage") {
+            const args = typeof tc.function.arguments === "string"
+              ? JSON.parse(tc.function.arguments || "{}")
+              : tc.function.arguments || {};
+            if (args.url) {
+              console.log("[VoiceCall] Navigate link received:", args.url, args.title);
+              const link: SharedLink = {
+                url: args.url,
+                title: args.title || args.url,
+                id: `${Date.now()}-${Math.random()}`,
+              };
+              setSharedLinks((prev) => [...prev, link]);
+              // Auto-dismiss after 15 seconds
+              setTimeout(() => {
+                setSharedLinks((prev) => prev.filter((l) => l.id !== link.id));
+              }, 15000);
+            }
+          }
+        }
+      }
+    };
+
     vapi.on("call-start", onCallStart);
     vapi.on("call-end", onCallEnd);
     vapi.on("speech-start", onSpeechStart);
     vapi.on("speech-end", onSpeechEnd);
     vapi.on("error", onError);
+    vapi.on("message", onMessage);
 
     return () => {
       console.log("[VoiceCall] Unmounting – cleaning up listeners");
@@ -105,6 +141,7 @@ export function VoiceCallOverlay({
       try { (vapi as any).removeListener("speech-start", onSpeechStart); } catch {}
       try { (vapi as any).removeListener("speech-end", onSpeechEnd); } catch {}
       try { (vapi as any).removeListener("error", onError); } catch {}
+      try { (vapi as any).removeListener("message", onMessage); } catch {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -183,6 +220,35 @@ export function VoiceCallOverlay({
           <PhoneOff className="h-4 w-4" />
           End Call
         </button>
+      )}
+
+      {/* Shared links */}
+      {sharedLinks.length > 0 && (
+        <div className="absolute bottom-6 left-4 right-4 flex flex-col gap-2">
+          {sharedLinks.map((link) => (
+            <div
+              key={link.id}
+              className="flex items-center gap-2 rounded-xl bg-gray-50 border border-gray-200 px-4 py-3 shadow-sm animate-in slide-in-from-bottom-2 duration-300"
+            >
+              <ExternalLink className="h-4 w-4 shrink-0 text-gray-500" />
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 text-sm font-medium truncate hover:underline"
+                style={{ color: accentColor }}
+              >
+                {link.title}
+              </a>
+              <button
+                onClick={() => dismissLink(link.id)}
+                className="shrink-0 rounded-full p-1 hover:bg-gray-200 transition-colors"
+              >
+                <X className="h-3.5 w-3.5 text-gray-400" />
+              </button>
+            </div>
+          ))}
+        </div>
       )}
 
       <style>{`
