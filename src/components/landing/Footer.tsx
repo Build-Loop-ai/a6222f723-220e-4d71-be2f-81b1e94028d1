@@ -168,7 +168,7 @@ const Footer = () => {
       </div>
 
       {/* Divider */}
-      <div className="container-large">
+      <div className="container-large relative z-10">
         <div className="h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
       </div>
 
