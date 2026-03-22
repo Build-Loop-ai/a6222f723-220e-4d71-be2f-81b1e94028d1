@@ -63,7 +63,7 @@ const Footer = () => {
     };
 
     const draw = () => {
-      t += 0.055;
+      t += 0.018;
       const w = canvas.width;
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
