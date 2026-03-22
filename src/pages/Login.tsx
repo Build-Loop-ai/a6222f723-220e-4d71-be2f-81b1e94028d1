@@ -11,7 +11,6 @@ import { loginSchema } from "@/lib/validations";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
-import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 import { motion } from "framer-motion";
 
 const Login = () => {
