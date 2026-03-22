@@ -87,13 +87,14 @@ export default function WidgetEmbed() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden">
+    <div className="h-screen w-screen" style={{ background: "transparent" }}>
       <ChatWidget
         apiKey={apiKey}
         supabaseUrl={import.meta.env.VITE_SUPABASE_URL}
         {...config}
         vapiPublicKey={voiceConfig.vapiPublicKey}
         vapiAssistantId={voiceConfig.vapiAssistantId}
+        embedded
       />
     </div>
   );

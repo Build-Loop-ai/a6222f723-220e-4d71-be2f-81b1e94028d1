@@ -6,6 +6,7 @@ export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (window.location.pathname.startsWith("/widget")) return;
     const consent = localStorage.getItem(COOKIE_KEY);
     if (!consent) {
       const timer = setTimeout(() => setVisible(true), 1500);

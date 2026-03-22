@@ -14,6 +14,7 @@ export interface ChatWidgetProps {
   voiceEnabled?: boolean;
   vapiPublicKey?: string;
   vapiAssistantId?: string;
+  embedded?: boolean;
 }
 
 export function ChatWidget({
@@ -28,6 +29,7 @@ export function ChatWidget({
   voiceEnabled = false,
   vapiPublicKey,
   vapiAssistantId,
+  embedded = false,
 }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
@@ -53,19 +55,37 @@ export function ChatWidget({
     else openWidget();
   }, [isOpen, openWidget, closeWidget]);
 
+  const panelConfig = {
+    accentColor,
+    welcomeMessage,
+    placeholderText,
+    widgetTitle,
+    avatarUrl,
+    voiceEnabled,
+    position,
+  };
+
+  // Embedded mode: render panel inline, always open, no bubble
+  if (embedded) {
+    return (
+      <ChatPanel
+        config={panelConfig}
+        apiKey={apiKey}
+        supabaseUrl={supabaseUrl}
+        onClose={() => {}}
+        isClosing={false}
+        vapiPublicKey={vapiPublicKey}
+        vapiAssistantId={vapiAssistantId}
+        embedded
+      />
+    );
+  }
+
   return (
     <>
       {showPanel && (
         <ChatPanel
-          config={{
-            accentColor,
-            welcomeMessage,
-            placeholderText,
-            widgetTitle,
-            avatarUrl,
-            voiceEnabled,
-            position,
-          }}
+          config={panelConfig}
           apiKey={apiKey}
           supabaseUrl={supabaseUrl}
           onClose={closeWidget}

@@ -30,9 +30,10 @@ interface ChatPanelProps {
   isClosing?: boolean;
   vapiPublicKey?: string;
   vapiAssistantId?: string;
+  embedded?: boolean;
 }
 
-export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = false, vapiPublicKey, vapiAssistantId }: ChatPanelProps) {
+export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = false, vapiPublicKey, vapiAssistantId, embedded = false }: ChatPanelProps) {
   const [inCall, setInCall] = useState(false);
   const [vapiInstance, setVapiInstance] = useState<Vapi | null>(null);
   const canVoiceCall = !!(vapiPublicKey && vapiAssistantId);
@@ -211,13 +212,17 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
     sendMessage(input);
   };
 
-  return (
-    <div
-      className={`fixed ${positionClasses} z-[9999] flex h-[520px] w-[380px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-250 ease-out ${
+  const containerClass = embedded
+    ? "flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+    : `fixed ${positionClasses} z-[9999] flex h-[520px] w-[380px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-250 ease-out ${
         isClosing
           ? "translate-y-4 scale-95 opacity-0"
           : "animate-[widget-open_0.25s_ease-out_forwards]"
-      }`}
+      }`;
+
+  return (
+    <div
+      className={containerClass}
       style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}
     >
       {/* Header */}
