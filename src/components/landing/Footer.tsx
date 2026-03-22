@@ -151,19 +151,18 @@ const Footer = () => {
             to="/signup"
             className="group flex items-center gap-3 font-semibold rounded transition-transform duration-300 hover:scale-[0.97] active:scale-95 shrink-0 w-full md:w-auto justify-between md:justify-start"
             style={{
-              background: "linear-gradient(135deg, hsl(var(--green)) 0%, hsl(var(--cyan)) 100%)",
-              color: "hsl(var(--primary-foreground))",
+              background: "white",
+              color: "#050506",
               padding: "var(--space-s) var(--space-l)",
               fontSize: "var(--text-body)",
-              boxShadow: "0 10px 36px hsl(var(--green-glow) / 0.35)",
             }}
           >
             Start Free Trial
             <span
               className="w-9 h-9 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1"
-              style={{ background: "rgba(0,0,0,0.16)", borderRadius: "4px" }}
+              style={{ background: "rgba(0,0,0,0.08)", borderRadius: "4px" }}
             >
-              <ArrowRight size={16} className="text-primary-foreground" />
+              <ArrowRight size={16} style={{ color: "#050506" }} />
             </span>
           </Link>
         </div>
