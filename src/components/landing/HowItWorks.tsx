@@ -10,8 +10,9 @@ const NUMBER_BLOBS = [
   { cx: 0.4, cy: 0.4, color: [0, 180, 200], speed: 0.42, phase: 4.5, drift: 0.34 },
 ];
 
-function AnimatedGradientNumber({ number, cardBg }: { number: string; cardBg: string }) {
+function AnimatedGradientNumber({ number }: { number: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,6 +37,18 @@ function AnimatedGradientNumber({ number, cardBg }: { number: string; cardBg: st
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
 
+      // Step 1: Draw the text as a solid shape (white)
+      const fontSize = Math.min(w * 0.7, h * 0.85);
+      ctx.save();
+      ctx.font = `900 ${fontSize}px "Syne", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "white";
+      ctx.fillText(number, w / 2, h / 2);
+
+      // Step 2: Use 'source-in' so gradient only renders inside the text
+      ctx.globalCompositeOperation = "source-in";
+
       for (const blob of NUMBER_BLOBS) {
         const cx = w * (blob.cx + Math.sin(t * blob.speed + blob.phase) * blob.drift
           + Math.sin(t * blob.speed * 2.1 + blob.phase * 0.7) * blob.drift * 0.3);
@@ -53,6 +66,7 @@ function AnimatedGradientNumber({ number, cardBg }: { number: string; cardBg: st
         ctx.fillRect(0, 0, w, h);
       }
 
+      ctx.restore();
       raf = requestAnimationFrame(draw);
     };
 
@@ -64,26 +78,22 @@ function AnimatedGradientNumber({ number, cardBg }: { number: string; cardBg: st
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
     };
-  }, []);
+  }, [number]);
 
   return (
-    <div className="relative overflow-hidden" style={{ isolation: "isolate" }}>
+    <div
+      ref={containerRef}
+      className="relative"
+      style={{
+        width: "100%",
+        aspectRatio: "1 / 1",
+        maxWidth: "clamp(180px, 14vw, 280px)",
+      }}
+    >
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
+        className="absolute inset-0 w-full h-full"
       />
-      <div
-        className="relative font-display font-[900]"
-        style={{
-          fontSize: "clamp(6rem, 12vw, 14rem)",
-          lineHeight: 1,
-          background: cardBg,
-          color: "white",
-          mixBlendMode: "multiply",
-        }}
-      >
-        {number}
-      </div>
     </div>
   );
 }
@@ -195,7 +205,7 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
 
           {/* Right — large number with animated gradient */}
           <div className="hidden md:flex items-center justify-center">
-            <AnimatedGradientNumber number={step.number} cardBg={`hsl(220, 20%, ${lightness}%)`} />
+            <AnimatedGradientNumber number={step.number} />
           </div>
         </div>
       </motion.div>
