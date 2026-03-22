@@ -102,27 +102,28 @@ const Footer = () => {
     <footer
       className="relative text-foreground rounded-t-[1rem] md:rounded-t-[3.5rem] overflow-hidden"
       style={{
-        background: "#050506",
+        background: "linear-gradient(180deg, rgba(4, 8, 9, 0.82) 0%, rgba(5, 5, 6, 0.9) 100%)",
       }}
     >
       {/* Animated gradient canvas background */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ opacity: 0.45 }}
+        style={{ opacity: 0.78 }}
       />
 
-      {/* Subtle vignette for depth */}
+      {/* Hero-like glow wash */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 50%, rgba(5,5,6,0.6) 100%)",
+          background:
+            "radial-gradient(120% 90% at 50% 45%, rgba(12, 64, 58, 0.22) 0%, rgba(5,5,6,0.12) 42%, rgba(5,5,6,0.68) 100%)",
         }}
       />
 
       {/* Grain overlay */}
       <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        className="absolute inset-0 opacity-[0.035] pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
           backgroundSize: "128px 128px",
