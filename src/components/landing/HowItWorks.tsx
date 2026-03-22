@@ -22,6 +22,16 @@ function AnimatedGradientNumber({ number }: { number: string }) {
 
     let raf: number;
     let t = Math.random() * 100;
+    let fontReady = false;
+
+    // Wait for Syne font to load before drawing
+    document.fonts.ready.then(() => {
+      document.fonts.load('900 100px "Syne"').then(() => {
+        fontReady = true;
+      }).catch(() => {
+        fontReady = true; // fallback
+      });
+    });
 
     const resize = () => {
       const rect = canvas.parentElement?.getBoundingClientRect();
@@ -37,18 +47,24 @@ function AnimatedGradientNumber({ number }: { number: string }) {
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
 
-      // Step 1: Draw the text as a solid shape (white)
-      const fontSize = Math.min(w * 0.7, h * 0.85);
-      ctx.save();
+      if (!fontReady || w === 0 || h === 0) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+
+      // Step 1: Draw text as solid mask
+      const fontSize = Math.min(w * 0.65, h * 0.8);
+      ctx.globalCompositeOperation = "source-over";
       ctx.font = `900 ${fontSize}px "Syne", sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillStyle = "white";
       ctx.fillText(number, w / 2, h / 2);
 
-      // Step 2: Use 'source-in' so gradient only renders inside the text
+      // Step 2: Draw gradient blobs ONLY inside text pixels
       ctx.globalCompositeOperation = "source-in";
 
+      // Draw all blobs onto an offscreen pass, then composite
       for (const blob of NUMBER_BLOBS) {
         const cx = w * (blob.cx + Math.sin(t * blob.speed + blob.phase) * blob.drift
           + Math.sin(t * blob.speed * 2.1 + blob.phase * 0.7) * blob.drift * 0.3);
@@ -66,7 +82,9 @@ function AnimatedGradientNumber({ number }: { number: string }) {
         ctx.fillRect(0, 0, w, h);
       }
 
-      ctx.restore();
+      // Reset for next frame
+      ctx.globalCompositeOperation = "source-over";
+
       raf = requestAnimationFrame(draw);
     };
 
