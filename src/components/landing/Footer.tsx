@@ -171,7 +171,7 @@ const Footer = () => {
 
       {/* Divider */}
       <div className="container-large relative z-10">
-        <div className="h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
+        <div className="h-px" style={{ background: "rgba(255,255,255,0.12)" }} />
       </div>
 
       {/* Bottom section */}
@@ -182,7 +182,7 @@ const Footer = () => {
             <Link to="/" className="font-display text-2xl font-[800] text-gradient inline-block" style={{ marginBottom: "var(--space-s)" }}>
               greet
             </Link>
-            <p className="leading-relaxed text-muted-foreground" style={{ fontSize: "var(--text-small)", maxWidth: "20rem" }}>
+            <p className="leading-relaxed text-foreground/58" style={{ fontSize: "var(--text-small)", maxWidth: "20rem" }}>
               AI chat and voice for every website. Turn visitors into conversations.
             </p>
           </div>
@@ -190,7 +190,7 @@ const Footer = () => {
           {/* Link columns */}
           {footerLinks.map((col) => (
             <div key={col.title} className="col-span-1 md:col-span-2">
-              <p className="font-semibold uppercase tracking-widest text-muted-foreground" style={{ fontSize: "var(--text-small)", marginBottom: "var(--space-s)" }}>
+              <p className="font-semibold uppercase tracking-widest text-foreground/48" style={{ fontSize: "var(--text-small)", marginBottom: "var(--space-s)" }}>
                 {col.title}
               </p>
               <ul className="flex flex-col gap-2.5">
@@ -199,7 +199,7 @@ const Footer = () => {
                     {"isContact" in link && link.isContact ? (
                       <button
                         onClick={() => setContactOpen(true)}
-                        className="text-muted-foreground/70 hover:text-foreground transition-opacity duration-200"
+                        className="text-foreground/68 hover:text-foreground transition-opacity duration-200"
                         style={{ fontSize: "var(--text-small)" }}
                       >
                         {link.label}
@@ -207,7 +207,7 @@ const Footer = () => {
                     ) : link.href.startsWith("/") ? (
                       <Link
                         to={link.href}
-                        className="text-muted-foreground/70 hover:text-foreground transition-opacity duration-200"
+                        className="text-foreground/68 hover:text-foreground transition-opacity duration-200"
                         style={{ fontSize: "var(--text-small)" }}
                       >
                         {link.label}
@@ -215,7 +215,7 @@ const Footer = () => {
                     ) : (
                       <a
                         href={link.href}
-                        className="text-muted-foreground/70 hover:text-foreground transition-opacity duration-200"
+                        className="text-foreground/68 hover:text-foreground transition-opacity duration-200"
                         style={{ fontSize: "var(--text-small)" }}
                       >
                         {link.label}
@@ -231,9 +231,9 @@ const Footer = () => {
         {/* Copyright */}
         <div
           className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3"
-          style={{ marginTop: "var(--space-xl)", paddingTop: "var(--space-m)", borderTop: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ marginTop: "var(--space-xl)", paddingTop: "var(--space-m)", borderTop: "1px solid rgba(255,255,255,0.12)" }}
         >
-          <p className="text-muted-foreground/40" style={{ fontSize: "var(--text-small)" }}>
+          <p className="text-foreground/42" style={{ fontSize: "var(--text-small)" }}>
             © {new Date().getFullYear()} Greet. All rights reserved.
           </p>
         </div>
