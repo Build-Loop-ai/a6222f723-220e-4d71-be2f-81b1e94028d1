@@ -285,6 +285,35 @@ function buildAssistantPayload(org: any, settings: any, systemPrompt: string, el
           },
         },
         {
+          type: "function",
+          messages: [
+            {
+              type: "request-start",
+              content: settings?.language?.startsWith("nl")
+                ? "Ik zoek de juiste pagina voor u..."
+                : "Let me find that page for you..."
+            },
+          ],
+          function: {
+            name: "navigateToPage",
+            description: "Share a clickable link to a specific page on the business website when the user asks to visit a page or wants more information about something that has a dedicated page. Use the business website URL to construct the link.",
+            parameters: {
+              type: "object",
+              properties: {
+                url: {
+                  type: "string",
+                  description: "The full URL of the page to navigate to",
+                },
+                title: {
+                  type: "string",
+                  description: "A short, human-readable title for the link",
+                },
+              },
+              required: ["url", "title"],
+            },
+          },
+        },
+        {
           type: "transferCall",
           destinations: settings?.transfer_number
             ? [
