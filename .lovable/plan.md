@@ -1,78 +1,64 @@
 
 
-# Pre-Launch Checklist for Greet SaaS
+# Remaining Pre-Launch Polish — Implementation Plan
 
-Your app is well-built with solid architecture. Here's what I'd recommend addressing before launch, grouped by priority.
-
----
-
-## Critical (Must-Have)
-
-### 1. Custom OG Image / Favicon
-- `index.html` uses a generic Unsplash stock photo for `og:image` and has no favicon set
-- Create a branded OG image (1200x630) and favicon for professional social sharing
-
-### 2. Email Confirmation UX
-- Signups require email confirmation but there's no resend-confirmation option on the login page if a user tries to sign in before confirming
-- Add a "Resend confirmation email" flow
-
-### 3. Error Handling on Stripe Checkout
-- Verify Stripe checkout and webhook flows work end-to-end with test keys before going live
-- Ensure failed payments show user-friendly messages
-
-### 4. Loading / Empty States Audit
-- Some dashboard pages (Analytics, Conversations) should be checked for proper empty states when there's no data yet, so new users aren't confused
+## Overview
+Implement all remaining checklist items: cookie consent banner, 404 page polish, widget accessibility, OG image fix, and branded auth email templates.
 
 ---
 
-## Important (Should-Have)
+## 1. Cookie Consent Banner (GDPR)
+**File**: New `src/components/CookieConsent.tsx`
 
-### 5. Mobile Responsiveness Pass
-- The dashboard layout, onboarding flow, and widget settings page should be tested on mobile viewports
-- The landing page likely works but the dashboard sidebar navigation on small screens needs verification
-
-### 6. Rate Limiting on Auth Endpoints
-- The widget-chat has rate limiting, but login/signup forms don't have client-side throttling to prevent brute-force or spam
-
-### 7. Cookie Consent / GDPR Banner
-- No cookie consent banner exists; if targeting EU users this is legally required
-- The Privacy page exists but doesn't mention cookie usage
-
-### 8. Transactional Email Templates
-- Verify that signup confirmation, password reset, and invitation emails have branded templates (not default Supabase emails)
+Create a minimal, non-intrusive banner that:
+- Shows at the bottom of the screen on first visit
+- Stores consent in `localStorage` so it only shows once
+- Has "Accept" and "Decline" buttons
+- Matches the app's dark theme styling
+- Renders in `App.tsx` outside the router so it appears on all pages
 
 ---
 
-## Nice-to-Have (Polish)
+## 2. Polish 404 Page
+**File**: `src/pages/NotFound.tsx`
 
-### 9. 404 Page Polish
-- Verify the NotFound page is branded and helpful (links back to home/dashboard)
-
-### 10. Accessibility
-- Add `aria-label` attributes to icon-only buttons (close, send, voice) in the chat widget
-- Ensure keyboard navigation works through the main flows
-
-### 11. Performance
-- Add `loading="lazy"` to images on the landing page
-- Consider code-splitting the Admin page since it's heavy and rarely accessed
-
-### 12. Analytics / Tracking
-- No analytics integration (e.g., Plausible, PostHog, or Google Analytics) for tracking landing page conversions and signup funnels
+- Add Greet branding (logo wordmark)
+- Add links to both home (`/`) and dashboard (`/dashboard`)
+- Use the app's ambient orb styling for visual consistency
+- Add a friendlier message
 
 ---
 
-## Summary of Suggested Implementation Order
+## 3. Widget Accessibility (aria-labels)
+**File**: `src/components/embed/ChatPanel.tsx`
 
-| Priority | Item | Effort |
-|----------|------|--------|
-| Critical | Custom OG image + favicon | Small |
-| Critical | Resend confirmation email | Medium |
-| Critical | Stripe end-to-end test | Manual |
-| Important | Mobile responsiveness pass | Medium |
-| Important | Cookie consent banner | Medium |
-| Important | Branded email templates | Medium |
-| Nice | Accessibility improvements | Small |
-| Nice | Analytics integration | Small |
+Add `aria-label` to all icon-only buttons:
+- Close button → `aria-label="Close chat"`
+- Phone/call button → `aria-label="Start voice call"`
+- Mic button → `aria-label="Toggle voice input"`
+- Send button → `aria-label="Send message"`
 
-Would you like me to start implementing any of these?
+---
+
+## 4. Fix OG Image URL
+**File**: `index.html`
+
+- Change relative `/og-image.png` to absolute URL using the published domain
+- Add `<meta name="theme-color" content="#050506">` for mobile browser chrome
+
+---
+
+## 5. Branded Auth Email Templates
+**Prerequisite**: No email domain is configured yet. The first step is setting up a sender domain through the email setup dialog. Once configured, I'll scaffold and brand the auth email templates (signup confirmation, password reset, magic link, invite).
+
+This step requires user interaction with the email domain setup dialog before templates can be created.
+
+---
+
+## Implementation Order
+1. Cookie consent banner (new component + wire into App.tsx)
+2. 404 page polish
+3. Widget aria-labels
+4. OG image + theme-color fix
+5. Email domain setup prompt → then auth email templates
 
