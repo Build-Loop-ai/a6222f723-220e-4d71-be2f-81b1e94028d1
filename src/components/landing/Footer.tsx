@@ -134,12 +134,12 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between" style={{ gap: "var(--space-xl)" }}>
           <div style={{ maxWidth: "var(--prose-max)" }}>
             <p
-              className="font-semibold uppercase tracking-widest text-muted-foreground"
+              className="font-semibold uppercase tracking-widest text-foreground/55"
               style={{ fontSize: "var(--text-small)", marginBottom: "var(--space-s)" }}
             >
               Ready to start?
             </p>
-            <h2 className="heading-2">
+            <h2 className="heading-2 text-foreground">
               Give your website
               <br />
               <span className="font-black text-primary" style={{ fontWeight: 900 }}>
@@ -155,12 +155,13 @@ const Footer = () => {
               color: "hsl(var(--primary-foreground))",
               padding: "var(--space-s) var(--space-l)",
               fontSize: "var(--text-body)",
+              boxShadow: "0 10px 36px hsl(var(--green-glow) / 0.35)",
             }}
           >
             Start Free Trial
             <span
               className="w-9 h-9 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1"
-              style={{ background: "rgba(0,0,0,0.2)", borderRadius: "4px" }}
+              style={{ background: "rgba(0,0,0,0.16)", borderRadius: "4px" }}
             >
               <ArrowRight size={16} className="text-primary-foreground" />
             </span>
