@@ -109,14 +109,14 @@ const Footer = () => {
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ opacity: 0.12 }}
+        style={{ opacity: 0.45 }}
       />
 
-      {/* Vignette overlay */}
+      {/* Subtle vignette for depth */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at center, transparent 30%, #050506 80%)",
+          background: "radial-gradient(ellipse at center, transparent 50%, rgba(5,5,6,0.6) 100%)",
         }}
       />
 
