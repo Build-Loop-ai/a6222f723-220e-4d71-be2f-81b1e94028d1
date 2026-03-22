@@ -213,7 +213,11 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
   };
 
   const containerClass = embedded
-    ? "flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+    ? `fixed ${positionClasses} z-[9999] flex h-[min(520px,calc(100vh-90px))] w-[min(380px,calc(100vw-40px))] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-250 ease-out ${
+        isClosing
+          ? "translate-y-4 scale-95 opacity-0"
+          : "animate-[widget-open_0.25s_ease-out_forwards]"
+      }`
     : `fixed ${positionClasses} z-[9999] flex h-[520px] w-[380px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl transition-all duration-250 ease-out ${
         isClosing
           ? "translate-y-4 scale-95 opacity-0"

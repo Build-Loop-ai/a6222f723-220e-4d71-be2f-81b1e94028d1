@@ -24,6 +24,33 @@ export default function WidgetEmbed() {
   const [voiceConfig, setVoiceConfig] = useState<{ vapiPublicKey?: string; vapiAssistantId?: string }>({});
   const [error, setError] = useState<string | null>(null);
 
+  // Force transparent background on the entire document for iframe embedding
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const root = document.getElementById("root");
+
+    // Save originals
+    const origHtmlBg = html.style.background;
+    const origBodyBg = body.style.background;
+    const origRootBg = root?.style.background;
+    const origHtmlColor = html.style.colorScheme;
+
+    // Force transparent
+    html.style.background = "transparent";
+    body.style.background = "transparent";
+    if (root) root.style.background = "transparent";
+    html.style.colorScheme = "light";
+    html.classList.remove("dark");
+
+    return () => {
+      html.style.background = origHtmlBg;
+      body.style.background = origBodyBg;
+      if (root) root.style.background = origRootBg || "";
+      html.style.colorScheme = origHtmlColor;
+    };
+  }, []);
+
   useEffect(() => {
     if (!apiKey) {
       setError("Missing widget key");
@@ -31,7 +58,6 @@ export default function WidgetEmbed() {
     }
 
     const fetchConfig = async () => {
-      // Fetch visual config + voice config in parallel
       const [configRes, voiceRes] = await Promise.allSettled([
         supabase.functions.invoke("get-widget-config", {
           headers: { "x-widget-key": apiKey },
@@ -41,7 +67,6 @@ export default function WidgetEmbed() {
         }),
       ]);
 
-      // Visual config
       if (configRes.status === "fulfilled" && configRes.value.data && !configRes.value.error) {
         const d = configRes.value.data;
         setConfig({
@@ -57,7 +82,6 @@ export default function WidgetEmbed() {
         setConfig(DEFAULTS);
       }
 
-      // Voice config
       if (voiceRes.status === "fulfilled" && voiceRes.value.data) {
         const v = voiceRes.value.data;
         setVoiceConfig({
@@ -72,7 +96,7 @@ export default function WidgetEmbed() {
 
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center text-sm text-muted-foreground">
+      <div style={{ background: "transparent" }} className="flex h-screen items-center justify-center text-sm text-gray-400">
         {error}
       </div>
     );
@@ -80,14 +104,14 @@ export default function WidgetEmbed() {
 
   if (!config) {
     return (
-      <div className="flex h-screen items-center justify-center text-sm text-muted-foreground">
+      <div style={{ background: "transparent" }} className="flex h-screen items-center justify-center text-sm text-gray-400">
         Loading...
       </div>
     );
   }
 
   return (
-    <div className="h-screen w-screen" style={{ background: "transparent" }}>
+    <div style={{ background: "transparent", position: "relative", width: "100vw", height: "100vh" }}>
       <ChatWidget
         apiKey={apiKey}
         supabaseUrl={import.meta.env.VITE_SUPABASE_URL}

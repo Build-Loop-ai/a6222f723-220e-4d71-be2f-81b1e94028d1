@@ -65,29 +65,31 @@ export function ChatWidget({
     position,
   };
 
-  // Embedded mode: render inside iframe with relative positioning, but still use bubble toggle
+  // Embedded mode: floating widget inside a transparent iframe
   if (embedded) {
     return (
-      <>
-        {showPanel && (
-          <ChatPanel
-            config={panelConfig}
-            apiKey={apiKey}
-            supabaseUrl={supabaseUrl}
-            onClose={closeWidget}
-            isClosing={isClosing}
-            vapiPublicKey={vapiPublicKey}
-            vapiAssistantId={vapiAssistantId}
-            embedded
+      <div style={{ position: "absolute", inset: 0, background: "transparent", pointerEvents: "none" }}>
+        <div style={{ pointerEvents: "auto" }}>
+          {showPanel && (
+            <ChatPanel
+              config={panelConfig}
+              apiKey={apiKey}
+              supabaseUrl={supabaseUrl}
+              onClose={closeWidget}
+              isClosing={isClosing}
+              vapiPublicKey={vapiPublicKey}
+              vapiAssistantId={vapiAssistantId}
+              embedded
+            />
+          )}
+          <ChatBubble
+            isOpen={isOpen}
+            onClick={toggleWidget}
+            accentColor={accentColor}
+            position={position}
           />
-        )}
-        <ChatBubble
-          isOpen={isOpen}
-          onClick={toggleWidget}
-          accentColor={accentColor}
-          position={position}
-        />
-      </>
+        </div>
+      </div>
     );
   }
 
