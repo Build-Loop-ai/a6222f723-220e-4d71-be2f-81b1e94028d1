@@ -28,7 +28,7 @@ export function EmbedCodeSnippet({ apiKey }: EmbedCodeSnippetProps) {
 <!-- Replace the URL below with your custom domain if you have one -->
 <iframe
   src="${publishedOrigin}/widget?key=${apiKey}"
-  style="position:fixed;bottom:0;right:0;width:400px;height:600px;border:none;z-index:9999;"
+  style="position:fixed;bottom:0;right:0;width:400px;height:700px;border:none;z-index:9999;"
   allow="microphone"
 ></iframe>`;
 
