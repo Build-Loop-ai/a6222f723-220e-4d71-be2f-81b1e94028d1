@@ -42,6 +42,16 @@ const Login = () => {
       setIsLoading(true);
       const { error } = await signIn(data.email, data.password);
       if (error) {
+        const isUnconfirmed = error.message.includes("Email not confirmed");
+        if (isUnconfirmed) {
+          setShowResendConfirmation(true);
+          toast({
+            variant: "destructive",
+            title: "Email not confirmed",
+            description: "Please check your inbox and confirm your email before signing in.",
+          });
+          return;
+        }
         toast({
           variant: "destructive",
           title: error.message.includes("Invalid login credentials")
