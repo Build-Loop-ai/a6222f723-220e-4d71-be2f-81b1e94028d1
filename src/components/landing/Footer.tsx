@@ -129,7 +129,7 @@ const Footer = () => {
         }}
       />
       {/* CTA Band */}
-      <div className="container-large" style={{ paddingTop: "var(--space-2xl)", paddingBottom: "var(--space-2xl)" }}>
+      <div className="container-large relative z-10" style={{ paddingTop: "var(--space-2xl)", paddingBottom: "var(--space-2xl)" }}>
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between" style={{ gap: "var(--space-xl)" }}>
           <div style={{ maxWidth: "var(--prose-max)" }}>
             <p
