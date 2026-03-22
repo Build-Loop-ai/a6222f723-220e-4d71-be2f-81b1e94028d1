@@ -267,6 +267,25 @@ const Login = () => {
               {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
             </div>
 
+            {showResendConfirmation && (
+              <div className="p-3 rounded-lg bg-muted border border-border/60 text-sm">
+                <p className="text-foreground/80 mb-2">
+                  Your email hasn't been confirmed yet. Check your inbox or resend the confirmation.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResendConfirmation}
+                  disabled={resendLoading}
+                  className="gap-2"
+                >
+                  <RefreshCw className={`w-3 h-3 ${resendLoading ? "animate-spin" : ""}`} />
+                  {resendLoading ? "Sending..." : "Resend confirmation email"}
+                </Button>
+              </div>
+            )}
+
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
