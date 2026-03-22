@@ -4,11 +4,11 @@ import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { useRef, useState, useEffect, useCallback } from "react";
 
 const HERO_BLOBS = [
-  { cx: 0.2, cy: 0.3, color: [0, 160, 190], speed: 0.35, phase: 0, drift: 0.3 },
-  { cx: 0.8, cy: 0.7, color: [30, 180, 100], speed: 0.3, phase: 1.8, drift: 0.35 },
-  { cx: 0.6, cy: 0.2, color: [0, 140, 140], speed: 0.4, phase: 3.2, drift: 0.25 },
-  { cx: 0.3, cy: 0.8, color: [20, 150, 90], speed: 0.32, phase: 4.5, drift: 0.32 },
-  { cx: 0.5, cy: 0.5, color: [0, 120, 130], speed: 0.38, phase: 5.8, drift: 0.28 },
+  { cx: 0.2, cy: 0.3, color: [52, 215, 123], speed: 0.45, phase: 0, drift: 0.3 },
+  { cx: 0.8, cy: 0.6, color: [0, 194, 224], speed: 0.40, phase: 1.5, drift: 0.32 },
+  { cx: 0.5, cy: 0.8, color: [52, 215, 123], speed: 0.50, phase: 3.0, drift: 0.26 },
+  { cx: 0.3, cy: 0.5, color: [0, 180, 200], speed: 0.42, phase: 4.5, drift: 0.34 },
+  { cx: 0.7, cy: 0.2, color: [80, 200, 180], speed: 0.48, phase: 5.8, drift: 0.28 },
 ];
 
 const HeroBlobCanvas = () => {
