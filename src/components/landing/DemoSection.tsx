@@ -11,12 +11,6 @@ const DEMO_BLOBS = [
   { cx: 0.35, cy: 0.5, color: [80, 200, 180], speed: 0.48, phase: 5.8, drift: 0.28 },
 ];
 
-const BUTTON_BLOBS = [
-  { cx: 0.2, cy: 0.4, color: [52, 215, 123], speed: 0.45, phase: 0, drift: 0.3 },
-  { cx: 0.8, cy: 0.5, color: [0, 194, 224], speed: 0.40, phase: 1.5, drift: 0.32 },
-  { cx: 0.5, cy: 0.6, color: [80, 200, 180], speed: 0.50, phase: 3.0, drift: 0.26 },
-  { cx: 0.35, cy: 0.3, color: [0, 180, 200], speed: 0.42, phase: 4.5, drift: 0.34 },
-];
 
 function useCanvasBlobs(blobs: typeof DEMO_BLOBS) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -90,7 +84,7 @@ const DemoSection = () => {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const bgCanvasRef = useCanvasBlobs(DEMO_BLOBS);
-  const btnCanvasRef = useCanvasBlobs(BUTTON_BLOBS);
+  
   const [crawlPhase, setCrawlPhase] = useState<"idle" | "crawling" | "done">("idle");
   const [visiblePages, setVisiblePages] = useState(0);
 
@@ -162,21 +156,14 @@ const DemoSection = () => {
             >
               Watch it
               <br />
-              <span className="relative inline-block overflow-hidden" style={{ isolation: "isolate" }}>
-                <canvas
-                  ref={useCanvasBlobs(BUTTON_BLOBS)}
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                />
-                <span
-                  style={{
-                    position: "relative",
-                    background: "#050506",
-                    color: "white",
-                    mixBlendMode: "multiply",
-                  }}
-                >
-                  learn.
-                </span>
+              <span
+                style={{
+                  background: "linear-gradient(135deg, hsl(var(--green)), hsl(var(--cyan)))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                learn.
               </span>
             </h2>
 
@@ -220,24 +207,18 @@ const DemoSection = () => {
             {/* CTA */}
             <Link to="/signup" className="self-start">
               <button
-                className="group relative overflow-hidden inline-flex items-center gap-3 font-medium transition-transform duration-300 hover:scale-[0.98] active:scale-[0.965]"
+                className="group inline-flex items-center gap-3 font-medium transition-all duration-300 hover:scale-[0.98] active:scale-[0.965]"
                 style={{
                   padding: "14px 28px",
                   fontSize: "var(--text-body)",
                   borderRadius: "10px",
-                  boxShadow: "0 4px 30px hsl(var(--green-glow))",
+                  background: "linear-gradient(135deg, hsl(var(--green)) 0%, hsl(var(--cyan)) 100%)",
                   color: "hsl(var(--primary-foreground))",
+                  boxShadow: "0 4px 30px hsl(var(--green-glow))",
                 }}
               >
-                <canvas
-                  ref={btnCanvasRef}
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  style={{ borderRadius: "inherit" }}
-                />
-                <span className="relative z-10 flex items-center gap-3">
-                  Try with your website
-                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                </span>
+                Try with your website
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </button>
             </Link>
           </div>
