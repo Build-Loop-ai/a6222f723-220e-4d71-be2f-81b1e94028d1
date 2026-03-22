@@ -71,11 +71,6 @@ function AnimatedGradientNumber({ number }: { number: string }) {
       ctx.fillStyle = "white";
       ctx.fillText(number, 0, 0);
       ctx.restore();
-      ctx.font = `900 ${fontSize}px "Syne", sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = "white";
-      ctx.fillText(number, w / 2, h / 2);
 
       // Step 2: Draw gradient blobs ONLY inside text pixels
       ctx.globalCompositeOperation = "source-in";
