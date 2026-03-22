@@ -43,18 +43,91 @@ const footerLinks = [
 
 const Footer = () => {
   const [contactOpen, setContactOpen] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let raf: number;
+    let t = Math.random() * 100;
+
+    const resize = () => {
+      const rect = canvas.parentElement?.getBoundingClientRect();
+      if (rect) {
+        canvas.width = rect.width * 2;
+        canvas.height = rect.height * 2;
+      }
+    };
+
+    const draw = () => {
+      t += 0.055;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      for (const blob of FOOTER_BLOBS) {
+        const cx = w * (blob.cx + Math.sin(t * blob.speed + blob.phase) * blob.drift
+          + Math.sin(t * blob.speed * 2.1 + blob.phase * 0.7) * blob.drift * 0.3);
+        const cy = h * (blob.cy + Math.cos(t * blob.speed * 0.8 + blob.phase + 1) * blob.drift
+          + Math.cos(t * blob.speed * 1.7 + blob.phase * 1.3) * blob.drift * 0.25);
+        const r = Math.min(w, h) * (0.85 + Math.sin(t * 0.5 + blob.phase) * 0.1);
+
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        grad.addColorStop(0, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 1)`);
+        grad.addColorStop(0.4, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.9)`);
+        grad.addColorStop(0.7, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.5)`);
+        grad.addColorStop(1, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.1)`);
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      raf = requestAnimationFrame(draw);
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+    draw();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
 
   return (
     <footer
-      className="text-foreground rounded-t-[1rem] md:rounded-t-[3.5rem]"
+      className="relative text-foreground rounded-t-[1rem] md:rounded-t-[3.5rem] overflow-hidden"
       style={{
-        background: "rgba(5,5,6,0.22)",
-        backgroundImage: "linear-gradient(to bottom, rgba(255,255,255,0.04), rgba(255,255,255,0))",
-        WebkitBackdropFilter: "blur(26px)",
-        backdropFilter: "blur(26px)",
-        boxShadow: "0 -10px 30px rgba(0, 0, 0, 0.30)",
+        background: "#050506",
       }}
     >
+      {/* Animated gradient canvas background */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ opacity: 0.12 }}
+      />
+
+      {/* Vignette overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at center, transparent 30%, #050506 80%)",
+        }}
+      />
+
+      {/* Grain overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundSize: "128px 128px",
+        }}
+      />
       {/* CTA Band */}
       <div className="container-large" style={{ paddingTop: "var(--space-2xl)", paddingBottom: "var(--space-2xl)" }}>
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between" style={{ gap: "var(--space-xl)" }}>
