@@ -1,29 +1,40 @@
 
 
-# Fix: Widget Iframe Embed URL
+# Fix Widget Embed Issues
 
-## Problem
-The iframe embed snippet in `EmbedCodeSnippet.tsx` uses `window.location.origin` to build the iframe URL. When the user copies this from the dashboard, it points to the Lovable preview domain (e.g., `https://id-preview--xxx.lovable.app/widget?key=...`), which requires Lovable login.
+Three problems identified from the screenshots:
 
-## Solution
-Update `EmbedCodeSnippet.tsx` to use the **published URL** for the iframe snippet instead of `window.location.origin`. The published URL is `https://a6222f723-220e-4d71-be2f-81b1e94028d1.lovable.app`. We should derive this from `VITE_SUPABASE_PROJECT_ID` or hardcode the published domain pattern.
+## 1. Black Background
+The `/widget` embed page inherits the app's dark theme CSS (dark background from `index.css`). The `WidgetEmbed` page wrapper `div` has no explicit background color, so it picks up the global dark `body`/`:root` background.
 
-However, a better long-term approach: since the **script tag** embed already works perfectly without any origin dependency (it loads from the edge function URL and injects the widget inline), we should:
+**Fix**: Add `bg-transparent` or `bg-white` to the wrapper div in `WidgetEmbed.tsx`, and ensure the `body` background is overridden for the widget route. Best approach: add inline style `background: transparent` on the wrapper so the iframe blends with the host page.
 
-1. **Make the script tag the primary/default** embed method (it already is labeled "recommended")
-2. **Fix the iframe URL** to use the published app URL instead of `window.location.origin`
-3. **Add a note** on the iframe option that it requires the app to be published
+## 2. Cookie Consent Showing in Embed
+The `CookieConsent` component is rendered globally in `App.tsx` (line 107), outside the router. This means it appears on every route, including `/widget`. The widget embed should never show the cookie banner.
 
-### File Change: `src/components/embed/EmbedCodeSnippet.tsx`
+**Fix**: Move `CookieConsent` so it doesn't render on the `/widget` route. Options:
+- Conditionally render `CookieConsent` based on the current path (check `window.location.pathname`)
+- Or move it inside a layout wrapper that excludes the widget route
 
-- Replace `window.location.origin` with the published URL derived from the environment
-- Use a pattern like `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.lovable.app` or store the published domain
-- Since we know the published URL, we can use it directly, but a cleaner approach is to use `VITE_SUPABASE_URL` to construct a standalone widget-embed endpoint, or simply note that users should replace the domain with their own
+Simplest: Add a path check inside `CookieConsent.tsx` — if `window.location.pathname === "/widget"`, return null.
 
-**Concrete change**: Replace the iframe origin with the known published domain, and add a comment in the snippet telling users to use their custom domain if they have one.
+## 3. Chat Panel Getting Cut Off
+The widget renders inside a `h-screen w-screen overflow-hidden` container. The `ChatPanel` uses `fixed` positioning with `bottom-24` and a height of `520px`. In a small iframe (600px height), the panel extends above the viewport and gets clipped by `overflow-hidden`.
 
-### Technical Details
-- `EmbedCodeSnippet.tsx` line 26: change `${window.location.origin}` to the published URL
-- The published URL pattern from Lovable is available but not as an env var — we'll use a hardcoded published domain or make the iframe snippet point users to use their own domain
-- Best approach: read from a constant or env var, falling back to guidance text
+**Fix**: In `WidgetEmbed.tsx`, remove `overflow-hidden` or make the ChatWidget render inline (not fixed-positioned) when in embed mode. Better approach: pass an `embedded` prop to `ChatWidget` so it renders the panel inline/fullscreen within the iframe instead of as a fixed overlay.
+
+## Files to Change
+
+1. **`src/pages/WidgetEmbed.tsx`** — Set transparent background, pass `embedded` prop to ChatWidget
+2. **`src/components/CookieConsent.tsx`** — Skip rendering on `/widget` path
+3. **`src/components/embed/ChatWidget.tsx`** — Accept `embedded` prop; when true, render panel inline (always open, no bubble)
+4. **`src/components/embed/ChatPanel.tsx`** — Accept `embedded` prop; when true, use relative positioning and fill container instead of fixed positioning
+
+### Technical Detail
+
+When `embedded=true`:
+- `ChatWidget` skips the bubble entirely and renders `ChatPanel` always-open, filling the iframe
+- `ChatPanel` switches from `fixed` positioning to `relative` with `h-full w-full` to fill the parent container
+- `WidgetEmbed` wrapper uses `bg-transparent` so the iframe has no background
+- `CookieConsent` checks `window.location.pathname.startsWith("/widget")` and returns null if true
 
