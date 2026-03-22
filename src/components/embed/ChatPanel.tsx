@@ -334,6 +334,7 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
         <button
           type="submit"
           disabled={!input.trim() || isLoading}
+          aria-label="Send message"
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white transition-all disabled:opacity-40"
           style={{ backgroundColor: config.accentColor }}
         >
