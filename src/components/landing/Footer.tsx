@@ -173,7 +173,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom section */}
-      <div className="container-large" style={{ paddingTop: "var(--space-xl)", paddingBottom: "var(--space-xl)" }}>
+      <div className="container-large relative z-10" style={{ paddingTop: "var(--space-xl)", paddingBottom: "var(--space-xl)" }}>
         <div className="grid grid-cols-2 md:grid-cols-12" style={{ gap: "var(--space-l)" }}>
           {/* Brand */}
           <div className="col-span-2 md:col-span-5">
