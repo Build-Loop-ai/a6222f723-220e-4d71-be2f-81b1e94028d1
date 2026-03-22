@@ -220,24 +220,18 @@ const DemoSection = () => {
             {/* CTA */}
             <Link to="/signup" className="self-start">
               <button
-                className="group relative overflow-hidden inline-flex items-center gap-3 font-medium transition-transform duration-300 hover:scale-[0.98] active:scale-[0.965]"
+                className="group inline-flex items-center gap-3 font-medium transition-all duration-300 hover:scale-[0.98] active:scale-[0.965]"
                 style={{
                   padding: "14px 28px",
                   fontSize: "var(--text-body)",
                   borderRadius: "10px",
-                  boxShadow: "0 4px 30px hsl(var(--green-glow))",
+                  background: "linear-gradient(135deg, hsl(var(--green)) 0%, hsl(var(--cyan)) 100%)",
                   color: "hsl(var(--primary-foreground))",
+                  boxShadow: "0 4px 30px hsl(var(--green-glow))",
                 }}
               >
-                <canvas
-                  ref={btnCanvasRef}
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  style={{ borderRadius: "inherit" }}
-                />
-                <span className="relative z-10 flex items-center gap-3">
-                  Try with your website
-                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                </span>
+                Try with your website
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </button>
             </Link>
           </div>
