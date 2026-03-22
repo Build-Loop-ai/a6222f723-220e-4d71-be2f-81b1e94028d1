@@ -205,7 +205,7 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
 
           {/* Right — large number with animated gradient */}
           <div className="hidden md:flex items-center justify-center">
-            <AnimatedGradientNumber number={step.number} cardBg={`hsl(220, 20%, ${lightness}%)`} />
+            <AnimatedGradientNumber number={step.number} />
           </div>
         </div>
       </motion.div>
