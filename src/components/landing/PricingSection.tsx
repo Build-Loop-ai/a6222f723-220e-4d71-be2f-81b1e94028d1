@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Check, Loader2, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { siteConfig } from "@/lib/site-config";
 
@@ -42,16 +42,8 @@ const PricingSection = () => {
   const [isAnnual, setIsAnnual] = useState(true);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-
-  const glowY = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -89,17 +81,8 @@ const PricingSection = () => {
         background: "#050506",
       }}
     >
-      {/* Centered gradient orb */}
-      <motion.div
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[800px] pointer-events-none"
-        style={{
-          background: "radial-gradient(ellipse, hsl(var(--primary) / 0.06) 0%, hsl(var(--cyan) / 0.03) 30%, transparent 60%)",
-          y: glowY,
-        }}
-      />
-
       <div className="container-large relative z-10">
-        {/* Header */}
+        {/* Tag */}
         <div className="flex items-center gap-2.5" style={{ marginBottom: "var(--space-m)" }}>
           <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
           <span className="font-medium text-foreground" style={{ fontSize: "var(--text-small)" }}>
@@ -107,51 +90,69 @@ const PricingSection = () => {
           </span>
         </div>
 
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6" style={{ marginBottom: "clamp(2.5rem, 5vw, 4rem)" }}>
-          <div>
-            <h2
-              className="text-foreground tracking-tight font-display"
+        {/* Heading row */}
+        <div
+          className="flex flex-col md:flex-row md:items-end md:justify-between gap-6"
+          style={{ marginBottom: "clamp(2.5rem, 5vw, 4rem)" }}
+        >
+          <h2
+            className="text-foreground tracking-tight font-display"
+            style={{
+              fontSize: "clamp(1.8rem, 5vw, 4rem)",
+              fontWeight: 900,
+              lineHeight: 1.1,
+            }}
+          >
+            Start free.
+            <br />
+            <span
               style={{
-                fontSize: "clamp(1.8rem, 5vw, 4rem)",
-                fontWeight: 900,
-                lineHeight: 1.1,
-                marginBottom: "var(--space-s)",
+                background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--cyan)))",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}
             >
-              Simple pricing
-            </h2>
-            <p className="text-muted-foreground" style={{ fontSize: "var(--text-body-lg)" }}>
-              Start free. Upgrade when you're ready.
-            </p>
-          </div>
+              Scale when ready.
+            </span>
+          </h2>
 
           {/* Toggle */}
-          <div className="flex items-center gap-3">
-            <span className={`text-sm font-medium transition-colors ${!isAnnual ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
+          <div
+            className="flex items-center gap-1 p-1 rounded-full self-start md:self-auto"
+            style={{
+              background: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+            }}
+          >
             <button
-              onClick={() => setIsAnnual(!isAnnual)}
-              className="relative w-12 h-7 rounded-full p-0.5 transition-colors focus:outline-none"
-              style={{ background: "hsl(var(--primary) / 0.2)" }}
+              onClick={() => setIsAnnual(false)}
+              className="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300"
+              style={{
+                background: !isAnnual ? "hsl(var(--foreground))" : "transparent",
+                color: !isAnnual ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
+              }}
             >
-              <motion.span
-                className="block w-6 h-6 rounded-full bg-primary shadow-md"
-                animate={{ x: isAnnual ? 20 : 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              />
+              Monthly
             </button>
-            <span className={`text-sm font-medium transition-colors flex items-center gap-2 ${isAnnual ? "text-foreground" : "text-muted-foreground"}`}>
+            <button
+              onClick={() => setIsAnnual(true)}
+              className="px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2"
+              style={{
+                background: isAnnual ? "hsl(var(--foreground))" : "transparent",
+                color: isAnnual ? "hsl(var(--background))" : "hsl(var(--muted-foreground))",
+              }}
+            >
               Annual
               <span
-                className="px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wider"
+                className="px-1.5 py-0.5 rounded-md text-[10px] font-mono"
                 style={{
-                  background: "hsl(var(--green-dim))",
-                  color: "hsl(var(--primary))",
-                  border: "1px solid hsl(var(--primary) / 0.15)",
+                  background: isAnnual ? "hsl(var(--primary))" : "hsl(var(--green-dim))",
+                  color: isAnnual ? "hsl(var(--primary-foreground))" : "hsl(var(--primary))",
                 }}
               >
                 -{siteConfig.annualDiscount}%
               </span>
-            </span>
+            </button>
           </div>
         </div>
 
@@ -162,150 +163,139 @@ const PricingSection = () => {
         )}
 
         {!loading && (
-          <div className="grid md:grid-cols-3 gap-0 max-w-5xl">
+          <div className="grid md:grid-cols-3 gap-4 lg:gap-5">
             {plans.map((plan, idx) => {
               const isPopular = !!plan.is_popular;
-              const isHovered = hoveredIdx === idx;
               const price = isAnnual ? getAnnualMonthlyPrice(plan) : formatPrice(plan.price_monthly_cents);
 
               return (
                 <motion.div
                   key={plan.id}
-                  initial={{ opacity: 0, y: 60 }}
+                  initial={{ opacity: 0, y: 50 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.7, delay: 0.2 + idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                  onMouseEnter={() => setHoveredIdx(idx)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                  className="relative"
-                  style={{ zIndex: isPopular || isHovered ? 10 : 1 }}
+                  transition={{ duration: 0.6, delay: 0.15 + idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                  className="group relative"
                 >
+                  {/* Gradient border for popular */}
+                  {isPopular && (
+                    <div
+                      className="absolute -inset-px rounded-[1.6rem] pointer-events-none"
+                      style={{
+                        background: "linear-gradient(180deg, hsl(var(--primary) / 0.5), hsl(var(--cyan) / 0.2), transparent 70%)",
+                      }}
+                    />
+                  )}
+
                   <div
-                    className="relative h-full flex flex-col transition-all duration-500"
+                    className="relative h-full flex flex-col rounded-3xl overflow-hidden transition-shadow duration-500"
                     style={{
-                      padding: "clamp(1.5rem, 2.5vw, 2.5rem)",
                       background: isPopular
-                        ? "linear-gradient(180deg, hsl(var(--primary) / 0.06) 0%, hsl(var(--card)) 40%)"
+                        ? "linear-gradient(180deg, hsl(var(--primary) / 0.04), hsl(var(--card)) 30%)"
                         : "hsl(var(--card))",
-                      borderRadius: idx === 0 ? "1.5rem 0 0 1.5rem" : idx === 2 ? "0 1.5rem 1.5rem 0" : "0",
-                      borderTop: isPopular ? "2px solid hsl(var(--primary) / 0.5)" : "1px solid hsl(var(--border))",
-                      borderBottom: "1px solid hsl(var(--border))",
-                      borderLeft: idx === 0 ? "1px solid hsl(var(--border))" : isPopular ? "1px solid hsl(var(--primary) / 0.2)" : "1px solid hsl(var(--border))",
-                      borderRight: idx === 2 ? "1px solid hsl(var(--border))" : isPopular ? "1px solid hsl(var(--primary) / 0.2)" : "none",
-                      transform: isPopular ? "scale(1.03)" : undefined,
+                      border: isPopular ? "none" : "1px solid hsl(var(--border))",
                       boxShadow: isPopular
-                        ? "0 0 80px hsl(var(--primary) / 0.08), 0 20px 60px rgba(0,0,0,0.3)"
+                        ? "0 24px 80px hsl(var(--primary) / 0.1)"
                         : "none",
                     }}
                   >
-                    {/* Popular badge */}
-                    {isPopular && (
-                      <div
-                        className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 text-[10px] font-mono tracking-[0.2em] uppercase rounded-full"
-                        style={{
-                          background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--cyan)))",
-                          color: "hsl(var(--primary-foreground))",
-                        }}
-                      >
-                        Most Popular
+                    {/* Top section with price */}
+                    <div style={{ padding: "clamp(1.5rem, 2.5vw, 2.5rem)", paddingBottom: 0 }}>
+                      {/* Plan name row */}
+                      <div className="flex items-center justify-between mb-6">
+                        <span
+                          className="font-display font-bold tracking-tight text-foreground"
+                          style={{ fontSize: "1.15rem" }}
+                        >
+                          {plan.name}
+                        </span>
+                        {isPopular && (
+                          <span
+                            className="px-3 py-1 rounded-full text-[10px] font-mono tracking-[0.15em] uppercase"
+                            style={{
+                              background: "hsl(var(--green-dim))",
+                              color: "hsl(var(--primary))",
+                              border: "1px solid hsl(var(--primary) / 0.2)",
+                            }}
+                          >
+                            Popular
+                          </span>
+                        )}
                       </div>
-                    )}
 
-                    {/* Plan name + desc */}
-                    <div style={{ marginBottom: "var(--space-l)" }}>
-                      <h3 className="font-display text-xl font-bold text-foreground tracking-tight mb-1">
-                        {plan.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">{plan.description}</p>
-                    </div>
-
-                    {/* Price */}
-                    <div style={{ marginBottom: "var(--space-l)" }}>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-sm text-muted-foreground">€</span>
+                      {/* Price display */}
+                      <div className="flex items-baseline gap-1 mb-2">
+                        <span className="text-muted-foreground" style={{ fontSize: "1.1rem" }}>€</span>
                         <motion.span
                           key={`${plan.id}-${isAnnual}`}
-                          initial={{ opacity: 0, y: -10 }}
+                          initial={{ opacity: 0, y: -8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="font-display font-[900] tracking-tight"
-                          style={{
-                            fontSize: isPopular ? "3.5rem" : "2.75rem",
-                            lineHeight: 1,
-                            background: isPopular
-                              ? "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--cyan)))"
-                              : undefined,
-                            WebkitBackgroundClip: isPopular ? "text" : undefined,
-                            WebkitTextFillColor: isPopular ? "transparent" : undefined,
-                            color: isPopular ? undefined : "hsl(var(--foreground))",
-                          }}
+                          transition={{ duration: 0.3 }}
+                          className="font-display font-[900] tracking-tighter text-foreground"
+                          style={{ fontSize: "clamp(3rem, 5vw, 4.5rem)", lineHeight: 1 }}
                         >
                           {price}
                         </motion.span>
-                        <span className="text-sm text-muted-foreground">/mo</span>
+                        <span className="text-muted-foreground text-sm ml-1">/mo</span>
                       </div>
+
+                      <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
+
+                      {/* CTA */}
+                      <Link to={plan.name === "Agency" ? "#" : "/signup"} className="block">
+                        <button
+                          className="w-full py-3.5 rounded-xl font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 group/btn"
+                          style={
+                            isPopular
+                              ? {
+                                  background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--cyan)))",
+                                  color: "hsl(var(--primary-foreground))",
+                                  boxShadow: "0 4px 24px hsl(var(--green-glow))",
+                                }
+                              : {
+                                  background: "hsl(var(--secondary))",
+                                  color: "hsl(var(--foreground))",
+                                  border: "1px solid hsl(var(--border))",
+                                }
+                          }
+                        >
+                          {plan.price_monthly_cents === 0
+                            ? "Get Started Free"
+                            : plan.name === "Agency"
+                            ? "Contact Us"
+                            : "Start Free Trial"}
+                          <ArrowRight size={14} className="transition-transform group-hover/btn:translate-x-1" />
+                        </button>
+                      </Link>
                     </div>
 
                     {/* Divider */}
-                    <div
-                      className="h-px w-full"
-                      style={{
-                        background: isPopular
-                          ? "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent)"
-                          : "hsl(var(--border))",
-                        marginBottom: "var(--space-m)",
-                      }}
-                    />
-
-                    {/* "Includes" label for Pro/Agency */}
-                    {(isPopular || plan.name === "Agency") && (
-                      <p className="text-[11px] font-mono tracking-[0.15em] uppercase text-muted-foreground mb-4">
-                        Everything in {isPopular ? "Starter" : "Pro"}, plus:
-                      </p>
-                    )}
+                    <div className="mx-6 my-6">
+                      <div
+                        className="h-px w-full"
+                        style={{
+                          background: isPopular
+                            ? "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.25), transparent)"
+                            : "hsl(var(--border))",
+                        }}
+                      />
+                    </div>
 
                     {/* Features */}
-                    <ul className="space-y-3 flex-1" style={{ marginBottom: "var(--space-l)" }}>
-                      {plan.features.map((feature, fi) => (
-                        <li key={fi} className="flex items-center gap-3">
-                          <div
-                            className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                            style={{ background: "hsl(var(--green-dim))" }}
-                          >
-                            <Check className="w-3 h-3 text-primary" />
-                          </div>
-                          <span className="text-sm text-muted-foreground">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    {/* CTA */}
-                    <Link to={plan.name === "Agency" ? "#" : "/signup"} className="block mt-auto">
-                      <button
-                        className="w-full py-3.5 rounded-xl font-medium text-sm transition-all duration-300 flex items-center justify-center gap-2 group"
-                        style={
-                          isPopular
-                            ? {
-                                background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--cyan)))",
-                                color: "hsl(var(--primary-foreground))",
-                                boxShadow: "0 4px 24px hsl(var(--green-glow))",
-                              }
-                            : {
-                                background: "transparent",
-                                color: "hsl(var(--foreground))",
-                                border: "1px solid hsl(var(--border))",
-                              }
-                        }
-                      >
-                        {plan.price_monthly_cents === 0
-                          ? "Get Started"
-                          : plan.name === "Agency"
-                          ? "Contact Us"
-                          : "Start Free Trial"}
-                        <ArrowRight
-                          size={14}
-                          className="transition-transform group-hover:translate-x-1"
-                        />
-                      </button>
-                    </Link>
+                    <div style={{ padding: "0 clamp(1.5rem, 2.5vw, 2.5rem) clamp(1.5rem, 2.5vw, 2.5rem)" }}>
+                      {(isPopular || plan.name === "Agency") && (
+                        <p className="text-[11px] font-mono tracking-[0.12em] uppercase text-muted-foreground mb-4">
+                          Everything in {isPopular ? "Starter" : "Pro"} +
+                        </p>
+                      )}
+                      <ul className="space-y-3">
+                        {plan.features.map((feature, fi) => (
+                          <li key={fi} className="flex items-center gap-3">
+                            <Check size={14} className="text-primary shrink-0" strokeWidth={2.5} />
+                            <span className="text-sm text-muted-foreground">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -313,9 +303,9 @@ const PricingSection = () => {
           </div>
         )}
 
-        {/* Footer note */}
+        {/* Footer */}
         <p
-          className="text-center font-mono tracking-wider mt-10"
+          className="text-center font-mono tracking-wider mt-12"
           style={{ fontSize: "11px", color: "hsl(var(--muted-foreground))" }}
         >
           All plans include a 14-day free trial · No credit card required
