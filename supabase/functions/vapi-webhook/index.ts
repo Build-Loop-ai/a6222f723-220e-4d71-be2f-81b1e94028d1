@@ -82,6 +82,11 @@ async function handleToolCalls(payload: any, supabase: any) {
         result = await bookAppointment(args, payload, supabase);
         break;
 
+      case "navigateToPage":
+        console.log("Navigate to page:", args.url, args.title);
+        result = { success: true, url: args.url, title: args.title };
+        break;
+
       default:
         result = { error: "Unknown function" };
     }

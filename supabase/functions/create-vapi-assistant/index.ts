@@ -389,7 +389,7 @@ function buildAssistantPayload(org: any, settings: any, systemPrompt: string, el
     ],
 
     // Call settings
-    maxDurationSeconds: 30, // 30 second max call
+    maxDurationSeconds: 300, // 5 minute max call
 
     // End call message
     endCallMessage: "Thank you for calling. Goodbye!",

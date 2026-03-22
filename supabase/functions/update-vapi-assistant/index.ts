@@ -57,6 +57,7 @@ serve(async (req) => {
       silenceTimeoutSeconds: 15,
       responseDelaySeconds: 0.2,
       interruptionsEnabled: true,
+      maxDurationSeconds: 300,
 
       // Turn detection - when to start speaking after user stops
       startSpeakingPlan: {
