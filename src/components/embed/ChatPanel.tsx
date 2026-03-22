@@ -302,8 +302,8 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
               }
             }}
             disabled={inCall}
+            aria-label="Start voice call"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-40"
-            title="Start voice call"
           >
             <Phone className="h-4 w-4" />
           </button>
