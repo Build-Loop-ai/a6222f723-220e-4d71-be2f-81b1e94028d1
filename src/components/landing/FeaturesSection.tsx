@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Globe, Mic, ArrowUpRight, UserPlus, FileText, Languages } from "lucide-react";
+import FeatureSignalMap from "@/components/landing/FeatureSignalMap";
 
 const TALK_BLOBS = [
   { cx: 0.25, cy: 0.35, color: [52, 215, 123], speed: 0.45, phase: 0, drift: 0.3 },
