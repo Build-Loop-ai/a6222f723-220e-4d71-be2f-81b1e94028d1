@@ -96,12 +96,12 @@ const features = [
 
 // Positions around a circle (6 items, evenly spaced starting from top)
 const orbitPositions = [
-  { angle: -90, radius: 42 },   // top
-  { angle: -30, radius: 42 },   // top-right
-  { angle: 30, radius: 42 },    // bottom-right
-  { angle: 90, radius: 42 },    // bottom
-  { angle: 150, radius: 42 },   // bottom-left
-  { angle: 210, radius: 42 },   // top-left
+  { angle: -90, radius: 36 },   // top
+  { angle: -30, radius: 36 },   // top-right
+  { angle: 30, radius: 36 },    // bottom-right
+  { angle: 90, radius: 36 },    // bottom
+  { angle: 150, radius: 36 },   // bottom-left
+  { angle: 210, radius: 36 },   // top-left
 ];
 
 function getOrbitXY(angle: number, radius: number) {
@@ -147,22 +147,22 @@ const FeaturesSection = () => {
         </h2>
 
         {/* === ORBIT LAYOUT (desktop) === */}
-        <div className="hidden lg:flex items-center justify-center" style={{ minHeight: "700px" }}>
-          <div className="relative" style={{ width: "700px", height: "700px" }}>
+        <div className="hidden lg:flex items-center justify-center" style={{ minHeight: "640px" }}>
+          <div className="relative" style={{ width: "640px", height: "640px" }}>
 
-            {/* Orbit ring */}
+            {/* Orbit ring – aligned with nodes */}
             <div
               className="absolute rounded-full border border-border/30"
               style={{
-                inset: "8%",
-                opacity: 0.4,
+                inset: "14%",
+                opacity: 0.35,
               }}
             />
             <div
               className="absolute rounded-full border border-border/20"
               style={{
-                inset: "20%",
-                opacity: 0.25,
+                inset: "30%",
+                opacity: 0.2,
               }}
             />
 
