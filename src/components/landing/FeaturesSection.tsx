@@ -1,7 +1,6 @@
-import { useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Mic, ArrowUpRight, UserPlus, FileText, Languages } from "lucide-react";
-import FeatureSignalMap from "@/components/landing/FeatureSignalMap";
 
 const TALK_BLOBS = [
   { cx: 0.25, cy: 0.35, color: [52, 215, 123], speed: 0.45, phase: 0, drift: 0.3 },
@@ -87,15 +86,17 @@ function AnimatedGradientWord({ word }: { word: string }) {
 }
 
 const features = [
-  { icon: Globe, title: "Auto-learns from your site", desc: "Greet reads every page on your sitemap. When you update content, the AI updates automatically. Zero manual training." },
-  { icon: Mic, title: "Voice mode", desc: "Visitors switch from text to voice inside the same widget. Same AI, spoken conversation. No phone line needed." },
-  { icon: ArrowUpRight, title: "Smart page routing", desc: "When a visitor asks about pricing, Greet answers AND links them directly to the right page." },
-  { icon: UserPlus, title: "Lead capture", desc: "Collect names, emails, and phone numbers naturally during conversations. Every chat is a potential conversion." },
-  { icon: FileText, title: "Custom documents", desc: "Upload PDFs, pricing sheets, FAQs, internal docs. Greet learns it all and answers from your proprietary knowledge." },
-  { icon: Languages, title: "22+ languages", desc: "Visitors chat in their language, Greet responds fluently. Dutch, English, German, Spanish, and 18 more." },
+  { icon: Globe, title: "Auto-learns from your site", desc: "Greet reads every page on your sitemap. When you update content, the AI updates automatically. Zero manual training.", num: "01" },
+  { icon: Mic, title: "Voice mode", desc: "Visitors switch from text to voice inside the same widget. Same AI, spoken conversation. No phone line needed.", num: "02" },
+  { icon: ArrowUpRight, title: "Smart page routing", desc: "When a visitor asks about pricing, Greet answers AND links them directly to the right page.", num: "03" },
+  { icon: UserPlus, title: "Lead capture", desc: "Collect names, emails, and phone numbers naturally during conversations. Every chat is a potential conversion.", num: "04" },
+  { icon: FileText, title: "Custom documents", desc: "Upload PDFs, pricing sheets, FAQs, internal docs. Greet learns it all and answers from your proprietary knowledge.", num: "05" },
+  { icon: Languages, title: "22+ languages", desc: "Visitors chat in their language, Greet responds fluently. Dutch, English, German, Spanish, and 18 more.", num: "06" },
 ];
 
 const FeaturesSection = () => {
+  const [expanded, setExpanded] = useState<number | null>(null);
+
   return (
     <section
       id="features"
@@ -122,7 +123,7 @@ const FeaturesSection = () => {
             fontWeight: 900,
             lineHeight: 1.1,
             maxWidth: "100%",
-            marginBottom: "clamp(3rem, 6vw, 8rem)",
+            marginBottom: "clamp(3rem, 6vw, 5rem)",
           }}
         >
           Everything your website
@@ -130,40 +131,128 @@ const FeaturesSection = () => {
           needs to <AnimatedGradientWord word="talk." />
         </h2>
 
-        <FeatureSignalMap features={features} />
+        {/* Stacked accordion rows */}
+        <div className="flex flex-col">
+          {features.map((f, i) => {
+            const isOpen = expanded === i;
+            const Icon = f.icon;
 
-        {/* === MOBILE LAYOUT === */}
-        <div className="lg:hidden flex flex-col" style={{ gap: "var(--space-m)" }}>
-          {features.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.06, duration: 0.4 }}
-              className="flex items-start gap-4 rounded-xl"
-              style={{
-                padding: "var(--space-card)",
-                background: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border) / 0.3)",
-              }}
-            >
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
-                style={{ background: "hsl(var(--primary) / 0.1)", border: "1px solid hsl(var(--primary) / 0.2)" }}
+            return (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06, duration: 0.5 }}
               >
-                <f.icon size={20} className="text-primary" strokeWidth={2.2} />
-              </div>
-              <div>
-                <h3 className="font-bold text-foreground tracking-tight" style={{ fontSize: "var(--text-body-lg)", marginBottom: "4px" }}>
-                  {f.title}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed" style={{ fontSize: "var(--text-body)" }}>
-                  {f.desc}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+                <button
+                  type="button"
+                  onClick={() => setExpanded(isOpen ? null : i)}
+                  className="w-full text-left group"
+                  style={{
+                    borderTop: "1px solid hsl(var(--border))",
+                    padding: "clamp(1.25rem, 2vw, 2rem) 0",
+                  }}
+                >
+                  <div className="flex items-center gap-4 md:gap-8">
+                    {/* Number */}
+                    <span
+                      className="font-mono shrink-0 transition-colors duration-300"
+                      style={{
+                        fontSize: "var(--text-small)",
+                        color: isOpen ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+                        width: "2rem",
+                      }}
+                    >
+                      {f.num}
+                    </span>
+
+                    {/* Icon */}
+                    <div
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300"
+                      style={{
+                        background: isOpen
+                          ? "linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--cyan) / 0.1))"
+                          : "hsl(var(--card))",
+                        border: isOpen
+                          ? "1px solid hsl(var(--primary) / 0.3)"
+                          : "1px solid hsl(var(--border))",
+                      }}
+                    >
+                      <Icon
+                        size={20}
+                        strokeWidth={2}
+                        className="transition-colors duration-300"
+                        style={{ color: isOpen ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+                      />
+                    </div>
+
+                    {/* Title */}
+                    <h3
+                      className="flex-1 font-display font-bold tracking-tight transition-colors duration-300"
+                      style={{
+                        fontSize: "clamp(1.1rem, 1.5vw, 1.5rem)",
+                        color: isOpen ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))",
+                      }}
+                    >
+                      {f.title}
+                    </h3>
+
+                    {/* Toggle indicator */}
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300"
+                      style={{
+                        background: isOpen ? "hsl(var(--primary) / 0.12)" : "transparent",
+                        border: isOpen ? "1px solid hsl(var(--primary) / 0.25)" : "1px solid hsl(var(--border))",
+                      }}
+                    >
+                      <motion.span
+                        animate={{ rotate: isOpen ? 45 : 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="block text-lg leading-none"
+                        style={{
+                          color: isOpen ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
+                        }}
+                      >
+                        +
+                      </motion.span>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Expandable description */}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div
+                        className="pb-6 md:pb-8"
+                        style={{ paddingLeft: "calc(2rem + 1rem + 2.5rem + 1rem)" }}
+                      >
+                        <p
+                          className="text-muted-foreground leading-relaxed"
+                          style={{
+                            fontSize: "var(--text-body-lg)",
+                            maxWidth: "520px",
+                          }}
+                        >
+                          {f.desc}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+
+          {/* Bottom border */}
+          <div style={{ borderTop: "1px solid hsl(var(--border))" }} />
         </div>
       </div>
     </section>
