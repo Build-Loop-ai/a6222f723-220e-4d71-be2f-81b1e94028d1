@@ -4,11 +4,13 @@ import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { loginSchema } from "@/lib/validations";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 import { motion } from "framer-motion";
 
