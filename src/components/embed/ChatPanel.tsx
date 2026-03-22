@@ -238,6 +238,7 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
         </div>
         <button
           onClick={onClose}
+          aria-label="Close chat"
           className="rounded-lg p-1 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
         >
           <X className="h-5 w-5" />
