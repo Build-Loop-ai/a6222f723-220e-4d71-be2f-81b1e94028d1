@@ -193,14 +193,9 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
             </div>
           </div>
 
-          {/* Right — large number */}
+          {/* Right — large number with animated gradient */}
           <div className="hidden md:flex items-center justify-center">
-            <span
-              className="font-display font-[900]"
-              style={{ fontSize: "clamp(6rem, 12vw, 14rem)", background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--cyan)))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", opacity: 0.15 }}
-            >
-              {step.number}
-            </span>
+            <AnimatedGradientNumber number={step.number} cardBg={`hsl(220, 20%, ${lightness}%)`} />
           </div>
         </div>
       </motion.div>
