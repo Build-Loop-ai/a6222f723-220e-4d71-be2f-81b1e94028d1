@@ -1,7 +1,92 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+const NUMBER_BLOBS = [
+  { cx: 0.3, cy: 0.3, color: [52, 215, 123], speed: 0.45, phase: 0, drift: 0.3 },
+  { cx: 0.7, cy: 0.6, color: [0, 194, 224], speed: 0.40, phase: 1.5, drift: 0.32 },
+  { cx: 0.5, cy: 0.8, color: [80, 200, 180], speed: 0.50, phase: 3.0, drift: 0.26 },
+  { cx: 0.4, cy: 0.4, color: [0, 180, 200], speed: 0.42, phase: 4.5, drift: 0.34 },
+];
+
+function AnimatedGradientNumber({ number, cardBg }: { number: string; cardBg: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let raf: number;
+    let t = Math.random() * 100;
+
+    const resize = () => {
+      const rect = canvas.parentElement?.getBoundingClientRect();
+      if (rect) {
+        canvas.width = rect.width * 2;
+        canvas.height = rect.height * 2;
+      }
+    };
+
+    const draw = () => {
+      t += 0.055;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      for (const blob of NUMBER_BLOBS) {
+        const cx = w * (blob.cx + Math.sin(t * blob.speed + blob.phase) * blob.drift
+          + Math.sin(t * blob.speed * 2.1 + blob.phase * 0.7) * blob.drift * 0.3);
+        const cy = h * (blob.cy + Math.cos(t * blob.speed * 0.8 + blob.phase + 1) * blob.drift
+          + Math.cos(t * blob.speed * 1.7 + blob.phase * 1.3) * blob.drift * 0.25);
+        const r = Math.min(w, h) * (0.85 + Math.sin(t * 0.5 + blob.phase) * 0.1);
+
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        grad.addColorStop(0, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 1)`);
+        grad.addColorStop(0.4, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.9)`);
+        grad.addColorStop(0.7, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.5)`);
+        grad.addColorStop(1, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.1)`);
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      raf = requestAnimationFrame(draw);
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+    draw();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <div className="relative overflow-hidden" style={{ isolation: "isolate" }}>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+      />
+      <div
+        className="relative font-display font-[900]"
+        style={{
+          fontSize: "clamp(6rem, 12vw, 14rem)",
+          lineHeight: 1,
+          background: cardBg,
+          color: "white",
+          mixBlendMode: "multiply",
+        }}
+      >
+        {number}
+      </div>
+    </div>
+  );
+}
 
 const steps = [
   {
@@ -108,14 +193,9 @@ function StackingCard({ step, index }: { step: (typeof steps)[0]; index: number 
             </div>
           </div>
 
-          {/* Right — large number */}
+          {/* Right — large number with animated gradient */}
           <div className="hidden md:flex items-center justify-center">
-            <span
-              className="font-display font-[900]"
-              style={{ fontSize: "clamp(6rem, 12vw, 14rem)", background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--cyan)))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", opacity: 0.15 }}
-            >
-              {step.number}
-            </span>
+            <AnimatedGradientNumber number={step.number} cardBg={`hsl(220, 20%, ${lightness}%)`} />
           </div>
         </div>
       </motion.div>
