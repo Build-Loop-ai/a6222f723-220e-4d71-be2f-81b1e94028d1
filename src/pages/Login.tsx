@@ -4,11 +4,12 @@ import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { loginSchema } from "@/lib/validations";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 import { useSiteConfigTransformed } from "@/hooks/useSiteConfig";
 import { motion } from "framer-motion";
 
@@ -23,6 +24,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showResendConfirmation, setShowResendConfirmation] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -38,6 +41,16 @@ const Login = () => {
       setIsLoading(true);
       const { error } = await signIn(data.email, data.password);
       if (error) {
+        const isUnconfirmed = error.message.includes("Email not confirmed");
+        if (isUnconfirmed) {
+          setShowResendConfirmation(true);
+          toast({
+            variant: "destructive",
+            title: "Email not confirmed",
+            description: "Please check your inbox and confirm your email before signing in.",
+          });
+          return;
+        }
         toast({
           variant: "destructive",
           title: error.message.includes("Invalid login credentials")
@@ -61,6 +74,25 @@ const Login = () => {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) throw error;
+      toast({ title: "Confirmation email sent", description: "Please check your inbox." });
+      setShowResendConfirmation(false);
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Failed to resend", description: err.message });
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -234,6 +266,25 @@ const Login = () => {
               </div>
               {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
             </div>
+
+            {showResendConfirmation && (
+              <div className="p-3 rounded-lg bg-muted border border-border/60 text-sm">
+                <p className="text-foreground/80 mb-2">
+                  Your email hasn't been confirmed yet. Check your inbox or resend the confirmation.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResendConfirmation}
+                  disabled={resendLoading}
+                  className="gap-2"
+                >
+                  <RefreshCw className={`w-3 h-3 ${resendLoading ? "animate-spin" : ""}`} />
+                  {resendLoading ? "Sending..." : "Resend confirmation email"}
+                </Button>
+              </div>
+            )}
 
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign In"}
