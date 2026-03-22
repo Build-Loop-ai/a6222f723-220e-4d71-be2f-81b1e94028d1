@@ -198,10 +198,9 @@ const DemoSection = () => {
           className="text-center mt-12"
         >
           <Link to="/signup">
-            <button
+            <AnimatedGradientButton
               className="group inline-flex items-center gap-3 font-medium transition-transform duration-300 hover:scale-[0.98] active:scale-[0.965]"
               style={{
-                background: "linear-gradient(135deg, hsl(var(--green)) 0%, hsl(var(--cyan)) 100%)",
                 color: "hsl(var(--primary-foreground))",
                 padding: "14px 28px",
                 fontSize: "var(--text-body)",
@@ -211,7 +210,7 @@ const DemoSection = () => {
             >
               Try it with your own website
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-            </button>
+            </AnimatedGradientButton>
           </Link>
         </motion.div>
       </div>
