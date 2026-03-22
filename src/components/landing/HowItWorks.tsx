@@ -42,6 +42,10 @@ function AnimatedGradientNumber({ number }: { number: string }) {
       }
     };
 
+    // Offscreen canvas for compositing gradient blobs at full brightness
+    const offscreen = document.createElement("canvas");
+    const offCtx = offscreen.getContext("2d")!;
+
     const draw = () => {
       t += 0.055;
       const w = canvas.width;
@@ -53,18 +57,38 @@ function AnimatedGradientNumber({ number }: { number: string }) {
         return;
       }
 
-      // Step 1: Draw text as solid mask — measure first to avoid cutoff
+      // Step 1: Draw all gradient blobs on offscreen canvas (full brightness, no masking)
+      offscreen.width = w;
+      offscreen.height = h;
+      offCtx.clearRect(0, 0, w, h);
+
+      for (const blob of NUMBER_BLOBS) {
+        const cx = w * (blob.cx + Math.sin(t * blob.speed + blob.phase) * blob.drift
+          + Math.sin(t * blob.speed * 2.1 + blob.phase * 0.7) * blob.drift * 0.3);
+        const cy = h * (blob.cy + Math.cos(t * blob.speed * 0.8 + blob.phase + 1) * blob.drift
+          + Math.cos(t * blob.speed * 1.7 + blob.phase * 1.3) * blob.drift * 0.25);
+        const r = Math.min(w, h) * (1.0 + Math.sin(t * 0.5 + blob.phase) * 0.1);
+
+        const grad = offCtx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        grad.addColorStop(0, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 1)`);
+        grad.addColorStop(0.3, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 1)`);
+        grad.addColorStop(0.6, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.7)`);
+        grad.addColorStop(1, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.2)`);
+
+        offCtx.fillStyle = grad;
+        offCtx.fillRect(0, 0, w, h);
+      }
+
+      // Step 2: Draw text as mask on main canvas
       const fontSize = h * 0.75;
-      ctx.globalCompositeOperation = "source-over";
       ctx.font = `900 ${fontSize}px "Syne", sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      // Measure and scale down if text is wider than canvas
       const measured = ctx.measureText(number);
       const maxWidth = w * 0.9;
       const scale = measured.width > maxWidth ? maxWidth / measured.width : 1;
-      
+
       ctx.save();
       ctx.translate(w / 2, h / 2);
       ctx.scale(scale, scale);
@@ -72,28 +96,9 @@ function AnimatedGradientNumber({ number }: { number: string }) {
       ctx.fillText(number, 0, 0);
       ctx.restore();
 
-      // Step 2: Draw gradient blobs ONLY inside text pixels
+      // Step 3: Stamp full-brightness gradient into text shape
       ctx.globalCompositeOperation = "source-in";
-
-      // Draw all blobs onto an offscreen pass, then composite
-      for (const blob of NUMBER_BLOBS) {
-        const cx = w * (blob.cx + Math.sin(t * blob.speed + blob.phase) * blob.drift
-          + Math.sin(t * blob.speed * 2.1 + blob.phase * 0.7) * blob.drift * 0.3);
-        const cy = h * (blob.cy + Math.cos(t * blob.speed * 0.8 + blob.phase + 1) * blob.drift
-          + Math.cos(t * blob.speed * 1.7 + blob.phase * 1.3) * blob.drift * 0.25);
-        const r = Math.min(w, h) * (0.85 + Math.sin(t * 0.5 + blob.phase) * 0.1);
-
-        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-        grad.addColorStop(0, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 1)`);
-        grad.addColorStop(0.4, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.9)`);
-        grad.addColorStop(0.7, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.5)`);
-        grad.addColorStop(1, `rgba(${blob.color[0]}, ${blob.color[1]}, ${blob.color[2]}, 0.1)`);
-
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, w, h);
-      }
-
-      // Reset for next frame
+      ctx.drawImage(offscreen, 0, 0);
       ctx.globalCompositeOperation = "source-over";
 
       raf = requestAnimationFrame(draw);
