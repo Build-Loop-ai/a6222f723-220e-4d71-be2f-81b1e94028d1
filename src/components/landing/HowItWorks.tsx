@@ -67,19 +67,28 @@ function AnimatedGradientNumber({ number, cardBg }: { number: string; cardBg: st
   }, []);
 
   return (
-    <div className="relative overflow-hidden" style={{ isolation: "isolate" }}>
+    <div
+      className="relative overflow-hidden"
+      style={{
+        isolation: "isolate",
+        WebkitTextFillColor: "transparent",
+        color: "transparent",
+      }}
+    >
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none"
       />
+      {/* Mask layer: cardBg everywhere, text is knocked out (transparent via background-clip) */}
       <div
         className="relative font-display font-[900]"
         style={{
           fontSize: "clamp(6rem, 12vw, 14rem)",
           lineHeight: 1,
           background: cardBg,
-          color: "white",
-          mixBlendMode: "multiply",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          mixBlendMode: "screen",
         }}
       >
         {number}
