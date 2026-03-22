@@ -555,42 +555,8 @@ const HeroSection = () => {
           className="absolute inset-0 pointer-events-none"
          style={{ background: "linear-gradient(135deg, rgb(0, 160, 190) 0%, rgb(30, 180, 100) 50%, rgb(0, 140, 160) 100%)" }}
         />
-        {/* Drifting color orbs that blend together — faster + darker */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 120% 80% at 20% 30%, rgb(0, 160, 190) 0%, transparent 55%)",
-            animation: "hero-orb-1 5s ease-in-out infinite",
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 100% 90% at 80% 70%, rgb(30, 180, 100) 0%, transparent 55%)",
-            animation: "hero-orb-2 6s ease-in-out infinite",
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 90% 70% at 60% 20%, rgb(0, 140, 140) 0%, transparent 50%)",
-            animation: "hero-orb-3 7s ease-in-out infinite",
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 80% 100% at 30% 80%, rgb(20, 150, 90) 0%, transparent 50%)",
-            animation: "hero-orb-2 8s ease-in-out infinite reverse",
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse 70% 60% at 50% 50%, rgb(0, 120, 130) 0%, transparent 45%)",
-            animation: "hero-orb-1 9s ease-in-out infinite reverse",
-          }}
-        />
+        {/* Canvas-based fluid blobs — no straight lines */}
+        <HeroBlobCanvas />
 
         {/* Bottom vignette for content readability */}
         <div
