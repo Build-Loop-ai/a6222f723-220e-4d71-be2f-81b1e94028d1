@@ -710,24 +710,6 @@ const HeroSection = () => {
             </Link>
           </motion.div>
 
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 1.8 }}
-            className="flex gap-10 md:gap-16 flex-wrap justify-center"
-          >
-            {[
-              { label: "Setup", value: "5 min" },
-              { label: "Languages", value: "22+" },
-              { label: "Free trial", value: "14 days" },
-            ].map((item, idx) => (
-              <div key={idx} className="flex flex-col gap-1 items-center">
-                <span className="text-base md:text-lg font-semibold text-white">{item.value}</span>
-                <span className="font-mono text-[9px] tracking-[3px] uppercase text-white/50">{item.label}</span>
-              </div>
-            ))}
-          </motion.div>
         </motion.div>
 
         {/* === WIDGET — inline in hero (before it goes fixed) === */}
