@@ -30,9 +30,10 @@ interface ChatPanelProps {
   isClosing?: boolean;
   vapiPublicKey?: string;
   vapiAssistantId?: string;
+  embedded?: boolean;
 }
 
-export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = false, vapiPublicKey, vapiAssistantId }: ChatPanelProps) {
+export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = false, vapiPublicKey, vapiAssistantId, embedded = false }: ChatPanelProps) {
   const [inCall, setInCall] = useState(false);
   const [vapiInstance, setVapiInstance] = useState<Vapi | null>(null);
   const canVoiceCall = !!(vapiPublicKey && vapiAssistantId);
