@@ -147,22 +147,22 @@ const FeaturesSection = () => {
         </h2>
 
         {/* === ORBIT LAYOUT (desktop) === */}
-        <div className="hidden lg:flex items-center justify-center" style={{ minHeight: "700px" }}>
-          <div className="relative" style={{ width: "700px", height: "700px" }}>
+        <div className="hidden lg:flex items-center justify-center" style={{ minHeight: "640px" }}>
+          <div className="relative" style={{ width: "640px", height: "640px" }}>
 
-            {/* Orbit ring */}
+            {/* Orbit ring – aligned with nodes */}
             <div
               className="absolute rounded-full border border-border/30"
               style={{
-                inset: "8%",
-                opacity: 0.4,
+                inset: "14%",
+                opacity: 0.35,
               }}
             />
             <div
               className="absolute rounded-full border border-border/20"
               style={{
-                inset: "20%",
-                opacity: 0.25,
+                inset: "30%",
+                opacity: 0.2,
               }}
             />
 
