@@ -312,6 +312,7 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
           <button
             type="button"
             onClick={toggleVoice}
+            aria-label={isListening ? "Stop voice input" : "Start voice input"}
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
               isListening
                 ? "bg-red-100 text-red-600"
