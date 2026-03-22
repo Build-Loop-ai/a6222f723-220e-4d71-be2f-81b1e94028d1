@@ -96,12 +96,12 @@ const features = [
 
 // Positions around a circle (6 items, evenly spaced starting from top)
 const orbitPositions = [
-  { angle: -90, radius: 42 },   // top
-  { angle: -30, radius: 42 },   // top-right
-  { angle: 30, radius: 42 },    // bottom-right
-  { angle: 90, radius: 42 },    // bottom
-  { angle: 150, radius: 42 },   // bottom-left
-  { angle: 210, radius: 42 },   // top-left
+  { angle: -90, radius: 36 },   // top
+  { angle: -30, radius: 36 },   // top-right
+  { angle: 30, radius: 36 },    // bottom-right
+  { angle: 90, radius: 36 },    // bottom
+  { angle: 150, radius: 36 },   // bottom-left
+  { angle: 210, radius: 36 },   // top-left
 ];
 
 function getOrbitXY(angle: number, radius: number) {
