@@ -117,10 +117,10 @@ const DashboardSidebar = () => {
 
       {/* Upgrade CTA card – shimmer border */}
       <div className="relative px-4 pb-3">
-        <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-primary/10 via-emerald-500/5 to-teal-500/5 border border-primary/10 shimmer-border">
+        <Link to="/dashboard/settings?tab=billing" className="relative block overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-primary/10 via-emerald-500/5 to-teal-500/5 border border-primary/10 shimmer-border hover:from-primary/15 hover:via-emerald-500/10 hover:to-teal-500/10 transition-all duration-200 group/upgrade">
           <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-primary/15 to-transparent rounded-bl-full pointer-events-none" />
           <div className="relative flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shrink-0 shadow-md shadow-primary/20">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shrink-0 shadow-md shadow-primary/20 group-hover/upgrade:scale-110 transition-transform">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -128,7 +128,7 @@ const DashboardSidebar = () => {
               <p className="text-[11px] text-foreground/45 mt-0.5 leading-relaxed">Unlock advanced AI features & analytics</p>
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Divider */}
