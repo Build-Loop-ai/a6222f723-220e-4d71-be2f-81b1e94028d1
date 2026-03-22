@@ -1,40 +1,48 @@
 
+Fix the iframe widget so the unused iframe area is transparent instead of black, while keeping the widget collapsed by default.
 
-# Fix Widget Embed Issues
+## What’s causing it
+The `/widget` page only makes its inner wrapper transparent. The actual document surface (`html`, `body`, and `#root`) still inherits the app’s dark global background, so the iframe rectangle appears black in external iframe testers. Also, the embedded widget layout should behave like a floating widget inside the iframe, not like a full-page app.
 
-Three problems identified from the screenshots:
+## Plan
+1. Add a dedicated “embed mode” for the `/widget` route
+- In `src/pages/WidgetEmbed.tsx`, apply a route-scoped embed class or inline document styles on mount
+- Force `html`, `body`, and `#root` to:
+  - `background: transparent`
+  - no dark theme fill
+  - full height
+- Clean these styles up on unmount so the rest of the app is unaffected
 
-## 1. Black Background
-The `/widget` embed page inherits the app's dark theme CSS (dark background from `index.css`). The `WidgetEmbed` page wrapper `div` has no explicit background color, so it picks up the global dark `body`/`:root` background.
+2. Refine the embedded widget layout
+- In `src/components/embed/ChatWidget.tsx`, wrap embedded mode in a transparent full-frame container
+- Keep the widget collapsed initially
+- Keep toggle behavior exactly as it works now
 
-**Fix**: Add `bg-transparent` or `bg-white` to the wrapper div in `WidgetEmbed.tsx`, and ensure the `body` background is overridden for the widget route. Best approach: add inline style `background: transparent` on the wrapper so the iframe blends with the host page.
+3. Make the open panel float inside the iframe instead of occupying the full iframe surface
+- In `src/components/embed/ChatPanel.tsx`, change embedded mode from a full white `h-full w-full` panel to a floating card anchored near the bubble
+- Preserve transparency around the panel so the host page shows through
+- Keep normal non-embed behavior unchanged
 
-## 2. Cookie Consent Showing in Embed
-The `CookieConsent` component is rendered globally in `App.tsx` (line 107), outside the router. This means it appears on every route, including `/widget`. The widget embed should never show the cookie banner.
+4. Prevent cutoff without reintroducing a full-screen white/black canvas
+- Constrain the embedded panel with responsive sizing, e.g.:
+  - width capped to iframe width minus margins
+  - height capped to iframe height minus bubble/header spacing
+- Use embedded-specific positioning so the panel opens upward cleanly inside small iframe sizes
 
-**Fix**: Move `CookieConsent` so it doesn't render on the `/widget` route. Options:
-- Conditionally render `CookieConsent` based on the current path (check `window.location.pathname`)
-- Or move it inside a layout wrapper that excludes the widget route
+5. Add a small embed hardening pass
+- Make the embedded bubble/panel use iframe-scoped positioning for consistency
+- Confirm the generated iframe snippet still points to the published URL, not a preview URL
 
-Simplest: Add a path check inside `CookieConsent.tsx` — if `window.location.pathname === "/widget"`, return null.
+## Files to update
+- `src/pages/WidgetEmbed.tsx`
+- `src/components/embed/ChatWidget.tsx`
+- `src/components/embed/ChatPanel.tsx`
+- `src/index.css` (or equivalent route-scoped embed styles)
 
-## 3. Chat Panel Getting Cut Off
-The widget renders inside a `h-screen w-screen overflow-hidden` container. The `ChatPanel` uses `fixed` positioning with `bottom-24` and a height of `520px`. In a small iframe (600px height), the panel extends above the viewport and gets clipped by `overflow-hidden`.
+## Technical details
+The key fix is not the widget card itself; it’s the page chrome behind it. Right now the iframe document still renders the app’s dark background. The correct solution is:
+- transparent document background in widget route
+- transparent wrapper around the widget
+- floating embedded panel with bounded dimensions
 
-**Fix**: In `WidgetEmbed.tsx`, remove `overflow-hidden` or make the ChatWidget render inline (not fixed-positioned) when in embed mode. Better approach: pass an `embedded` prop to `ChatWidget` so it renders the panel inline/fullscreen within the iframe instead of as a fixed overlay.
-
-## Files to Change
-
-1. **`src/pages/WidgetEmbed.tsx`** — Set transparent background, pass `embedded` prop to ChatWidget
-2. **`src/components/CookieConsent.tsx`** — Skip rendering on `/widget` path
-3. **`src/components/embed/ChatWidget.tsx`** — Accept `embedded` prop; when true, render panel inline (always open, no bubble)
-4. **`src/components/embed/ChatPanel.tsx`** — Accept `embedded` prop; when true, use relative positioning and fill container instead of fixed positioning
-
-### Technical Detail
-
-When `embedded=true`:
-- `ChatWidget` skips the bubble entirely and renders `ChatPanel` always-open, filling the iframe
-- `ChatPanel` switches from `fixed` positioning to `relative` with `h-full w-full` to fill the parent container
-- `WidgetEmbed` wrapper uses `bg-transparent` so the iframe has no background
-- `CookieConsent` checks `window.location.pathname.startsWith("/widget")` and returns null if true
-
+That will make the iframe look like a true overlay widget instead of a black mini-page.
