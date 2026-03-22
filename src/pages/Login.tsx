@@ -25,6 +25,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showResendConfirmation, setShowResendConfirmation] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   useEffect(() => {
     if (user && !authLoading) {
