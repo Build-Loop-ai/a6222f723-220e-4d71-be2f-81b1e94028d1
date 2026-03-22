@@ -4,10 +4,11 @@ import { motion, useScroll, useTransform } from "framer-motion";
 const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const NUMBER_BLOBS = [
-  { cx: 0.3, cy: 0.3, color: [52, 215, 123], speed: 0.45, phase: 0, drift: 0.3 },
-  { cx: 0.7, cy: 0.6, color: [0, 194, 224], speed: 0.40, phase: 1.5, drift: 0.32 },
-  { cx: 0.5, cy: 0.8, color: [80, 200, 180], speed: 0.50, phase: 3.0, drift: 0.26 },
-  { cx: 0.4, cy: 0.4, color: [0, 180, 200], speed: 0.42, phase: 4.5, drift: 0.34 },
+  { cx: 0.2, cy: 0.3, color: [52, 215, 123], speed: 0.45, phase: 0, drift: 0.3 },
+  { cx: 0.8, cy: 0.6, color: [0, 194, 224], speed: 0.40, phase: 1.5, drift: 0.32 },
+  { cx: 0.5, cy: 0.8, color: [52, 215, 123], speed: 0.50, phase: 3.0, drift: 0.26 },
+  { cx: 0.3, cy: 0.5, color: [0, 180, 200], speed: 0.42, phase: 4.5, drift: 0.34 },
+  { cx: 0.7, cy: 0.2, color: [80, 200, 180], speed: 0.48, phase: 5.8, drift: 0.28 },
 ];
 
 function AnimatedGradientNumber({ number }: { number: string }) {
