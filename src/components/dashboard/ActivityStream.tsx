@@ -85,12 +85,16 @@ const ActivityStream = ({ conversations, isLoading }: ActivityStreamProps) => {
         <div className="space-y-1">
           {conversations.slice(0, 5).map((conv, index) => {
             const isActive = conv.status === "active";
-            const ChannelIcon = conv.channel === "voice" ? Mic : MessageSquare;
+            const isVoice = conv.channel === "voice";
+            const ChannelIcon = isVoice ? Mic : MessageSquare;
+            const detailLink = isVoice
+              ? `/dashboard/calls`
+              : `/dashboard/conversations/${conv.id}`;
 
             return (
               <Link
                 key={conv.id}
-                to={`/dashboard/conversations/${conv.id}`}
+                to={detailLink}
                 className={cn(
                   "flex items-center gap-4 p-3 -mx-3 rounded-xl transition-all",
                   "hover:bg-white/60 cursor-pointer group",

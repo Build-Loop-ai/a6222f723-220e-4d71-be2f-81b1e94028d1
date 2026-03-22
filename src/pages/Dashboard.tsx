@@ -19,10 +19,23 @@ interface ConversationRow {
   page_url: string | null;
 }
 
+interface CallLogRow {
+  id: string;
+  caller_number: string | null;
+  direction: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  duration_seconds: number | null;
+  outcome: string | null;
+  created_at: string;
+  summary: string | null;
+}
+
 const Dashboard = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [conversations, setConversations] = useState<ConversationRow[]>([]);
+  const [callLogs, setCallLogs] = useState<CallLogRow[]>([]);
   const [messageCount, setMessageCount] = useState(0);
   const [pagesRecommended, setPagesRecommended] = useState(0);
   const [userName, setUserName] = useState("");
@@ -48,11 +61,10 @@ const Dashboard = () => {
 
         setUserName(profile.full_name || user.email?.split("@")[0] || "");
 
-        // Fetch today's conversations + recent for activity stream
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
 
-        const [convRes, widgetRes] = await Promise.all([
+        const [convRes, callRes, widgetRes] = await Promise.all([
           supabase
             .from("conversations")
             .select("id, visitor_id, channel, started_at, ended_at, status, page_url")
@@ -61,6 +73,13 @@ const Dashboard = () => {
             .order("started_at", { ascending: false })
             .limit(200),
           supabase
+            .from("call_logs")
+            .select("id, caller_number, direction, started_at, ended_at, duration_seconds, outcome, created_at, summary")
+            .eq("organization_id", profile.organization_id)
+            .gte("created_at", todayStart.toISOString())
+            .order("created_at", { ascending: false })
+            .limit(50),
+          supabase
             .from("widget_configs")
             .select("id")
             .eq("organization_id", profile.organization_id)
@@ -68,7 +87,9 @@ const Dashboard = () => {
         ]);
 
         const allConvs = (convRes.data || []) as ConversationRow[];
+        const allCalls = (callRes.data || []) as CallLogRow[];
         setConversations(allConvs);
+        setCallLogs(allCalls);
         setHasWidget(!!widgetRes.data);
         if (widgetRes.data) setWidgetId(widgetRes.data.id);
 
@@ -92,7 +113,6 @@ const Dashboard = () => {
           setMessageCount(msgRes.count || 0);
           setPagesRecommended(pagesRes.count || 0);
 
-          // Compute avg response time from ended conversations
           const endedToday = todayConvs.filter((c) => c.ended_at);
           if (endedToday.length > 0) {
             const totalSec = endedToday.reduce((sum, c) => {
@@ -113,14 +133,46 @@ const Dashboard = () => {
   }, [user]);
 
   const todayConversations = conversations.filter((c) => isToday(parseISO(c.started_at)));
-  const activeVisitors = conversations.filter((c) => c.status === "active").length;
+  const todayCalls = callLogs.filter((c) => isToday(parseISO(c.created_at)));
 
-  // Compute performance metrics
-  const resolved = todayConversations.filter((c) => c.status === "ended" || c.status === "completed").length;
-  const abandoned = todayConversations.filter((c) => c.status === "abandoned").length;
-  const escalated = todayConversations.filter((c) => c.status === "escalated" || c.status === "transferred").length;
-  const satisfactionScore = todayConversations.length > 0
-    ? Math.round(((resolved) / todayConversations.length) * 100)
+  // Active visitors = unique active text conversation visitor_ids
+  const activeVisitorIds = new Set(
+    conversations.filter((c) => c.status === "active").map((c) => c.visitor_id)
+  );
+  const activeVisitors = activeVisitorIds.size;
+
+  // Merge text conversations and voice calls into unified activity stream
+  const mergedActivity: ConversationRow[] = [
+    ...todayConversations,
+    ...todayCalls.map((call) => ({
+      id: call.id,
+      visitor_id: call.caller_number || "Voice caller",
+      channel: "voice" as string,
+      started_at: call.started_at || call.created_at,
+      ended_at: call.ended_at,
+      status: call.outcome === "completed" || call.outcome === "info_provided" ? "ended" : (call.outcome || "ended"),
+      page_url: null,
+    })),
+  ].sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime());
+
+  // Total interactions = text + voice
+  const totalInteractions = todayConversations.length + todayCalls.length;
+
+  // Performance metrics combining text + voice
+  const resolvedConvs = todayConversations.filter((c) => c.status === "ended" || c.status === "completed").length;
+  const resolvedCalls = todayCalls.filter((c) => c.outcome === "completed" || c.outcome === "info_provided" || c.outcome === "appointment_booked").length;
+  const resolved = resolvedConvs + resolvedCalls;
+
+  const abandonedConvs = todayConversations.filter((c) => c.status === "abandoned").length;
+  const missedCalls = todayCalls.filter((c) => c.outcome === "missed" || c.outcome === "voicemail").length;
+  const abandoned = abandonedConvs + missedCalls;
+
+  const escalatedConvs = todayConversations.filter((c) => c.status === "escalated" || c.status === "transferred").length;
+  const transferredCalls = todayCalls.filter((c) => c.outcome === "transferred").length;
+  const escalated = escalatedConvs + transferredCalls;
+
+  const satisfactionScore = totalInteractions > 0
+    ? Math.round((resolved / totalInteractions) * 100)
     : 0;
 
   if (loading) {
@@ -152,7 +204,7 @@ const Dashboard = () => {
       />
 
       <MetricCardsRow
-        conversationsToday={todayConversations.length}
+        conversationsToday={totalInteractions}
         activeVisitors={activeVisitors}
         messagesSent={messageCount}
         avgResponseTime={avgResponseTime}
@@ -163,7 +215,7 @@ const Dashboard = () => {
       <div className="grid lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3">
           <ActivityStream
-            conversations={todayConversations.slice(0, 8)}
+            conversations={mergedActivity.slice(0, 8)}
             isLoading={loading}
           />
         </div>
