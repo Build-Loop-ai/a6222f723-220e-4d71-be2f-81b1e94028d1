@@ -77,6 +77,25 @@ const Login = () => {
     }
   };
 
+  const handleResendConfirmation = async () => {
+    if (!email) return;
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) throw error;
+      toast({ title: "Confirmation email sent", description: "Please check your inbox." });
+      setShowResendConfirmation(false);
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Failed to resend", description: err.message });
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     const { error } = await signInWithGoogle();
     if (error) {
