@@ -156,21 +156,14 @@ const DemoSection = () => {
             >
               Watch it
               <br />
-              <span className="relative inline-block overflow-hidden" style={{ isolation: "isolate" }}>
-                <canvas
-                  ref={useCanvasBlobs(BUTTON_BLOBS)}
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                />
-                <span
-                  style={{
-                    position: "relative",
-                    background: "#050506",
-                    color: "white",
-                    mixBlendMode: "multiply",
-                  }}
-                >
-                  learn.
-                </span>
+              <span
+                style={{
+                  background: "linear-gradient(135deg, hsl(var(--green)), hsl(var(--cyan)))",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                learn.
               </span>
             </h2>
 
