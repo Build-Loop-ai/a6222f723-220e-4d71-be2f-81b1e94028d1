@@ -238,6 +238,7 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
         </div>
         <button
           onClick={onClose}
+          aria-label="Close chat"
           className="rounded-lg p-1 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
         >
           <X className="h-5 w-5" />
@@ -301,8 +302,8 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
               }
             }}
             disabled={inCall}
+            aria-label="Start voice call"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-40"
-            title="Start voice call"
           >
             <Phone className="h-4 w-4" />
           </button>
@@ -311,6 +312,7 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
           <button
             type="button"
             onClick={toggleVoice}
+            aria-label={isListening ? "Stop voice input" : "Start voice input"}
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors ${
               isListening
                 ? "bg-red-100 text-red-600"
@@ -332,6 +334,7 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
         <button
           type="submit"
           disabled={!input.trim() || isLoading}
+          aria-label="Send message"
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white transition-all disabled:opacity-40"
           style={{ backgroundColor: config.accentColor }}
         >

@@ -31,6 +31,7 @@ import Admin from "./pages/Admin";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import CookieConsent from "./components/CookieConsent";
 import WidgetEmbed from "./pages/WidgetEmbed";
 import WidgetLivePreview from "./pages/WidgetLivePreview";
 
@@ -103,6 +104,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <CookieConsent />
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
