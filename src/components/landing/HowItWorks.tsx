@@ -53,9 +53,24 @@ function AnimatedGradientNumber({ number }: { number: string }) {
         return;
       }
 
-      // Step 1: Draw text as solid mask
-      const fontSize = Math.min(w * 0.65, h * 0.8);
+      // Step 1: Draw text as solid mask — measure first to avoid cutoff
+      const fontSize = h * 0.75;
       ctx.globalCompositeOperation = "source-over";
+      ctx.font = `900 ${fontSize}px "Syne", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // Measure and scale down if text is wider than canvas
+      const measured = ctx.measureText(number);
+      const maxWidth = w * 0.9;
+      const scale = measured.width > maxWidth ? maxWidth / measured.width : 1;
+      
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      ctx.scale(scale, scale);
+      ctx.fillStyle = "white";
+      ctx.fillText(number, 0, 0);
+      ctx.restore();
       ctx.font = `900 ${fontSize}px "Syne", sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
