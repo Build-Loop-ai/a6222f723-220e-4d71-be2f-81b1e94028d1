@@ -119,9 +119,8 @@ function AnimatedGradientNumber({ number }: { number: string }) {
       ref={containerRef}
       className="relative"
       style={{
-        width: "100%",
-        aspectRatio: "1 / 1",
-        maxWidth: "clamp(180px, 14vw, 280px)",
+        width: "clamp(200px, 18vw, 340px)",
+        aspectRatio: "1.3 / 1",
       }}
     >
       <canvas
