@@ -2,6 +2,9 @@ import { Link } from "react-router-dom";
 import { Send, Mic, ArrowRight, Globe, MessageCircle, Phone, Loader2, X } from "lucide-react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
+import { createFreshVapiClient, resetVapiClient, stopVapiCall } from "@/lib/vapi-client";
+import { VoiceCallOverlay } from "@/components/embed/VoiceCallOverlay";
+import type Vapi from "@vapi-ai/web";
 
 const HERO_BLOBS = [
   { cx: 0.2, cy: 0.3, color: [52, 215, 123], speed: 0.45, phase: 0, drift: 0.3 },
