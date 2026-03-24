@@ -33,5 +33,8 @@ verify_jwt = false
 [functions.hero-chat]
 verify_jwt = false
 
+[functions.hero-voice-config]
+verify_jwt = false
+
 [functions.complete-onboarding]
 verify_jwt = false
