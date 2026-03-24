@@ -429,69 +429,33 @@ const HeroSection = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.3 }}
-                className="flex flex-col items-center justify-center py-8 gap-5"
-                style={{ background: "#ffffff" }}
+                className="relative"
+                style={{ background: "#ffffff", minHeight: "260px" }}
               >
-                <div className="relative">
-                  <motion.div
-                    className="w-20 h-20 rounded-full flex items-center justify-center"
-                    style={{
-                      background: voiceActive
-                        ? "linear-gradient(135deg, hsl(148 68% 52%), hsl(190 100% 44%))"
-                        : "rgba(0,0,0,0.05)",
+                {inCall && vapiInstance ? (
+                  <VoiceCallOverlay
+                    vapiInstance={vapiInstance}
+                    accentColor="hsl(148 68% 52%)"
+                    onEnd={() => {
+                      setInCall(false);
+                      setVapiInstance(null);
+                      resetVapiClient();
                     }}
-                    animate={
-                      voiceActive
-                        ? { scale: [1, 1.08, 1], boxShadow: ["0 0 0px rgba(52,215,123,0.3)", "0 0 40px rgba(52,215,123,0.4)", "0 0 0px rgba(52,215,123,0.3)"] }
-                        : {}
-                    }
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Phone className="w-7 h-7" style={{ color: voiceActive ? "white" : "rgba(0,0,0,0.4)" }} />
-                  </motion.div>
-                  {voiceActive && (
-                    <>
-                      <motion.div
-                        className="absolute inset-0 rounded-full border border-primary/30"
-                        animate={{ scale: [1, 2.2], opacity: [0.5, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                      />
-                      <motion.div
-                        className="absolute inset-0 rounded-full border border-primary/20"
-                        animate={{ scale: [1, 2.6], opacity: [0.3, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
-                      />
-                    </>
-                  )}
-                </div>
-
-                {voiceActive && (
-                  <div className="flex items-center gap-[3px] h-8">
-                    {Array.from({ length: 16 }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="w-[3px] rounded-full"
-                        style={{ background: "linear-gradient(to top, hsl(148 68% 52%), hsl(190 100% 44%))" }}
-                        animate={{ height: [4, 8 + Math.random() * 22, 4] }}
-                        transition={{
-                          duration: 0.4 + Math.random() * 0.4,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                          delay: i * 0.05,
-                        }}
-                      />
-                    ))}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 gap-5">
+                    <div
+                      className="w-20 h-20 rounded-full flex items-center justify-center"
+                      style={{ background: "rgba(0,0,0,0.05)" }}
+                    >
+                      <Phone className="w-7 h-7" style={{ color: "rgba(0,0,0,0.4)" }} />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[13px] font-medium text-gray-900">Talk to our AI</p>
+                      <p className="text-[11px] text-gray-500 mt-0.5">Live voice demo</p>
+                    </div>
                   </div>
                 )}
-
-                <div className="text-center">
-                  <p className="text-[13px] font-medium text-gray-900">
-                    {voiceActive ? "AI is speaking…" : "Connecting…"}
-                  </p>
-                  <p className="text-[11px] text-gray-500 mt-0.5 font-mono">
-                    {voiceActive ? `0:${voiceSeconds.toString().padStart(2, "0")}` : "Starting call"}
-                  </p>
-                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -537,15 +501,28 @@ const HeroSection = () => {
               <button
                 className="w-full py-2.5 rounded-xl text-[12px] font-semibold transition-all"
                 style={{
-                  background: voiceActive ? "rgba(239,68,68,0.15)" : "rgba(52,215,123,0.1)",
-                  color: voiceActive ? "#ef4444" : "hsl(148 68% 52%)",
+                  background: inCall ? "rgba(239,68,68,0.15)" : "rgba(52,215,123,0.1)",
+                  color: inCall ? "#ef4444" : "hsl(148 68% 52%)",
                 }}
                 onClick={() => {
-                  setVoiceActive(!voiceActive);
-                  if (voiceActive) setVoiceSeconds(0);
+                  if (inCall) {
+                    stopVapiCall();
+                    resetVapiClient();
+                    setInCall(false);
+                    setVapiInstance(null);
+                  } else if (voiceConfig) {
+                    console.log("[HeroVoice] Starting call");
+                    const vapi = createFreshVapiClient(voiceConfig.vapiPublicKey);
+                    vapi.start(voiceConfig.vapiAssistantId).catch((err: unknown) => {
+                      console.error("[HeroVoice] vapi.start() rejected:", err);
+                    });
+                    setVapiInstance(vapi);
+                    setInCall(true);
+                  }
                 }}
+                disabled={!voiceConfig && !inCall}
               >
-                {voiceActive ? "End Call" : "Start Call"}
+                {inCall ? "End Call" : voiceConfig ? "Start Call" : "Voice unavailable"}
               </button>
             )}
           </div>
