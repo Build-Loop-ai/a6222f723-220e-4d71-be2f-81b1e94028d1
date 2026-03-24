@@ -18,22 +18,19 @@ const footerLinks = [
       { label: "Features", href: "#features" },
       { label: "Pricing", href: "#pricing" },
       { label: "Demo", href: "/demo" },
-      { label: "Changelog", href: "#" },
+      { label: "Assessment", href: "/assessment" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Documentation", href: "#" },
-      { label: "Blog", href: "#" },
+      { label: "Walkthrough", href: "/walkthrough" },
       { label: "Support", href: "#", isContact: true },
-      { label: "API", href: "#" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About", href: "#" },
       { label: "Contact", href: "#", isContact: true },
       { label: "Privacy", href: "/privacy" },
       { label: "Terms", href: "/terms" },
