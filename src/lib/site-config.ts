@@ -11,15 +11,15 @@
 
 export const siteConfig = {
   // Brand - Update these in Admin Panel → Site Config
-  name: "AI Assistant",
+  name: "Greet",
   tagline: "Your AI website assistant, always online",
   logoUrl: "",
   logoUrlDark: "",
   description: "Engage every visitor. Answer every question. Book every appointment. AI chat assistant trained on your website, ready in minutes.",
   
   // Contact - Update in Admin Panel → Site Config
-  supportEmail: "support@example.com",
-  salesEmail: "sales@example.com",
+  supportEmail: "hello@greet.chat",
+  salesEmail: "hello@greet.chat",
   
   // Social links - Leave empty to hide, configure in Admin Panel
   social: {
