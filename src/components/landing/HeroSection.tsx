@@ -106,12 +106,14 @@ const HeroSection = () => {
   const [isTypingUrl, setIsTypingUrl] = useState(false);
   const [showWidget, setShowWidget] = useState(false);
   const [widgetTab, setWidgetTab] = useState<"chat" | "voice">("chat");
-  const [voiceActive, setVoiceActive] = useState(false);
-  const [voiceSeconds, setVoiceSeconds] = useState(0);
+
+  // Real Vapi voice state
+  const [voiceConfig, setVoiceConfig] = useState<{ vapiPublicKey: string; vapiAssistantId: string } | null>(null);
+  const [inCall, setInCall] = useState(false);
+  const [vapiInstance, setVapiInstance] = useState<Vapi | null>(null);
 
   // Widget lifecycle: "building" → "ready"
   const [widgetPhase, setWidgetPhase] = useState<"building" | "ready">("building");
-  // Whether the widget has settled into the fixed bottom-right position
   const [isFixed, setIsFixed] = useState(false);
 
   // Chat state
@@ -122,55 +124,19 @@ const HeroSection = () => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [widgetDismissed, setWidgetDismissed] = useState(false);
 
-  // Rotate words
+  // Fetch voice config on mount
   useEffect(() => {
-    const interval = setInterval(() => {
-      setWordIndex((prev) => (prev + 1) % ROTATING_WORDS.length);
-    }, 2800);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Auto-type URL demo
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsTypingUrl(true);
-      const url = "greet.ai";
-      let i = 0;
-      const typeInterval = setInterval(() => {
-        setUrlValue(url.slice(0, i + 1));
-        i++;
-        if (i >= url.length) {
-          clearInterval(typeInterval);
-          setTimeout(() => {
-            setShowWidget(true);
-            // After "building" phase, transition to ready and then fix
-            setTimeout(() => setWidgetPhase("ready"), 2200);
-            setTimeout(() => setIsFixed(true), 3400);
-          }, 600);
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hero-voice-config`;
+    fetch(url)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.vapiPublicKey && data.vapiAssistantId) {
+          setVoiceConfig(data);
+          console.log("[HeroVoice] Config loaded");
         }
-      }, 80);
-      return () => clearInterval(typeInterval);
-    }, 2000);
-    return () => clearTimeout(timeout);
+      })
+      .catch((err) => console.warn("[HeroVoice] Failed to load config:", err));
   }, []);
-
-  // Auto-activate voice demo after tab switch
-  useEffect(() => {
-    if (widgetTab === "voice") {
-      const t = setTimeout(() => setVoiceActive(true), 600);
-      return () => clearTimeout(t);
-    } else {
-      setVoiceActive(false);
-      setVoiceSeconds(0);
-    }
-  }, [widgetTab]);
-
-  // Voice timer
-  useEffect(() => {
-    if (!voiceActive) return;
-    const i = setInterval(() => setVoiceSeconds((s) => s + 1), 1000);
-    return () => clearInterval(i);
-  }, [voiceActive]);
 
   // Scroll chat to bottom
   useEffect(() => {
