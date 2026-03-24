@@ -138,6 +138,47 @@ const HeroSection = () => {
       .catch((err) => console.warn("[HeroVoice] Failed to load config:", err));
   }, []);
 
+  // Rotate words
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % ROTATING_WORDS.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-type URL demo
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsTypingUrl(true);
+      const url = "greet.ai";
+      let i = 0;
+      const typeInterval = setInterval(() => {
+        setUrlValue(url.slice(0, i + 1));
+        i++;
+        if (i >= url.length) {
+          clearInterval(typeInterval);
+          setTimeout(() => {
+            setShowWidget(true);
+            setTimeout(() => setWidgetPhase("ready"), 2200);
+            setTimeout(() => setIsFixed(true), 3400);
+          }, 600);
+        }
+      }, 80);
+      return () => clearInterval(typeInterval);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // Clean up Vapi on tab switch away from voice
+  useEffect(() => {
+    if (widgetTab !== "voice" && inCall) {
+      stopVapiCall();
+      resetVapiClient();
+      setInCall(false);
+      setVapiInstance(null);
+    }
+  }, [widgetTab, inCall]);
+
   // Scroll chat to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
