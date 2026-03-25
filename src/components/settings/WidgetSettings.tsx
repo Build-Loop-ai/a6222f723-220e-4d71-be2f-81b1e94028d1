@@ -782,7 +782,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                   <ChevronDown className="h-2.5 w-2.5 opacity-50" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-48 p-1.5 glass-light-strong border-white/60 shadow-xl z-50 rounded-xl" align="start" sideOffset={8}>
+              <PopoverContent className="w-48 p-1.5 bg-popover text-popover-foreground border-border/50 shadow-xl z-50 rounded-xl" align="start" sideOffset={8}>
                 <div className="space-y-0.5">
                   {FONT_OPTIONS.map((f) => (
                     <button
@@ -811,7 +811,7 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
                   <ChevronDown className="h-2.5 w-2.5 opacity-50" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-44 p-1.5 glass-light-strong border-white/60 shadow-xl z-50 rounded-xl" align="start" sideOffset={8}>
+              <PopoverContent className="w-44 p-1.5 bg-popover text-popover-foreground border-border/50 shadow-xl z-50 rounded-xl" align="start" sideOffset={8}>
                 <div className="space-y-0.5">
                   {RADIUS_OPTIONS.map((r) => (
                     <button
