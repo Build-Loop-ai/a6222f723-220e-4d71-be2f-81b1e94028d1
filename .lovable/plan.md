@@ -1,25 +1,33 @@
 
 
-# Pre-Launch: Update OG Image URLs to Production Domain
+# Fix: Crawl-Site Auth Failure + Missing Asia Timezones
 
-## What
-Update the Open Graph and Twitter image URLs in `index.html` from the Lovable staging domain to `https://greet.chat`.
+## Problem 1: Crawl always fails for regular users
+The `crawl-site` edge function uses `supabase.auth.getClaims(token)` (line 38), which **does not exist** in supabase-js v2. This causes a runtime error, returning 401 Unauthorized for every non-service-role call. Since the frontend calls it with a normal user JWT, the crawl always fails.
 
-## Why
-Social sharing previews (Facebook, Twitter/X, LinkedIn, Slack) will fetch these URLs. The staging URL works but looks unprofessional and will break if the staging subdomain changes.
+**Fix**: Replace `getClaims` with `supabase.auth.getUser()` which is the correct v2 method.
 
-## Change
+## Problem 2: No Asia/Singapore timezone
+The timezone dropdown in `BusinessSettings.tsx` (lines 581-589) only lists 6 timezones — all European/American. No Asian timezones at all.
 
-**File: `index.html`** (lines 15, 19)
-- Change `https://a6222f723-220e-4d71-be2f-81b1e94028d1.lovable.app/og-image.png` → `https://greet.chat/og-image.png` (2 occurrences)
+**Fix**: Add a comprehensive set of global timezones including Asia/Singapore, Asia/Tokyo, Asia/Hong_Kong, Asia/Dubai, Australia/Sydney, etc.
 
-## Post-Code Checklist (Your Action)
+## Changes
 
-| Task | Where |
-|------|-------|
-| Connect `greet.chat` domain | Settings → Domains |
-| Test hero voice agent | Landing page → Voice tab → Start Call |
-| Set Stripe webhook URL to production | Stripe Dashboard → Webhooks |
-| Set up branded email domain | Cloud → Emails |
-| Publish frontend | Publish button → Update |
+### 1. `supabase/functions/crawl-site/index.ts` (lines 31-46)
+Replace the broken `getClaims` auth block with:
+```typescript
+const { data: { user }, error: userError } = await supabase.auth.getUser();
+if (userError || !user) {
+  return unauthorized response;
+}
+const userId = user.id;
+```
+
+### 2. `src/components/settings/BusinessSettings.tsx` (lines 581-589)
+Expand the timezone `<SelectContent>` to include ~20 global timezones grouped by region:
+- **Americas**: New York, Chicago, Denver, Los Angeles, Sao Paulo
+- **Europe**: London, Amsterdam, Paris, Berlin, Moscow
+- **Asia**: Dubai, Kolkata, Bangkok, Singapore, Hong Kong, Tokyo, Seoul
+- **Oceania**: Sydney, Auckland
 
