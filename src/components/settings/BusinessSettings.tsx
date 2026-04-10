@@ -579,12 +579,25 @@ export function BusinessSettings({ organizationId }: BusinessSettingsProps) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Europe/Amsterdam">Europe/Amsterdam (CET)</SelectItem>
+                      <SelectItem value="America/New_York">America/New_York (EST)</SelectItem>
+                      <SelectItem value="America/Chicago">America/Chicago (CST)</SelectItem>
+                      <SelectItem value="America/Denver">America/Denver (MST)</SelectItem>
+                      <SelectItem value="America/Los_Angeles">America/Los_Angeles (PST)</SelectItem>
+                      <SelectItem value="America/Sao_Paulo">America/São Paulo (BRT)</SelectItem>
                       <SelectItem value="Europe/London">Europe/London (GMT)</SelectItem>
+                      <SelectItem value="Europe/Amsterdam">Europe/Amsterdam (CET)</SelectItem>
                       <SelectItem value="Europe/Paris">Europe/Paris (CET)</SelectItem>
                       <SelectItem value="Europe/Berlin">Europe/Berlin (CET)</SelectItem>
-                      <SelectItem value="America/New_York">America/New_York (EST)</SelectItem>
-                      <SelectItem value="America/Los_Angeles">America/Los_Angeles (PST)</SelectItem>
+                      <SelectItem value="Europe/Moscow">Europe/Moscow (MSK)</SelectItem>
+                      <SelectItem value="Asia/Dubai">Asia/Dubai (GST)</SelectItem>
+                      <SelectItem value="Asia/Kolkata">Asia/Kolkata (IST)</SelectItem>
+                      <SelectItem value="Asia/Bangkok">Asia/Bangkok (ICT)</SelectItem>
+                      <SelectItem value="Asia/Singapore">Asia/Singapore (SGT)</SelectItem>
+                      <SelectItem value="Asia/Hong_Kong">Asia/Hong Kong (HKT)</SelectItem>
+                      <SelectItem value="Asia/Tokyo">Asia/Tokyo (JST)</SelectItem>
+                      <SelectItem value="Asia/Seoul">Asia/Seoul (KST)</SelectItem>
+                      <SelectItem value="Australia/Sydney">Australia/Sydney (AEST)</SelectItem>
+                      <SelectItem value="Pacific/Auckland">Pacific/Auckland (NZST)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
