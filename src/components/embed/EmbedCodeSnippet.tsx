@@ -14,8 +14,7 @@ export function EmbedCodeSnippet({ apiKey }: EmbedCodeSnippetProps) {
 <script>
   (function() {
     var w = document.createElement('script');
-    w.src = '${supabaseUrl}/functions/v1/widget-loader';
-    w.setAttribute('data-widget-key', '${apiKey}');
+    w.src = '${supabaseUrl}/functions/v1/widget-loader?key=${apiKey}';
     w.async = true;
     document.head.appendChild(w);
   })();
@@ -42,7 +41,29 @@ export function EmbedCodeSnippet({ apiKey }: EmbedCodeSnippetProps) {
     <div className="space-y-4">
       <div>
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">Script Tag (recommended)</span>
+          <span className="text-sm font-medium text-foreground">Iframe Embed (recommended)</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => copy(iframeSnippet, "iframe")}
+            className="h-7 gap-1.5 text-xs"
+          >
+            {copied === "iframe" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            {copied === "iframe" ? "Copied!" : "Copy"}
+          </Button>
+        </div>
+        <p className="mb-1.5 text-xs text-muted-foreground">
+          Paste this just before the closing &lt;/body&gt; tag of your site. Works on any
+          platform — no setup needed.
+        </p>
+        <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+          {iframeSnippet}
+        </pre>
+      </div>
+
+      <div>
+        <div className="mb-1.5 flex items-center justify-between">
+          <span className="text-sm font-medium text-foreground">Script Tag</span>
           <Button
             variant="ghost"
             size="sm"
@@ -55,24 +76,6 @@ export function EmbedCodeSnippet({ apiKey }: EmbedCodeSnippetProps) {
         </div>
         <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs text-muted-foreground">
           {scriptSnippet}
-        </pre>
-      </div>
-
-      <div>
-        <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-sm font-medium text-foreground">Iframe Embed</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => copy(iframeSnippet, "iframe")}
-            className="h-7 gap-1.5 text-xs"
-          >
-            {copied === "iframe" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-            {copied === "iframe" ? "Copied!" : "Copy"}
-          </Button>
-        </div>
-        <pre className="overflow-x-auto rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-          {iframeSnippet}
         </pre>
       </div>
     </div>
