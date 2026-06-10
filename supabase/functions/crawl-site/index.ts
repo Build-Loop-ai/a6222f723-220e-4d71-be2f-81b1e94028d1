@@ -27,6 +27,13 @@ Deno.serve(async (req) => {
 
     const { organizationId, websiteUrl } = await req.json();
 
+    if (!organizationId || typeof websiteUrl !== "string" || !websiteUrl.trim()) {
+      return new Response(
+        JSON.stringify({ error: "organizationId and websiteUrl are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // If not service role, verify user is org member
     if (!isServiceRole) {
       const supabase = createClient(
@@ -82,6 +89,30 @@ Deno.serve(async (req) => {
     let formattedUrl = websiteUrl.trim();
     if (!formattedUrl.startsWith("http://") && !formattedUrl.startsWith("https://")) {
       formattedUrl = `https://${formattedUrl}`;
+    }
+
+    // Only crawl public websites — reject localhost/private/internal hosts
+    let hostname: string;
+    try {
+      hostname = new URL(formattedUrl).hostname.toLowerCase();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid website URL" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const isPrivateHost =
+      hostname === "localhost" ||
+      !hostname.includes(".") ||
+      /^127\.|^10\.|^192\.168\.|^169\.254\.|^0\./.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
+      hostname.endsWith(".local") ||
+      hostname.endsWith(".internal");
+    if (isPrivateHost) {
+      return new Response(
+        JSON.stringify({ error: "Only public websites can be crawled" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     console.log("Step 1: Mapping site URLs for", formattedUrl);

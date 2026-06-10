@@ -40,7 +40,7 @@ export function VoiceCallOverlay({
     setStatus("ended");
     if (reason) setErrorMsg(reason);
 
-    try { stopVapiCall(); } catch {}
+    try { stopVapiCall(); } catch { /* already stopped */ }
     resetVapiClient();
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -136,12 +136,21 @@ export function VoiceCallOverlay({
     return () => {
       console.log("[VoiceCall] Unmounting – cleaning up listeners");
       if (timerRef.current) clearInterval(timerRef.current);
-      try { (vapi as any).removeListener("call-start", onCallStart); } catch {}
-      try { (vapi as any).removeListener("call-end", onCallEnd); } catch {}
-      try { (vapi as any).removeListener("speech-start", onSpeechStart); } catch {}
-      try { (vapi as any).removeListener("speech-end", onSpeechEnd); } catch {}
-      try { (vapi as any).removeListener("error", onError); } catch {}
-      try { (vapi as any).removeListener("message", onMessage); } catch {}
+      const listeners: Array<[string, (...args: never[]) => void]> = [
+        ["call-start", onCallStart],
+        ["call-end", onCallEnd],
+        ["speech-start", onSpeechStart],
+        ["speech-end", onSpeechEnd],
+        ["error", onError],
+        ["message", onMessage],
+      ];
+      for (const [event, handler] of listeners) {
+        try {
+          (vapi as unknown as { removeListener: (e: string, h: unknown) => void }).removeListener(event, handler);
+        } catch {
+          // best-effort cleanup — the Vapi instance may already be torn down
+        }
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

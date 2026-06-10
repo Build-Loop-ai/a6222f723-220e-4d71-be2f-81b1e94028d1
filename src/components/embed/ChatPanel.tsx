@@ -58,6 +58,12 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Cancel any in-flight stream when the widget unmounts
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
 
   const positionClasses =
     config.position === "bottom-right" ? "right-5 bottom-24" : "left-5 bottom-24";
@@ -86,6 +92,9 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
         { id: assistantId, role: "assistant", content: "" },
       ]);
 
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       try {
         const res = await fetch(`${supabaseUrl}/functions/v1/widget-chat`, {
           method: "POST",
@@ -99,6 +108,7 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
             visitorId,
             pageUrl: window.location.href,
           }),
+          signal: controller.signal,
         });
 
         if (!res.ok) {
@@ -160,7 +170,9 @@ export function ChatPanel({ config, apiKey, supabaseUrl, onClose, isClosing = fa
             );
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
+        // Unmount/cancellation is not an error worth surfacing
+        if (err instanceof DOMException && err.name === "AbortError") return;
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantId

@@ -11,6 +11,27 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Verify the request actually comes from Vapi. Assistants are created with
+  // serverUrlSecret = VAPI_WEBHOOK_SECRET, which Vapi echoes back in the
+  // x-vapi-secret header. Without this check anyone could forge appointments,
+  // call logs, and billing minutes.
+  const webhookSecret = Deno.env.get("VAPI_WEBHOOK_SECRET");
+  if (webhookSecret) {
+    const incomingSecret = req.headers.get("x-vapi-secret");
+    if (incomingSecret !== webhookSecret) {
+      console.error("Vapi webhook rejected: invalid or missing x-vapi-secret header");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  } else {
+    console.warn(
+      "VAPI_WEBHOOK_SECRET is not configured — webhook requests are NOT authenticated. " +
+        "Set it in Settings → Backend → Secrets and re-save your assistant to enable verification.",
+    );
+  }
+
   try {
     const payload = await req.json();
     console.log("Vapi webhook received:", payload.message?.type);
@@ -463,6 +484,22 @@ async function handleEndOfCallReport(payload: any, supabase: any) {
 
   console.log("=== END OF CALL REPORT ===");
   console.log("Organization ID:", orgId);
+
+  // Idempotency: Vapi retries webhooks, so a call may be reported more than
+  // once. Skip if we already logged this call (prevents double-billed minutes).
+  if (call?.id) {
+    const { data: existing } = await supabase
+      .from("call_logs")
+      .select("id")
+      .eq("vapi_call_id", call.id)
+      .maybeSingle();
+    if (existing) {
+      console.log("Call already logged, skipping duplicate report:", call.id);
+      return new Response(JSON.stringify({ success: true, duplicate: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
   console.log("Call object keys:", call ? Object.keys(call) : "null");
   console.log("Message-level keys:", msg ? Object.keys(msg) : "null");
 

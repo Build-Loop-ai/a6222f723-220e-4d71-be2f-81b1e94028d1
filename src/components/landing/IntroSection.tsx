@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { useRef, useState, useCallback, useEffect } from "react";
 
 const stats = [
@@ -214,11 +214,16 @@ const StatCard = ({
 
 const ScrollRevealWord = ({
   word,
-  progress,
+  scrollYProgress,
+  start,
+  end,
 }: {
   word: string;
-  progress: any;
+  scrollYProgress: MotionValue<number>;
+  start: number;
+  end: number;
 }) => {
+  const progress = useTransform(scrollYProgress, [start, end], [0, 1]);
   const opacity = useTransform(progress, [0, 1], [0.12, 1]);
   return (
     <motion.span className="inline-block mr-[0.3em]" style={{ opacity }}>
@@ -269,12 +274,15 @@ const IntroSection = () => {
             }}
             className="font-black tracking-tight text-foreground"
           >
-            {introWords.map((word, i) => {
-              const start = Math.max(0, (i - overlap) / introWords.length);
-              const end = Math.min(1, (i + overlap) / introWords.length);
-              const progress = useTransform(scrollYProgress, [start, end], [0, 1]);
-              return <ScrollRevealWord key={`${word}-${i}`} word={word} progress={progress} />;
-            })}
+            {introWords.map((word, i) => (
+              <ScrollRevealWord
+                key={`${word}-${i}`}
+                word={word}
+                scrollYProgress={scrollYProgress}
+                start={Math.max(0, (i - overlap) / introWords.length)}
+                end={Math.min(1, (i + overlap) / introWords.length)}
+              />
+            ))}
           </div>
         </div>
 

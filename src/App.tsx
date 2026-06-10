@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,34 +8,37 @@ import { AuthProvider } from "@/hooks/useAuth";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/AdminRoute";
+import CookieConsent from "@/components/CookieConsent";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import AcceptInvitation from "./pages/AcceptInvitation";
-import Onboarding from "./pages/Onboarding";
-import Dashboard from "./pages/Dashboard";
-import DashboardConversations from "./pages/DashboardConversations";
-import DashboardConversationDetail from "./pages/DashboardConversationDetail";
-import DashboardCallDetail from "./pages/DashboardCallDetail";
-import DashboardCalls from "./pages/DashboardCalls";
-import DashboardAnalytics from "./pages/DashboardAnalytics";
-import DashboardKnowledgeBase from "./pages/DashboardKnowledgeBase";
-import DashboardWidget from "./pages/DashboardWidget";
-import DashboardSettings from "./pages/DashboardSettings";
-import DashboardLayout from "./layouts/DashboardLayout";
-import Demo from "./pages/Demo";
-import Assessment from "./pages/Assessment";
-import AuthCallback from "./pages/AuthCallback";
-import Admin from "./pages/Admin";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import NotFound from "./pages/NotFound";
-import Walkthrough from "./pages/Walkthrough";
-import CookieConsent from "./components/CookieConsent";
-import WidgetEmbed from "./pages/WidgetEmbed";
-import WidgetLivePreview from "./pages/WidgetLivePreview";
+
+// Route-level code splitting: the landing page loads eagerly for fast first
+// paint, every other page is fetched on demand.
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const DashboardConversations = lazy(() => import("./pages/DashboardConversations"));
+const DashboardConversationDetail = lazy(() => import("./pages/DashboardConversationDetail"));
+const DashboardCallDetail = lazy(() => import("./pages/DashboardCallDetail"));
+const DashboardCalls = lazy(() => import("./pages/DashboardCalls"));
+const DashboardAnalytics = lazy(() => import("./pages/DashboardAnalytics"));
+const DashboardKnowledgeBase = lazy(() => import("./pages/DashboardKnowledgeBase"));
+const DashboardWidget = lazy(() => import("./pages/DashboardWidget"));
+const DashboardSettings = lazy(() => import("./pages/DashboardSettings"));
+const DashboardLayout = lazy(() => import("./layouts/DashboardLayout"));
+const Demo = lazy(() => import("./pages/Demo"));
+const Assessment = lazy(() => import("./pages/Assessment"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Walkthrough = lazy(() => import("./pages/Walkthrough"));
+const WidgetEmbed = lazy(() => import("./pages/WidgetEmbed"));
+const WidgetLivePreview = lazy(() => import("./pages/WidgetLivePreview"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +53,12 @@ const queryClient = new QueryClient({
   },
 });
 
+const PageLoader = () => (
+  <div className="flex min-h-screen items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -57,54 +67,56 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/demo" element={<Demo />} />
-            <Route path="/assessment" element={<Assessment />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/accept-invitation" element={<AcceptInvitation />} />
-            <Route path="/walkthrough" element={<Walkthrough />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/onboarding" element={
-              <ProtectedRoute>
-                <Onboarding />
-              </ProtectedRoute>
-            } />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Dashboard />} />
-              <Route path="conversations" element={<DashboardConversations />} />
-              <Route path="conversations/:conversationId" element={<DashboardConversationDetail />} />
-              <Route path="calls" element={<DashboardCalls />} />
-              <Route path="calls/:callId" element={<DashboardCallDetail />} />
-              <Route path="analytics" element={<DashboardAnalytics />} />
-              <Route path="knowledge-base" element={<DashboardKnowledgeBase />} />
-              <Route path="widget" element={<DashboardWidget />} />
-              <Route path="settings" element={<DashboardSettings />} />
-            </Route>
-            <Route path="/admin" element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <Admin />
-                </AdminRoute>
-              </ProtectedRoute>
-            } />
-            <Route path="/widget" element={<WidgetEmbed />} />
-            <Route path="/widget-preview" element={
-              <ProtectedRoute>
-                <WidgetLivePreview />
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/demo" element={<Demo />} />
+              <Route path="/assessment" element={<Assessment />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/accept-invitation" element={<AcceptInvitation />} />
+              <Route path="/walkthrough" element={<Walkthrough />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/onboarding" element={
+                <ProtectedRoute>
+                  <Onboarding />
+                </ProtectedRoute>
+              } />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Dashboard />} />
+                <Route path="conversations" element={<DashboardConversations />} />
+                <Route path="conversations/:conversationId" element={<DashboardConversationDetail />} />
+                <Route path="calls" element={<DashboardCalls />} />
+                <Route path="calls/:callId" element={<DashboardCallDetail />} />
+                <Route path="analytics" element={<DashboardAnalytics />} />
+                <Route path="knowledge-base" element={<DashboardKnowledgeBase />} />
+                <Route path="widget" element={<DashboardWidget />} />
+                <Route path="settings" element={<DashboardSettings />} />
+              </Route>
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminRoute>
+                    <Admin />
+                  </AdminRoute>
+                </ProtectedRoute>
+              } />
+              <Route path="/widget" element={<WidgetEmbed />} />
+              <Route path="/widget-preview" element={
+                <ProtectedRoute>
+                  <WidgetLivePreview />
+                </ProtectedRoute>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
         <CookieConsent />
       </TooltipProvider>
