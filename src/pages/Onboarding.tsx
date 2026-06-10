@@ -204,6 +204,20 @@ const Onboarding = () => {
         toast({ variant: "destructive", title: "Website URL is required" });
         return;
       }
+      // Validate the URL so the website crawl doesn't silently fail later.
+      const rawUrl = businessData.website.trim();
+      const normalized = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+      try {
+        const parsed = new URL(normalized);
+        if (!parsed.hostname.includes(".")) throw new Error("no TLD");
+      } catch {
+        toast({
+          variant: "destructive",
+          title: "Enter a valid website URL",
+          description: "For example: yourbusiness.com",
+        });
+        return;
+      }
       setCurrentStep(2);
     } else if (currentStep === 2) {
       setCurrentStep(3);

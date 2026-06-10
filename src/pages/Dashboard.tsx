@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -124,6 +125,7 @@ const Dashboard = () => {
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
+        toast.error("Couldn't load your dashboard. Please refresh to try again.");
       } finally {
         setLoading(false);
       }

@@ -87,6 +87,7 @@ const DashboardConversations = () => {
         }
       } catch (error) {
         console.error("Error fetching conversations:", error);
+        toast.error("Couldn't load your conversations. Please refresh to try again.");
       } finally {
         setLoading(false);
       }

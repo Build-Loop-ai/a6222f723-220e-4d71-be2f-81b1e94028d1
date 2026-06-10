@@ -20,8 +20,10 @@ export function EmbedCodeSnippet({ apiKey }: EmbedCodeSnippetProps) {
   })();
 </script>`;
 
-  // Use the published app URL for iframe embeds (not the preview domain)
-  const publishedOrigin = `https://a6222f723-220e-4d71-be2f-81b1e94028d1.lovable.app`;
+  // Use this app's own origin for iframe embeds so the snippet always points at
+  // the deployment the user is actually on (custom domain, prod, or preview).
+  const publishedOrigin =
+    typeof window !== "undefined" ? window.location.origin : "";
 
   const iframeSnippet = `<!-- Chat Widget (iframe) -->
 <!-- Replace the URL below with your custom domain if you have one -->

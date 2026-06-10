@@ -273,7 +273,13 @@ const HeroSection = () => {
     }),
   };
 
-  const headlineWords = "Your website,".split("");
+  // Split into words, then letters, so the per-letter animation never breaks a
+  // word across lines on narrow screens (e.g. "website" wrapping as "we bsite").
+  const headlineText = "Your website,";
+  let headlineLetterIndex = 0;
+  const headlineWordGroups = headlineText.split(" ").map((word) => ({
+    letters: word.split("").map((letter) => ({ letter, index: headlineLetterIndex++ })),
+  }));
 
   // Building steps for the animation
   const buildingSteps = [
@@ -580,21 +586,27 @@ const HeroSection = () => {
               className="font-display font-[800] leading-[0.9] tracking-[-0.04em]"
               style={{ fontSize: "clamp(48px, 8vw, 96px)" }}
             >
-              <span className="inline-block">
-                {headlineWords.map((letter, i) => (
-                  <motion.span
-                    key={i}
-                    custom={i}
-                    initial="hidden"
-                    animate="visible"
-                    variants={letterVariants}
-                    className="inline-block text-white"
-                    style={{ transformOrigin: "bottom" }}
-                  >
-                    {letter === " " ? "\u00A0" : letter}
-                  </motion.span>
-                ))}
-              </span>
+              {headlineWordGroups.map((group, wi) => (
+                <span
+                  key={wi}
+                  className="inline-block whitespace-nowrap"
+                  style={{ marginRight: wi < headlineWordGroups.length - 1 ? "0.25em" : undefined }}
+                >
+                  {group.letters.map(({ letter, index }) => (
+                    <motion.span
+                      key={index}
+                      custom={index}
+                      initial="hidden"
+                      animate="visible"
+                      variants={letterVariants}
+                      className="inline-block text-white"
+                      style={{ transformOrigin: "bottom" }}
+                    >
+                      {letter}
+                    </motion.span>
+                  ))}
+                </span>
+              ))}
             </h1>
           </div>
 
