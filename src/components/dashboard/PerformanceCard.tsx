@@ -25,7 +25,7 @@ const PerformanceCard = ({ resolved, escalated, abandoned }: PerformanceCardProp
   const hasData = total > 0;
 
   return (
-    <div className="rounded-2xl glass-card gradient-border-top p-5 space-y-4">
+    <div className="rounded-2xl glass-card gradient-border-top p-6 space-y-4">
       <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">AI Performance</h3>
 
       {hasData ? (

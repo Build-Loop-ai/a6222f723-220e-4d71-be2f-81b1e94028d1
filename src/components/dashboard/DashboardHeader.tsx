@@ -25,11 +25,28 @@ const DashboardHeader = ({ userName, isLive, widgetId }: DashboardHeaderProps) =
     toast.success("Embed code copied!");
   };
 
+  const today = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-foreground/40">
+          {today}
+        </p>
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-          {getGreeting()}{userName ? `, ${userName.split(" ")[0]}` : ""}
+          {getGreeting()}
+          {userName && (
+            <>
+              ,{" "}
+              <span className="bg-gradient-to-r from-primary via-green to-cyan bg-clip-text text-transparent">
+                {userName.split(" ")[0]}
+              </span>
+            </>
+          )}
         </h1>
         <div className="flex items-center gap-3">
           <div className={cn(
