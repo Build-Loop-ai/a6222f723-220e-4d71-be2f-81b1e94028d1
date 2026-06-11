@@ -836,23 +836,25 @@ export const WidgetSettings = ({ organizationId }: WidgetSettingsProps) => {
             {/* Feature toggle icons */}
             <button
               onClick={() => uNow("voice_enabled", !config.voice_enabled)}
-              className={`hidden md:flex h-7 w-7 rounded-xl items-center justify-center transition-all duration-200 ${
+              className={`flex h-7 w-7 rounded-xl items-center justify-center transition-all duration-200 ${
                 config.voice_enabled
                   ? "bg-primary/12 text-primary shadow-sm shadow-primary/10"
                   : "bg-foreground/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-foreground/[0.07]"
               }`}
-              title="Voice input"
+              title={`Voice replies (text-to-speech): ${config.voice_enabled ? "on" : "off"}`}
+              aria-label="Toggle voice replies"
             >
               <Mic className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => uNow("voice_call_enabled", !config.voice_call_enabled)}
-              className={`hidden md:flex h-7 w-7 rounded-xl items-center justify-center transition-all duration-200 ${
+              className={`flex h-7 w-7 rounded-xl items-center justify-center transition-all duration-200 ${
                 config.voice_call_enabled
                   ? "bg-primary/12 text-primary shadow-sm shadow-primary/10"
                   : "bg-foreground/[0.04] text-foreground/30 hover:text-foreground/55 hover:bg-foreground/[0.07]"
               }`}
-              title="Voice call (VAPI)"
+              title={`Voice call (talk to the AI, needs a Vapi key): ${config.voice_call_enabled ? "on" : "off"}`}
+              aria-label="Toggle voice call"
             >
               <Phone className="h-3.5 w-3.5" />
             </button>

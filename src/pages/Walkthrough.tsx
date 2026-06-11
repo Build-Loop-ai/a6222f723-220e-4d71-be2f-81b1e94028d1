@@ -353,9 +353,9 @@ const DashboardSlide = () => (
 
 /* ─── Slide 8: Business Model ─── */
 const plans = [
-  { name: "Starter", price: "$29", features: ["100 AI minutes", "1 phone number", "Chat widget", "Email support"] },
-  { name: "Pro", price: "$79", popular: true, features: ["500 AI minutes", "3 phone numbers", "Voice + Chat", "Priority support", "Custom branding"] },
-  { name: "Business", price: "$199", features: ["2,000 AI minutes", "10 phone numbers", "API access", "Dedicated manager", "Custom integrations"] },
+  { name: "Starter", price: "$29", features: ["500 conversations / mo", "1 website", "Chat + voice replies", "Email support"] },
+  { name: "Pro", price: "$79", popular: true, features: ["3,000 conversations / mo", "Up to 3 websites", "Voice calls (Vapi)", "Lead capture", "Custom branding"] },
+  { name: "Business", price: "$199", features: ["Unlimited conversations", "Up to 10 websites", "API access", "Remove branding", "Dedicated manager"] },
 ];
 
 const BusinessModelSlide = () => (
