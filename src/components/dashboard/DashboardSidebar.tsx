@@ -9,6 +9,7 @@ import {
   Sparkles,
   MessageSquareText,
   Phone,
+  Rocket,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,6 +18,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  { icon: Rocket, label: "Go Live", href: "/dashboard/launch" },
   { icon: MessageSquareText, label: "Widget", href: "/dashboard/widget" },
   { icon: MessageSquare, label: "Conversations", href: "/dashboard/conversations" },
   { icon: Phone, label: "Calls", href: "/dashboard/calls" },

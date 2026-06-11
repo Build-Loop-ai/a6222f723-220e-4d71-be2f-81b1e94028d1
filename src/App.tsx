@@ -27,6 +27,7 @@ const DashboardCalls = lazy(() => import("./pages/DashboardCalls"));
 const DashboardAnalytics = lazy(() => import("./pages/DashboardAnalytics"));
 const DashboardKnowledgeBase = lazy(() => import("./pages/DashboardKnowledgeBase"));
 const DashboardWidget = lazy(() => import("./pages/DashboardWidget"));
+const DashboardLaunch = lazy(() => import("./pages/DashboardLaunch"));
 const DashboardSettings = lazy(() => import("./pages/DashboardSettings"));
 const DashboardLayout = lazy(() => import("./layouts/DashboardLayout"));
 const Demo = lazy(() => import("./pages/Demo"));
@@ -92,6 +93,7 @@ const App = () => (
                 </ProtectedRoute>
               }>
                 <Route index element={<Dashboard />} />
+                <Route path="launch" element={<DashboardLaunch />} />
                 <Route path="conversations" element={<DashboardConversations />} />
                 <Route path="conversations/:conversationId" element={<DashboardConversationDetail />} />
                 <Route path="calls" element={<DashboardCalls />} />
